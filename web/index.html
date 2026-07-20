@@ -89,7 +89,7 @@
   .cal-grid .d.today{color:#8a5a3c;font-weight:700;}
   .cal-grid .d.today::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border:2.5px solid #c06a44;border-radius:50%;}
   .cal-grid .d.mark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:#d98872;}
-  .cal-grid .d.amark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:#8fbf7f;}
+  .cal-grid .d.amark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:var(--dot,#8fbf7f);}
   .cal-grid .d.today.mark::after,.cal-grid .d.today.amark::after{background:#fff;}
   .cal-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#b06a48;margin-top:11px;position:relative;z-index:1;}
   .cal-legend i{width:6px;height:6px;border-radius:50%;background:#d98872;display:inline-block;}
@@ -289,7 +289,7 @@
         </div>
       </div>
       <div class="cal-grid" id="calGrid"></div>
-      <div class="cal-legend"><i></i>打工日<i class="g"></i>日程</div>
+      <div class="cal-legend"><i></i>打工日<i class="g"></i>日程(颜色对应类型)</div>
     </div>
     <div class="tt-head"><div class="h">📚 我的课表</div></div>
     <div class="tt-enter" onclick="nav('timetable')">
@@ -383,6 +383,7 @@
       <h4>添加行程</h4>
       <div class="frm">
         <input id="agTitle" placeholder="行程,如 回国 / 期末考试 / 签证面谈"/>
+        <div class="chips" id="agTypeChips" style="margin:2px 0"></div>
         <div class="r">
           <input id="agDate" type="date"/>
           <input id="agTime" placeholder="时间(可选)如 14:00"/>
@@ -582,7 +583,7 @@ function renderCal(){
   document.getElementById('calCard').classList.toggle('exp',exp);
   const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
   const isCur=(y===NY&&m===NM);
-  const wmark=workDaysFor(y,m), amark=agendaDaysFor(y,m);
+  const wmark=workDaysFor(y,m), amap=agendaColorFor(y,m);
   const cells=[]; for(let i=0;i<first;i++) cells.push(null); for(let d=1;d<=days;d++) cells.push(d);
   while(cells.length%7) cells.push(null);
   const weeks=[]; for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
@@ -591,8 +592,10 @@ function renderCal(){
   let h=['日','一','二','三','四','五','六'].map((w,i)=>`<div class="wd${i===0?' sun':i===6?' sat':''}">${w}</div>`).join('');
   show.forEach(week=>week.forEach((d,dow)=>{
     if(d==null){ h+='<div class="d"></div>'; return; }
-    const dot = wmark.has(d)?' mark':(amark.has(d)?' amark':'');
-    h+=`<div class="d${dow===0?' sun':dow===6?' sat':''}${(isCur&&d===ND)?' today':''}${dot}">${d}</div>`;
+    const inA = amap[d]!=null;
+    const dot = inA?' amark':(wmark.has(d)?' mark':'');
+    const st = inA?` style="--dot:${amap[d]}"`:'';
+    h+=`<div class="d${dow===0?' sun':dow===6?' sat':''}${(isCur&&d===ND)?' today':''}${dot}"${st}>${d}</div>`;
   }));
   document.getElementById('calGrid').innerHTML=h;
 }
@@ -908,19 +911,35 @@ let AG=null; try{AG=JSON.parse(localStorage.getItem(AGKEY)||'null');}catch(e){}
 if(!AG){ AG=[]; saveAG(); }
 function saveAG(){try{localStorage.setItem(AGKEY,JSON.stringify(AG));}catch(e){}}
 function fmtDate(iso){const p=(iso||'').split('-');return p.length===3?`${+p[1]}月${+p[2]}日`:iso;}
-function agendaDaysFor(y,m){const s=new Set(),pre=y+'-'+String(m+1).padStart(2,'0');try{(AG||[]).forEach(a=>{if((a.date||'').slice(0,7)===pre)s.add(+(a.date).slice(8,10));});}catch(e){}return s;}
+const AGTYPES=[
+  {id:'trip',icon:'✈️',label:'出行/回国',color:'#83a9cf'},
+  {id:'exam',icon:'📝',label:'考试/DDL',color:'#e2937c'},
+  {id:'admin',icon:'🏛️',label:'手续/预约',color:'#b79dd4'},
+  {id:'event',icon:'🎉',label:'活动',color:'#e7bf6b'},
+  {id:'life',icon:'🗑️',label:'生活/垃圾',color:'#8fbf7f'},
+  {id:'other',icon:'📌',label:'其他',color:'#e79fb6'}
+];
+function agTypeById(id){return AGTYPES.find(t=>t.id===id)||AGTYPES[5];}
+function agendaColorFor(y,m){const map={},pre=y+'-'+String(m+1).padStart(2,'0');try{(AG||[]).forEach(a=>{if((a.date||'').slice(0,7)===pre){const d=+(a.date).slice(8,10); if(!map[d])map[d]=a.color||'#8fbf7f';}});}catch(e){}return map;}
 function renderAgenda(){
   const el=document.getElementById('agList'); if(!el) return;
   if(!AG.length){ el.innerHTML='<div class="ag-card" style="color:var(--ink2)">暂无安排</div>'; return; }
   AG.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  el.innerHTML=AG.map(a=>`<div class="ag-card"><span class="ag-dot" style="background:${a.color||'#8fbf7f'}"></span>${esc(a.title)} · ${fmtDate(a.date)}${a.time?' '+esc(a.time):''}<span class="wl-del" style="margin-left:auto" onclick="delAgenda('${a.id}')">✕</span></div>`).join('');
+  el.innerHTML=AG.map(a=>`<div class="ag-card"><span class="ag-dot" style="background:${a.color||'#8fbf7f'}"></span>${a.icon?a.icon+' ':''}${esc(a.title)} · ${fmtDate(a.date)}${a.time?' '+esc(a.time):''}<span class="wl-del" style="margin-left:auto" onclick="delAgenda('${a.id}')">✕</span></div>`).join('');
 }
 function delAgenda(id){ AG=AG.filter(x=>x.id!==id); saveAG(); renderAgenda(); renderCal(); }
-const AGCOLORS=['#e2937c','#8fbf7f','#e7bf6b','#83a9cf','#b79dd4','#e79fb6'];
+let selectedAgType='trip';
+function renderAgTypeChips(){
+  document.getElementById('agTypeChips').innerHTML=AGTYPES.map(t=>
+    `<span class="qa-chip" data-t="${t.id}" style="background:${t.id===selectedAgType?t.color:'#f2ece0'};color:${t.id===selectedAgType?'#fff':'#7a705f'}" onclick="pickAgType('${t.id}')">${t.icon} ${t.label}</span>`).join('');
+}
+function pickAgType(id){ selectedAgType=id; renderAgTypeChips(); }
 function openAgendaAdd(){
+  selectedAgType='trip';
   document.getElementById('agTitle').value='';
   document.getElementById('agDate').value=new Date().toISOString().slice(0,10);
   document.getElementById('agTime').value='';
+  renderAgTypeChips();
   document.getElementById('maskAgenda').classList.add('on');
 }
 function addAgenda(){
@@ -928,7 +947,8 @@ function addAgenda(){
   const d=document.getElementById('agDate').value;
   const tm=document.getElementById('agTime').value.trim();
   if(!t||!d){ toast('请填行程和日期'); return; }
-  AG.push({id:'a'+Date.now(),date:d,title:t,time:tm,color:AGCOLORS[AG.length%AGCOLORS.length]});
+  const ty=agTypeById(selectedAgType);
+  AG.push({id:'a'+Date.now(),date:d,title:t,time:tm,icon:ty.icon,color:ty.color});
   saveAG(); renderAgenda(); renderCal();
   document.getElementById('maskAgenda').classList.remove('on'); toast('已加入日程 ✓');
 }
