@@ -26,7 +26,7 @@ git commit -m "日留生活小助手 初始版本"
 
 # 去 https://github.com/new 建一个空仓库(比如 jp-life-agent),不要勾选 README
 # 然后把下面 URL 换成你自己仓库的地址:
-git remote add origin https://github.com/你的用户名/jp-life-agent.git
+git remote add origin https://github.com/iisland2008/jp-life-agent.git
 git branch -M main
 git push -u origin main
 ```
