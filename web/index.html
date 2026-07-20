@@ -764,7 +764,7 @@ function saveClass(){
 function removeClass(){ if(editing){ TT=TT.filter(x=>x!==editing); saveTT(); renderGrid(); } closeSheet(); }
 
 /* ---------- 我的收藏(食谱) ---------- */
-const FAVKEY='jp_fav_recipes';
+const FAVKEY='jp_fav_recipes_v2';
 const TINTS=['linear-gradient(135deg,#fbe6dd,#f7d9c0)','linear-gradient(135deg,#e6f0dc,#d6e8c4)','linear-gradient(135deg,#e2ecf6,#cfe0ef)','linear-gradient(135deg,#f8eecd,#f2e0a8)','linear-gradient(135deg,#eee6f6,#e0d0ee)'];
 function SEED(){return [
   {id:'s1',title:'番茄炒蛋',emoji:'🍅',tint:TINTS[0],cal:'约 320 kcal',ingredients:['鸡蛋 3个','番茄 2个','盐 / 糖 少许','葱花'],steps:['鸡蛋打散加少许盐,热油炒至半凝固盛出','番茄切块下锅炒出汁,加少许糖','倒回鸡蛋翻炒均匀,撒葱花'],tip:'番茄先炒出汁更入味;一点糖能中和酸味。'},
@@ -772,7 +772,7 @@ function SEED(){return [
   {id:'s3',title:'味噌汤',emoji:'🍲',tint:TINTS[1],cal:'约 90 kcal',ingredients:['味噌 1大勺','豆腐 半块','裙带菜 少许','葱花','高汤(だし)'],steps:['高汤烧开,下豆腐块','关小火,化开味噌(别煮沸)','放裙带菜和葱花即可'],tip:'味噌煮沸会失去香味,最后化开最佳。'}
 ];}
 let FAV=null; try{FAV=JSON.parse(localStorage.getItem(FAVKEY)||'null');}catch(e){}
-if(!FAV){ FAV=SEED(); saveFav(); }
+if(!FAV){ FAV=[]; saveFav(); }
 function saveFav(){try{localStorage.setItem(FAVKEY,JSON.stringify(FAV));}catch(e){}}
 function renderFavCount(){const el=document.getElementById('favCount'); if(el) el.textContent=`已保存 ${FAV.length} 道菜谱`;}
 function renderFav(){
@@ -812,7 +812,7 @@ function saveRecipeFromChat(idx,btn){
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
 
 /* ---------- 打工记录 ---------- */
-const WLKEY='jp_work_log', PRIOR_INCOME=640000, WALL103=1030000, WALL130=1300000;
+const WLKEY='jp_work_log_v2', PRIOR_INCOME=0, WALL103=1030000, WALL130=1300000;
 function SEEDWL(){return [
   {id:'w1',date:NY+'-07-02',place:'セブンイレブン',hours:6,wage:1200},
   {id:'w2',date:NY+'-07-05',place:'カフェ',hours:7,wage:1150},
@@ -823,7 +823,7 @@ function SEEDWL(){return [
   {id:'w7',date:NY+'-07-19',place:'カフェ',hours:6,wage:1150}
 ];}
 let WL=null; try{WL=JSON.parse(localStorage.getItem(WLKEY)||'null');}catch(e){}
-if(!WL){ WL=SEEDWL(); saveWL(); }
+if(!WL){ WL=[]; saveWL(); }
 function saveWL(){try{localStorage.setItem(WLKEY,JSON.stringify(WL));}catch(e){}}
 function yen(n){return '¥'+Math.round(n).toLocaleString();}
 function calcWL(){
@@ -877,7 +877,7 @@ function addWork(){
 function delWork(id){ WL=WL.filter(x=>x.id!==id); saveWL(); renderWL(); }
 
 /* ---------- 本次安排(日程事项) ---------- */
-const AGKEY='jp_agenda_v1';
+const AGKEY='jp_agenda_v2';
 function isoAdd(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
 function isoNextSat(){const d=new Date();const add=((6-d.getDay())%7)||7;d.setDate(d.getDate()+add);return d.toISOString().slice(0,10);}
 function SEEDAG(){return [
@@ -886,7 +886,7 @@ function SEEDAG(){return [
   {id:'a3',date:isoNextSat(),title:'三丽鸥快闪 · 涩谷 开始',color:'#e7bf6b'}
 ];}
 let AG=null; try{AG=JSON.parse(localStorage.getItem(AGKEY)||'null');}catch(e){}
-if(!AG){ AG=SEEDAG(); saveAG(); }
+if(!AG){ AG=[]; saveAG(); }
 function saveAG(){try{localStorage.setItem(AGKEY,JSON.stringify(AG));}catch(e){}}
 function fmtDate(iso){const p=(iso||'').split('-');return p.length===3?`${+p[1]}月${+p[2]}日`:iso;}
 function agendaDaysFor(y,m){const s=new Set(),pre=y+'-'+String(m+1).padStart(2,'0');try{(AG||[]).forEach(a=>{if((a.date||'').slice(0,7)===pre)s.add(+(a.date).slice(8,10));});}catch(e){}return s;}
