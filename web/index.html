@@ -297,7 +297,7 @@
       <div class="et"><b>周间课表</b><span id="ttSum">还没有课程,点击导入</span></div>
       <div class="arw">›</div>
     </div>
-    <div class="sec-h">⭐ 本次安排</div>
+    <div class="sec-h">⭐ 本次安排<span class="tt-imp" style="margin-left:auto;font-size:12px" onclick="openAgendaAdd()">＋ 添加</span></div>
     <div id="agList"></div>
     <div class="disc">示例知识库,仅供参考。<br>医疗类不构成诊断,急症拨 119 / #7119。</div>
   </section>
@@ -374,6 +374,22 @@
         <button class="btn-del" id="shDel" style="display:none" onclick="removeClass()">删除这门课</button>
       </div>
       <button class="btn-close" onclick="closeSheet()">取消</button>
+    </div>
+  </div>
+
+  <!-- 添加行程 弹层 -->
+  <div class="mask" id="maskAgenda">
+    <div class="sheet">
+      <h4>添加行程</h4>
+      <div class="frm">
+        <input id="agTitle" placeholder="行程,如 回国 / 期末考试 / 签证面谈"/>
+        <div class="r">
+          <input id="agDate" type="date"/>
+          <input id="agTime" placeholder="时间(可选)如 14:00"/>
+        </div>
+        <button class="btn-add" onclick="addAgenda()">保存</button>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('maskAgenda').classList.remove('on')">取消</button>
     </div>
   </div>
 
@@ -900,6 +916,22 @@ function renderAgenda(){
   el.innerHTML=AG.map(a=>`<div class="ag-card"><span class="ag-dot" style="background:${a.color||'#8fbf7f'}"></span>${esc(a.title)} · ${fmtDate(a.date)}${a.time?' '+esc(a.time):''}<span class="wl-del" style="margin-left:auto" onclick="delAgenda('${a.id}')">✕</span></div>`).join('');
 }
 function delAgenda(id){ AG=AG.filter(x=>x.id!==id); saveAG(); renderAgenda(); renderCal(); }
+const AGCOLORS=['#e2937c','#8fbf7f','#e7bf6b','#83a9cf','#b79dd4','#e79fb6'];
+function openAgendaAdd(){
+  document.getElementById('agTitle').value='';
+  document.getElementById('agDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('agTime').value='';
+  document.getElementById('maskAgenda').classList.add('on');
+}
+function addAgenda(){
+  const t=document.getElementById('agTitle').value.trim();
+  const d=document.getElementById('agDate').value;
+  const tm=document.getElementById('agTime').value.trim();
+  if(!t||!d){ toast('请填行程和日期'); return; }
+  AG.push({id:'a'+Date.now(),date:d,title:t,time:tm,color:AGCOLORS[AG.length%AGCOLORS.length]});
+  saveAG(); renderAgenda(); renderCal();
+  document.getElementById('maskAgenda').classList.remove('on'); toast('已加入日程 ✓');
+}
 
 /* ---------- Agent 动作:把结构化指令写进本地数据 ---------- */
 const ACTION_LABEL={add_schedule:['📅','已加入日程'],add_work:['💼','已记打工'],add_class:['📚','已加课程']};
