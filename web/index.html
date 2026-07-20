@@ -192,6 +192,7 @@
   .chatlog{padding:6px 13px 8px;display:flex;flex-direction:column;gap:9px;min-height:60px;}
   .msg{max-width:85%;padding:9px 12px;border-radius:15px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
   .msg.me{align-self:flex-end;color:#fff;border-bottom-right-radius:5px;}
+  .msg-img{max-width:170px;border-radius:10px;display:block;}
   .msg.bot{align-self:flex-start;background:var(--paper2);border:1.5px solid #f0e7d6;color:#5f574c;border-bottom-left-radius:5px;}
   .toolchips{display:flex;flex-wrap:wrap;gap:5px;align-self:flex-start;}
   .toolchip{font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;}
@@ -412,6 +413,8 @@
       <button class="btn-close" onclick="document.getElementById('maskWork').classList.remove('on')">取消</button>
     </div>
   </div>
+
+  <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)"/>
 
   <div class="toast" id="toast"></div>
 
@@ -681,7 +684,7 @@ function openCat(key){
         <span class="tag" id="modeTag" style="background:${c.c}">…</span></div>
       <div class="chatlog" id="chatlog"></div>
       <div class="inbar">
-        <div class="iobtn" onclick="soon('拍照识别')">📷</div>
+        <div class="iobtn" onclick="document.getElementById('photoInput').click()">📷</div>
         <div class="iobtn" onclick="soon('语音输入')">🎤</div>
         <input id="inp" placeholder="问问关于${c.name}的问题…" autocomplete="off" onkeydown="if(event.key==='Enter')send()"/>
         <button class="sendb" style="background:${c.c}" onclick="send()">➤</button>
@@ -923,17 +926,32 @@ function mdClean(t){
 }
 let busy=false;
 function ask(q){const i=document.getElementById('inp');if(i){i.value=q;send();}}
-async function send(){
+/* 拍照/选图:压缩到 <=1024px 再发给 AI(Gemini 支持看图) */
+function handlePhoto(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=e=>{ const img=new Image(); img.onload=()=>{
+    const max=1024; let w=img.width,h=img.height;
+    if(w>h && w>max){h=Math.round(h*max/w);w=max;} else if(h>=w && h>max){w=Math.round(w*max/h);h=max;}
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    let durl; try{durl=cv.toDataURL('image/jpeg',0.82);}catch(err){durl=e.target.result;}
+    input.value=''; send(durl);
+  }; img.src=e.target.result; };
+  rd.readAsDataURL(f);
+}
+async function send(imageData){
   const inp=document.getElementById('inp'),log=document.getElementById('chatlog');
-  if(!inp||busy)return; const text=inp.value.trim(); if(!text)return;
+  if(busy) return; const text=inp?inp.value.trim():''; if(!text && !imageData) return;
   busy=true; const c=CATS[cur];
-  log.insertAdjacentHTML('beforeend',`<div class="msg me" style="background:${c.c}">${esc(text)}</div>`); inp.value='';
+  let uh=''; if(imageData) uh+=`<img src="${imageData}" class="msg-img">`; if(text) uh+=(imageData?'<br>':'')+esc(text);
+  log.insertAdjacentHTML('beforeend',`<div class="msg me" style="background:${c.c}">${uh||'📷 图片'}</div>`); if(inp)inp.value='';
   const tp=document.createElement('div'); tp.className='msg bot'; tp.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
   log.appendChild(tp); log.scrollTop=log.scrollHeight;
   try{
     const catName = cur==='gomi' ? c.name+'·'+currentGomi.pref+currentGomi.city : c.name;
     const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:text,history:state[cur].history,category:catName})});
+      body:JSON.stringify({message:text,history:state[cur].history,category:catName,image:imageData||undefined})});
     const d=await r.json(); tp.remove();
     if(d.tools&&d.tools.length){
       const reads=d.tools.filter(t=>!ACTION_LABEL[t.name]);

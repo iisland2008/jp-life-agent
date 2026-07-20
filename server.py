@@ -76,18 +76,19 @@ def api_chat():
     message = (data.get("message") or "").strip()
     history = data.get("history") or []
     category = (data.get("category") or "").strip()
-    if not message:
+    image = data.get("image")  # 可选:base64 data URL
+    if not message and not image:
         return jsonify({"error": "empty message"}), 400
 
     # 注入当前功能分类,让 AI 问答聚焦(仅在首轮追加,避免污染多轮上下文)
-    sent = message
+    sent = message or "请看这张图片,用中文帮我说明。"
     if category and not history:
-        sent = f"【当前功能:{category}】{message}"
+        sent = f"【当前功能:{category}】{sent}"
 
     tool_events = []
     try:
         answer, new_history = chat(
-            sent, history=history, verbose=False, on_event=tool_events.append
+            sent, history=history, verbose=False, on_event=tool_events.append, image=image
         )
     except Exception as e:
         return jsonify({"error": f"{type(e).__name__}: {e}"}), 500

@@ -74,7 +74,22 @@ def _emit(on_event, name, args):
             pass
 
 
-def _run_llm(user_input, history, verbose=True, on_event=None):
+def _strip_images(msgs):
+    """把带图片的用户消息在历史里替换成纯文本,避免 localStorage 里塞大段 base64。"""
+    out = []
+    for m in msgs:
+        c = m.get("content")
+        if isinstance(c, list):
+            txt = " ".join(p.get("text", "") for p in c if isinstance(p, dict) and p.get("type") == "text")
+            nm = dict(m)
+            nm["content"] = (txt + " [图片]").strip()
+            out.append(nm)
+        else:
+            out.append(m)
+    return out
+
+
+def _run_llm(user_input, history, verbose=True, on_event=None, image=None):
     import datetime
 
     from openai import OpenAI
@@ -92,8 +107,15 @@ def _run_llm(user_input, history, verbose=True, on_event=None):
         "【重要】区役所等官方预约需要本人到官网认证办理,你不能代为预约;遇到这类请求,"
         "改为用 add_schedule 加一条提醒(如“区役所预约·在留卡更新”),并提示用户到官方渠道完成预约、附上所需材料。"
     )
+    if image:
+        user_content = [
+            {"type": "text", "text": user_input},
+            {"type": "image_url", "image_url": {"url": image}},
+        ]
+    else:
+        user_content = user_input
     messages = [{"role": "system", "content": SYSTEM_PROMPT + date_note}] + history + [
-        {"role": "user", "content": user_input}
+        {"role": "user", "content": user_content}
     ]
 
     for _ in range(MAX_TURNS):
@@ -127,17 +149,19 @@ def _run_llm(user_input, history, verbose=True, on_event=None):
         # 最终回答:去掉 system,返回可复用的对话历史
         answer = msg.content or ""
         messages.append({"role": "assistant", "content": answer})
-        return answer, messages[1:]
+        return answer, _strip_images(messages[1:])
 
-    return "(达到最大轮数,未能给出最终回答)", messages[1:]
+    return "(达到最大轮数,未能给出最终回答)", _strip_images(messages[1:])
 
 
 # ---------------- Mock 模式(离线演示检索链路,无需 API) ----------------
-def _run_mock(user_input, history, verbose=True, on_event=None):
+def _run_mock(user_input, history, verbose=True, on_event=None, image=None):
     """
     简易意图路由 + 工具调用,用来在没有 API key 时演示『Agent 挑工具 -> 查知识库』的链路。
     真实效果请配置 GEMINI_API_KEY 后运行。
     """
+    if image:
+        return ("【演示模式】收到图片啦,但拍照识别需要真实模型。配置 GEMINI_API_KEY 后重启即可看图回答~", history)
     text = user_input
     calls = []
     if any(k in text for k in ["扔", "垃圾", "分类", "ゴミ", "怎么丢", "哪天收"]):
@@ -160,7 +184,7 @@ def _run_mock(user_input, history, verbose=True, on_event=None):
     return "\n".join(out), history
 
 
-def chat(user_input, history=None, verbose=True, on_event=None):
+def chat(user_input, history=None, verbose=True, on_event=None, image=None):
     history = history or []
     runner = _run_llm if has_api_key() else _run_mock
-    return runner(user_input, history, verbose=verbose, on_event=on_event)
+    return runner(user_input, history, verbose=verbose, on_event=on_event, image=image)
