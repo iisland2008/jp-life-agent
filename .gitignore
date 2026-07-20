@@ -1,0 +1,18 @@
+# ===== 密钥,绝对不要上传 =====
+apikey.txt
+.env
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 用户本地数据(如有导出)
+*.local.json

@@ -1,0 +1,6 @@
+# 用 OpenAI SDK 调用 Gemini 的 OpenAI 兼容接口(同样适用于 Groq / OpenRouter / DeepSeek)
+openai>=1.40.0
+# Web 可视化后端
+flask>=3.0.0
+# 生产部署用的 WSGI 服务器
+gunicorn>=21.2.0

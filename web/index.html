@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#f8efe6" />
+<title>日留生活の小助手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f8efe6; --paper2:#fdf8f2; --card:#fffdf9; --ink:#6b5f52; --ink2:#9c8f7d; --line:#efe6d7;
+    --green:#8fbf7f; --green-t:#e6f0dc; --yellow:#e7bf6b; --yellow-t:#f8eecd;
+    --coral:#e2937c; --coral-t:#fbe6dd; --blue:#83a9cf; --blue-t:#e2ecf6;
+    --purple:#b79dd4; --purple-t:#eee6f6; --pink:#e79fb6; --pink-t:#fbe6ee;
+    --nav:#a9865a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{font-family:"Zen Maru Gothic","PingFang SC","Hiragino Sans",sans-serif;color:var(--ink);
+    background:#e6e0d5;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .phone{position:relative;width:100%;max-width:420px;height:100vh;max-height:900px;background:var(--paper);
+    overflow:hidden;box-shadow:0 24px 70px rgba(90,70,40,.28);}
+  @media(min-width:480px){ .phone{height:90vh;border-radius:38px;} }
+
+  /* 屏幕切换 */
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:80px;z-index:2;}
+  .screen.active{display:flex;animation:fade .25s ease;}
+  /* 关键:滚动屏里的内容块不许被弹性压缩,否则滚动高度算错会「卡住」 */
+  .screen>*{flex:none;}
+  #home .bubbles{flex:1;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* 水彩水果背景(仅首页) */
+  .bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+  .bg span{position:absolute;transform:rotate(var(--r,0deg));animation:sway 10s ease-in-out infinite;}
+
+  /* ===== 首页 ===== */
+  #home{z-index:1;}
+  .h-title{margin:22px 22px 4px;background:rgba(255,255,255,.62);border-radius:22px;padding:14px 10px;text-align:center;
+    backdrop-filter:blur(3px);box-shadow:0 6px 18px rgba(150,120,80,.12);}
+  .h-title h1{font-weight:700;font-size:26px;margin:0;color:#6b4e3d;letter-spacing:1px;}
+  .h-title .en{font-family:"Baloo 2";font-size:11px;color:#a3927c;letter-spacing:3px;margin-top:2px;}
+  .bubbles{flex:1;position:relative;margin:8px 12px 18px;min-height:520px;}
+  .bubble{position:absolute;cursor:pointer;transition:transform .12s ease;animation:bpop .5s cubic-bezier(.34,1.56,.64,1) backwards;}
+  .bubble:active{transform:scale(.9);}
+  .fl{width:100%;height:100%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.52);box-shadow:0 10px 26px rgba(140,110,70,.16), inset 0 0 0 7px rgba(255,255,255,.30);
+    animation:floaty 4s ease-in-out infinite;}
+  .bubble .ico{border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:2px;transition:transform .2s;}
+  .bubble:active .ico{transform:scale(1.12) rotate(-6deg);}
+  .bubble .ico svg{width:60%;height:60%;}
+  .bubble .lbl{font-weight:700;font-size:14px;}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  @keyframes bpop{0%{opacity:0;transform:scale(.4)}72%{transform:scale(1.07)}100%{opacity:1;transform:scale(1)}}
+  @keyframes sway{0%,100%{transform:translate(0,0) rotate(var(--r,0deg))}50%{transform:translate(5px,-12px) rotate(calc(var(--r,0deg) + 5deg))}}
+  @media (prefers-reduced-motion: reduce){ .fl,.bg span,.bubble{animation:none!important} }
+  .h-hint{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:11.5px;color:#a3927c;}
+
+  /* ===== 通用二级头 ===== */
+  .d-head{flex:none;padding:16px 16px 12px;display:flex;align-items:center;gap:10px;}
+  .back{width:38px;height:38px;border-radius:50%;background:var(--card);box-shadow:0 3px 10px rgba(150,120,80,.15);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#7a6a55;flex:none;}
+  .back:active{transform:scale(.9);}
+  .d-title{font-weight:700;font-size:19px;color:#5f5245;}
+  .d-title .jp{font-size:10px;color:var(--ink2);font-weight:400;margin-left:5px;}
+  .center-title{flex:1;text-align:center;font-weight:700;font-size:18px;color:#5f5245;margin-right:38px;}
+
+  /* ===== 日程 / 水彩日历 ===== */
+  #sched{background:var(--paper);}
+  #sched>*{flex:none;}
+  .cal-card{margin:4px 16px 0;border-radius:28px;padding:18px 18px 16px;position:relative;overflow:hidden;
+    background:linear-gradient(160deg,#fbe9d8,#f6d3ba);box-shadow:0 8px 22px rgba(200,150,110,.2);}
+  .cal-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+  .cal-ctrl{display:flex;align-items:center;gap:6px;}
+  .cnav,.cfold{width:29px;height:29px;border-radius:50%;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;color:#b06a48;font-size:16px;cursor:pointer;}
+  .cnav:active,.cfold:active{transform:scale(.9);}
+  .cfold{font-size:14px;transition:transform .25s;}
+  .cal-card.exp .cfold{transform:rotate(180deg);}
+  .cal-m{font-family:"Baloo 2";font-weight:700;font-size:32px;color:#c06a44;line-height:1;}
+  .cal-m small{font-family:"Zen Maru Gothic";font-size:15px;color:#b06a48;margin-left:8px;font-weight:500;}
+  .cal-sub{font-size:12px;color:#bb7c55;margin:4px 0 0;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center;position:relative;z-index:1;}
+  .cal-grid .wd{font-size:11px;color:#b5794f;padding:4px 0;font-weight:500;}
+  .cal-grid .wd.sun{color:#d06a54;}.cal-grid .wd.sat{color:#6f93c4;}
+  .cal-grid .d{font-family:"Baloo 2";font-size:13px;color:#7a5c44;padding:7px 0;border-radius:10px;position:relative;}
+  .cal-grid .d.sun{color:#d47a63;}.cal-grid .d.sat{color:#7ea0cd;}
+  .cal-grid .d.today{color:#8a5a3c;font-weight:700;}
+  .cal-grid .d.today::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border:2.5px solid #c06a44;border-radius:50%;}
+  .cal-grid .d.mark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:#d98872;}
+  .cal-grid .d.amark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:#8fbf7f;}
+  .cal-grid .d.today.mark::after,.cal-grid .d.today.amark::after{background:#fff;}
+  .cal-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#b06a48;margin-top:11px;position:relative;z-index:1;}
+  .cal-legend i{width:6px;height:6px;border-radius:50%;background:#d98872;display:inline-block;}
+  .cal-legend i.g{background:#8fbf7f;margin-left:8px;}
+  .sec-h{display:flex;align-items:center;gap:7px;margin:20px 18px 8px;font-size:15px;font-weight:700;color:#6b4e3d;}
+  .ag-card{margin:0 16px 10px;background:var(--card);border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:11px;
+    font-size:13.5px;color:#6b5f52;box-shadow:0 3px 10px rgba(150,120,80,.08);}
+  .ag-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .disc{font-size:11px;color:var(--ink2);text-align:center;padding:14px 26px 8px;line-height:1.7;}
+
+  /* 我的课表 · 日程页入口卡 */
+  .tt-head{display:flex;align-items:center;margin:22px 18px 8px;}
+  .tt-head .h{font-size:15px;font-weight:700;color:#6b4e3d;display:flex;align-items:center;gap:7px;}
+  .tt-enter{margin:0 16px;background:var(--card);border-radius:16px;padding:15px 16px;display:flex;align-items:center;gap:12px;
+    box-shadow:0 3px 10px rgba(150,120,80,.08);cursor:pointer;}
+  .tt-enter:active{transform:scale(.99);}
+  .tt-enter .ei{width:40px;height:40px;border-radius:12px;background:var(--green-t);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;}
+  .tt-enter .et b{display:block;font-size:14.5px;color:#5f5245;}
+  .tt-enter .et span{font-size:11.5px;color:var(--ink2);}
+  .tt-enter .arw{margin-left:auto;color:#cbbba2;font-size:18px;}
+
+  /* 课表页 · 节次×星期 网格 */
+  #timetable{background:var(--paper);}
+  .tt-grid{display:grid;grid-template-columns:40px repeat(5,1fr);gap:4px;margin:4px 14px 0;}
+  .tt-cell{border-radius:10px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;text-align:center;padding:3px;line-height:1.25;}
+  .tt-corner{min-height:34px;}
+  .tt-wd{background:var(--card);color:#7a6a55;font-weight:700;min-height:34px;box-shadow:0 2px 6px rgba(150,120,80,.06);}
+  .tt-per{color:var(--ink2);font-size:10px;}
+  .tt-per span{display:block;font-size:8.5px;color:#c3b7a1;}
+  .tt-cls{color:#5f574c;font-weight:600;box-shadow:0 2px 6px rgba(150,120,80,.1);cursor:pointer;word-break:break-all;}
+  .tt-cls small{display:block;font-size:8.5px;color:#9c8f7d;font-weight:400;margin-top:1px;}
+  .tt-add{background:rgba(255,255,255,.5);color:#d4c7b0;font-size:17px;cursor:pointer;border:1px dashed #e3d8c4;}
+  .tt-add:active{transform:scale(.95);}
+  .tt-actions{display:flex;gap:10px;margin:16px 16px 0;}
+  .tt-actions button{flex:1;border:none;border-radius:14px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .tt-actions .add{background:var(--green);color:#fff;}
+  .tt-actions .imp{background:var(--card);color:#7a6a55;border:1.5px dashed #d8c8a8;}
+  .tt-note{text-align:center;font-size:11px;color:var(--ink2);margin:14px 24px 0;line-height:1.6;}
+
+  /* 底部弹层表单 */
+  .mask{position:absolute;inset:0;background:rgba(70,55,40,.42);z-index:50;display:none;align-items:flex-end;}
+  .mask.on{display:flex;}
+  .sheet{width:100%;background:var(--paper2);border-radius:24px 24px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 20px);animation:up .28s ease;}
+  @keyframes up{from{transform:translateY(100%)}to{transform:none}}
+  .sheet h4{margin:2px 0 14px;font-size:16px;color:#5f5245;text-align:center;font-weight:700;}
+  .frm{display:flex;flex-direction:column;gap:9px;}
+  .frm input,.frm select{border:1.5px solid #ece1cd;background:var(--card);border-radius:12px;padding:11px 12px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;}
+  .frm input:focus,.frm select:focus{border-color:#dcccac;}
+  .frm .r{display:flex;gap:9px;}.frm .r>*{flex:1;min-width:0;}
+  .btn-add{background:var(--green);color:#fff;border:none;border-radius:14px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:2px;}
+  .btn-del{background:none;border:1.5px solid #e6bcae;color:#c9705a;border-radius:14px;padding:11px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .btn-close{background:none;border:none;color:var(--ink2);font-size:13px;margin-top:8px;width:100%;cursor:pointer;font-family:inherit;}
+
+  /* ===== 我的 ===== */
+  #profile{background:var(--paper);align-items:center;}
+  .pf-top{text-align:center;padding:34px 0 6px;}
+  .pf-ava{width:96px;height:96px;border-radius:50%;background:var(--green-t);margin:0 auto;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(140,180,120,.25);}
+  .pf-ava svg{width:56px;height:56px;}
+  .pf-ava{cursor:pointer;overflow:hidden;}
+  .ava-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;}
+  .ava-opt{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2.5px solid transparent;transition:transform .12s;}
+  .ava-opt:active{transform:scale(.9);}
+  .ava-opt.on{border-color:var(--nav);}
+  .ava-opt svg{width:62%;height:62%;}
+  .pf-name{font-weight:700;font-size:21px;color:#5f5245;margin-top:14px;}
+  .pf-sub{font-size:12.5px;color:var(--ink2);margin-top:3px;}
+  .pf-list{width:100%;padding:16px;}
+  .pf-item{background:var(--card);border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:13px;margin-bottom:11px;
+    box-shadow:0 3px 10px rgba(150,120,80,.08);cursor:pointer;}
+  .pf-item:active{transform:scale(.99);}
+  .pf-ic{font-size:22px;flex:none;width:26px;text-align:center;}
+  .pf-item .t b{display:block;font-size:14.5px;color:#5f5245;}
+  .pf-item .t span{font-size:11.5px;color:var(--ink2);}
+  .pf-item .arw{margin-left:auto;color:#cbbba2;font-size:18px;}
+
+  /* ===== 分类页内容 ===== */
+  .d-body{padding:2px 16px 8px;}
+  .panel{background:var(--card);border-radius:20px;padding:14px 15px;margin-bottom:13px;box-shadow:0 4px 12px rgba(150,120,80,.08);}
+  .panel h3{margin:0 0 10px;font-size:14.5px;color:#6b4e3d;display:flex;align-items:center;gap:6px;}
+  .row-day{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--line);}
+  .row-day:last-child{border-bottom:none;}
+  .daybadge{width:44px;height:44px;border-radius:14px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;line-height:1.1;}
+  .row-day .what{font-size:13.5px;color:#5f574c;font-weight:500;}
+  .row-day .sub{font-size:11px;color:var(--ink2);}
+  .tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+  .tab{flex:none;padding:8px 15px;border-radius:16px;background:var(--card);border:2px solid #efe4d0;font-size:13px;color:#7a705f;cursor:pointer;font-weight:500;}
+  .tab.on{color:#fff;border-color:transparent;}
+  .matrow{display:flex;gap:8px;padding:6px 0;font-size:13px;}
+  .matrow .k{color:var(--ink2);min-width:52px;flex:none;}
+  .matrow .v{color:#5f574c;}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .qa-chip{padding:7px 12px;border-radius:15px;font-size:12.5px;cursor:pointer;font-weight:500;}
+  .qa-chip:active{transform:scale(.96);}
+  .banner{border-radius:14px;padding:10px 13px;font-size:12.5px;display:flex;gap:8px;align-items:center;line-height:1.5;}
+  .aiwrap{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 4px 12px rgba(150,120,80,.08);margin-bottom:14px;}
+  .aihead{padding:12px 15px 8px;display:flex;align-items:center;gap:7px;}
+  .aihead .t{font-weight:700;font-size:16px;color:#6b4e3d;}
+  .aihead .tag{margin-left:auto;font-size:10px;color:#fff;padding:2px 9px;border-radius:12px;}
+  .chatlog{padding:6px 13px 8px;display:flex;flex-direction:column;gap:9px;min-height:60px;}
+  .msg{max-width:85%;padding:9px 12px;border-radius:15px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+  .msg.me{align-self:flex-end;color:#fff;border-bottom-right-radius:5px;}
+  .msg.bot{align-self:flex-start;background:var(--paper2);border:1.5px solid #f0e7d6;color:#5f574c;border-bottom-left-radius:5px;}
+  .toolchips{display:flex;flex-wrap:wrap;gap:5px;align-self:flex-start;}
+  .toolchip{font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;}
+  .typing{display:inline-flex;gap:4px;padding:4px 2px;}
+  .typing i{width:6px;height:6px;border-radius:50%;background:#d3c8b4;animation:blink 1.2s infinite;}
+  .typing i:nth-child(2){animation-delay:.2s;}.typing i:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  .inbar{display:flex;align-items:center;gap:7px;padding:9px 11px;border-top:1.5px solid #f1e8d7;background:var(--paper2);}
+  .iobtn{width:36px;height:36px;border-radius:50%;background:var(--card);border:1.5px solid #ece1cd;flex:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+  .iobtn:active{transform:scale(.9);}
+  .inbar input{flex:1;border:1.5px solid #ece1cd;background:var(--card);border-radius:18px;padding:9px 13px;font-size:13.5px;outline:none;font-family:inherit;color:var(--ink);}
+  .inbar input:focus{border-color:#dcccac;}
+  .sendb{width:38px;height:38px;border-radius:50%;border:none;color:#fff;font-size:16px;cursor:pointer;flex:none;}
+  .toast{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);background:rgba(90,72,52,.92);color:#fff;font-size:12px;padding:8px 15px;border-radius:20px;z-index:40;opacity:0;transition:.25s;pointer-events:none;}
+  .toast.show{opacity:1;}
+
+  /* ===== 我的收藏(食谱卡片墙) ===== */
+  #favorites,#recipeView{background:var(--paper);}
+  .fav-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:6px 16px 0;}
+  .fav-card{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 3px 10px rgba(150,120,80,.1);cursor:pointer;}
+  .fav-card:active{transform:scale(.98);}
+  .fav-cover{height:108px;display:flex;align-items:center;justify-content:center;font-size:46px;}
+  .fav-meta{padding:9px 11px 11px;}
+  .fav-meta b{font-size:13.5px;color:#5f5245;display:block;line-height:1.35;}
+  .fav-meta .m{font-size:11px;color:var(--ink2);margin-top:5px;}
+  .fav-empty{grid-column:1/-1;text-align:center;color:var(--ink2);font-size:13px;padding:44px 24px;line-height:1.8;}
+  .rv-cover{height:150px;display:flex;align-items:center;justify-content:center;font-size:72px;border-radius:20px;margin:2px 16px 0;}
+  .rv-sec{margin:14px 16px 0;background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px rgba(150,120,80,.08);}
+  .rv-sec h4{margin:0 0 8px;font-size:14px;color:#6b4e3d;}
+  .rv-sec ul,.rv-sec ol{margin:0;padding-left:18px;}
+  .rv-sec li{font-size:13px;color:#5f574c;line-height:1.9;}
+  .rv-raw{font-size:13.5px;color:#5f574c;line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+  .rv-del{margin:16px;width:calc(100% - 32px);background:none;border:1.5px solid #e6bcae;color:#c9705a;border-radius:14px;padding:12px;font-size:13.5px;cursor:pointer;font-family:inherit;}
+  .save-rec{align-self:flex-start;background:var(--green-t);color:#5a7a4a;font-size:12px;font-weight:600;padding:7px 13px;border-radius:14px;cursor:pointer;border:1.5px dashed #b8d3a6;margin-top:-2px;}
+  .save-rec.done{background:#eee7db;color:#a89c88;border-style:solid;cursor:default;}
+
+  /* ===== 打工记录 ===== */
+  #worklog{background:var(--paper);}
+  .wl-sum{margin:4px 16px 0;border-radius:22px;padding:18px;background:linear-gradient(150deg,#eaf1dd,#d8e8c3);box-shadow:0 6px 18px rgba(150,170,110,.2);}
+  .wl-stats{display:flex;gap:12px;margin-bottom:12px;}
+  .wl-stat{flex:1;}
+  .wl-stat b{display:block;font-family:"Baloo 2";font-size:23px;color:#5a7a3f;line-height:1.1;}
+  .wl-stat span{font-size:11px;color:#7d8a63;}
+  .wl-yline{font-size:12px;color:#6b7a4f;margin-bottom:6px;}
+  .wl-yline b{color:#4f6d36;}
+  .wl-bar{height:12px;border-radius:8px;background:rgba(255,255,255,.65);position:relative;}
+  .wl-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#a8cf8e,#e7bf6b);}
+  .wl-mark{position:absolute;top:-4px;width:2px;height:20px;background:#d98872;}
+  .wl-cap{font-size:11.5px;color:#6b7a4f;margin-top:9px;line-height:1.5;}
+  .wl-sec{margin:20px 18px 8px;font-size:15px;font-weight:700;color:#6b4e3d;}
+  .wl-item{margin:0 16px 9px;background:var(--card);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 10px rgba(150,120,80,.08);}
+  .wl-date{width:42px;flex:none;text-align:center;}
+  .wl-date b{display:block;font-family:"Baloo 2";font-size:17px;color:#7a6a55;line-height:1;}
+  .wl-date span{font-size:9px;color:var(--ink2);}
+  .wl-info b{font-size:13.5px;color:#5f5245;display:block;}
+  .wl-info span{font-size:11px;color:var(--ink2);}
+  .wl-earn{margin-left:auto;font-weight:700;color:#5a7a3f;font-size:14px;font-family:"Baloo 2";}
+  .wl-del{color:#d7a89a;cursor:pointer;font-size:12px;padding-left:4px;}
+  .wl-add{display:block;margin:14px 16px 0;width:calc(100% - 32px);background:var(--nav);color:#fff;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+  /* ===== 底部导航 ===== */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;z-index:20;height:calc(62px + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);display:flex;background:rgba(253,248,242,.94);backdrop-filter:blur(8px);
+    border-top:1px solid #efe6d7;}
+  .navb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:#b8ab95;}
+  .navb svg{width:23px;height:23px;}
+  .navb span{font-size:10.5px;}
+  .navb.on{color:var(--nav);}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- 首页 -->
+  <section class="screen active" id="home">
+    <div class="bg" id="bg"></div>
+    <div class="h-title"><h1>日留生活の小助手</h1><div class="en">JAPAN LIFE · LITTLE HELPER</div></div>
+    <div class="bubbles" id="bubbles"></div>
+  </section>
+
+  <!-- 日程 -->
+  <section class="screen" id="sched">
+    <div class="d-head"><div class="center-title">日程安排</div></div>
+    <div class="cal-card" id="calCard">
+      <div class="cal-hd">
+        <div onclick="calToggle()" style="cursor:pointer">
+          <div class="cal-m" id="calM">—</div>
+          <div class="cal-sub" id="calSub"></div>
+        </div>
+        <div class="cal-ctrl">
+          <span class="cnav" onclick="calMove(-1)">‹</span>
+          <span class="cnav" onclick="calMove(1)">›</span>
+          <span class="cfold" id="calFold" onclick="calToggle()">⌄</span>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend"><i></i>打工日<i class="g"></i>日程</div>
+    </div>
+    <div class="tt-head"><div class="h">📚 我的课表</div></div>
+    <div class="tt-enter" onclick="nav('timetable')">
+      <div class="ei">📚</div>
+      <div class="et"><b>周间课表</b><span id="ttSum">还没有课程,点击导入</span></div>
+      <div class="arw">›</div>
+    </div>
+    <div class="sec-h">⭐ 本次安排</div>
+    <div id="agList"></div>
+    <div class="disc">示例知识库,仅供参考。<br>医疗类不构成诊断,急症拨 119 / #7119。</div>
+  </section>
+
+  <!-- 打工记录 -->
+  <section class="screen" id="worklog">
+    <div class="d-head"><div class="back" onclick="goBack()">‹</div><div class="d-title">打工记录<span class="jp">アルバイト記録</span></div></div>
+    <div class="wl-sum" id="wlSum"></div>
+    <div class="wl-sec">📋 记录明细</div>
+    <div id="wlList"></div>
+    <button class="wl-add" onclick="openWLAdd()">＋ 添加打工记录</button>
+    <div class="tt-note">记录会算进上方进度条,帮你盯住「103万 / 130万之壁」。数据存本机。</div>
+  </section>
+
+  <!-- 我的收藏(食谱) -->
+  <section class="screen" id="favorites">
+    <div class="d-head"><div class="back" onclick="goBack()">‹</div><div class="d-title">我的收藏<span class="jp">お気に入りレシピ</span></div></div>
+    <div class="fav-grid" id="favGrid"></div>
+    <div class="tt-note">在「留学生食谱」里问我菜谱,点「收藏为完整食谱」就会出现在这里。</div>
+  </section>
+
+  <!-- 食谱详情 -->
+  <section class="screen" id="recipeView">
+    <div class="d-head"><div class="back" onclick="showScreen('favorites')">‹</div><div class="d-title" id="rvTitle">食谱</div></div>
+    <div id="rvBody"></div>
+  </section>
+
+  <!-- 课表页 -->
+  <section class="screen" id="timetable">
+    <div class="d-head"><div class="back" onclick="goBack()">‹</div><div class="d-title">我的课表<span class="jp">週間時間割</span></div></div>
+    <div class="tt-grid" id="ttGrid"></div>
+    <div class="tt-actions">
+      <button class="add" onclick="openAdd()">＋ 添加课程</button>
+      <button class="imp" onclick="document.getElementById('ttFile').click()">📷 拍照导入</button>
+    </div>
+    <input type="file" id="ttFile" accept="image/*" hidden onchange="soon('课表识别')"/>
+    <div class="tt-note">点空格子添加课程,点已有课程可编辑/删除。<br>课表保存在本机,拍照识别(OCR)开发中。</div>
+  </section>
+
+  <!-- 分类详情 -->
+  <section class="screen" id="detail">
+    <div class="d-head" id="dHead"><div class="back" onclick="goBack()">‹</div><div class="d-title" id="dTitle"></div></div>
+    <div class="d-body" id="dBody"></div>
+  </section>
+
+  <!-- 我的 -->
+  <section class="screen" id="profile">
+    <div class="pf-top">
+      <div class="pf-ava" id="pfAva" onclick="openUserEdit()"></div>
+      <div class="pf-name" id="pfName">小留同学</div>
+      <div class="pf-sub" id="pfSub">留学中 · 東京都新宿区</div>
+    </div>
+    <div class="pf-list">
+      <div class="pf-item" onclick="openUserEdit()"><span class="pf-ic">🧑</span><span class="t"><b>个人信息</b><span id="uInfo">居住区 · 新宿区</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="nav('favorites')"><span class="pf-ic">🍜</span><span class="t"><b>收藏的食谱</b><span id="favCount">已保存 0 道菜谱</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="nav('timetable')"><span class="pf-ic">📚</span><span class="t"><b>我的课表</b><span>查看和编辑周间时间割</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="nav('worklog')"><span class="pf-ic">💼</span><span class="t"><b>打工记录</b><span id="wlCount">本月 0 小时</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="soon('语言设置')"><span class="pf-ic">🌏</span><span class="t"><b>语言设置</b><span>中文 / 日本語</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="soon('关于')"><span class="pf-ic">ℹ️</span><span class="t"><b>关于小助手</b><span>版本 1.0.0 · 示例项目</span></span><span class="arw">›</span></div>
+    </div>
+  </section>
+
+  <!-- 添加/编辑课程 弹层 -->
+  <div class="mask" id="mask">
+    <div class="sheet">
+      <h4 id="shTitle">添加课程</h4>
+      <div class="frm">
+        <input id="fName" placeholder="课程名,如 経済学入門"/>
+        <div class="r">
+          <select id="fDay"><option value="0">周一</option><option value="1">周二</option><option value="2">周三</option><option value="3">周四</option><option value="4">周五</option></select>
+          <select id="fPeriod"><option value="1">1限</option><option value="2">2限</option><option value="3">3限</option><option value="4">4限</option><option value="5">5限</option></select>
+        </div>
+        <button class="btn-add" onclick="saveClass()">保存</button>
+        <button class="btn-del" id="shDel" style="display:none" onclick="removeClass()">删除这门课</button>
+      </div>
+      <button class="btn-close" onclick="closeSheet()">取消</button>
+    </div>
+  </div>
+
+  <!-- 个人信息 弹层 -->
+  <div class="mask" id="maskUser">
+    <div class="sheet">
+      <h4>个人信息</h4>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:8px">选个头像</div>
+      <div class="ava-grid" id="avaGrid"></div>
+      <div class="frm">
+        <input id="uName" placeholder="昵称,如 小留同学"/>
+        <div class="r">
+          <select id="uPref"></select>
+          <input id="uCity" placeholder="市区町村,如 新宿区"/>
+        </div>
+        <button class="btn-add" onclick="saveUserInfo()">保存</button>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('maskUser').classList.remove('on')">取消</button>
+    </div>
+  </div>
+
+  <!-- 添加打工记录 弹层 -->
+  <div class="mask" id="maskWork">
+    <div class="sheet">
+      <h4>添加打工记录</h4>
+      <div class="frm">
+        <div class="r">
+          <input id="wDate" type="date"/>
+          <input id="wPlace" placeholder="店名,如 セブン"/>
+        </div>
+        <div class="r">
+          <input id="wHours" type="number" step="0.5" min="0" placeholder="时长(h)"/>
+          <input id="wWage" type="number" step="10" min="0" placeholder="时薪(¥)"/>
+        </div>
+        <button class="btn-add" onclick="addWork()">保存记录</button>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('maskWork').classList.remove('on')">取消</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 底部导航 -->
+  <div class="tabbar" id="tabbar">
+    <div class="navb on" data-s="home" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>首页</span></div>
+    <div class="navb" data-s="sched" onclick="nav('sched')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7v15H4z"/><path d="M13 5h7v15h-7z"/></svg><span>日程</span></div>
+    <div class="navb" data-s="profile" onclick="nav('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>我的</span></div>
+  </div>
+</div>
+
+<script>
+/* ---------- 可爱吉祥物图标(带表情) ---------- */
+const IC={
+  admin:'<svg viewBox="0 0 48 48"><rect x="12" y="9" width="24" height="30" rx="7" fill="#eaf1f8" stroke="#8fb3d4" stroke-width="2.6"/><circle cx="20" cy="25" r="1.7" fill="#6f97bd"/><circle cx="28" cy="25" r="1.7" fill="#6f97bd"/><path d="M21 28.5 q3 2.4 6 0" stroke="#6f97bd" stroke-width="1.7" fill="none" stroke-linecap="round"/><path d="M31.5 11 l1 2.6 2.7 1 -2.7 1 -1 2.6 -1-2.6 -2.7-1 2.7-1Z" fill="#f0c86a"/></svg>',
+  gomi:'<svg viewBox="0 0 48 48"><path d="M14 22 h20 v2 a10 10 0 0 1-10 10 a10 10 0 0 1-10-10Z" fill="#aed49d"/><rect x="11" y="18.5" width="26" height="5" rx="2.5" fill="#8fbf7f"/><path d="M27 13 q3.5-3.5 6 -0.5" stroke="#8fbf7f" stroke-width="2.4" fill="none" stroke-linecap="round"/><ellipse cx="33" cy="11.5" rx="3" ry="2" fill="#8fbf7f" transform="rotate(30 33 11.5)"/><circle cx="20.5" cy="27" r="1.7" fill="#5f7d4a"/><circle cx="27.5" cy="27" r="1.7" fill="#5f7d4a"/><path d="M21.5 30 q2.5 2.2 5 0" stroke="#5f7d4a" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>',
+  medical:'<svg viewBox="0 0 48 48"><rect x="9" y="17" width="30" height="21" rx="7" fill="#efe4f7" stroke="#ab8fd0" stroke-width="2.6"/><path d="M18 17 v-3 a2.5 2.5 0 0 1 2.5-2.5 h7 a2.5 2.5 0 0 1 2.5 2.5 v3" fill="none" stroke="#ab8fd0" stroke-width="2.6"/><rect x="21.4" y="22.5" width="5.2" height="12" rx="2" fill="#9d7bc0"/><rect x="18" y="25.9" width="12" height="5.2" rx="2" fill="#9d7bc0"/></svg>',
+  work:'<svg viewBox="0 0 48 48"><rect x="9" y="16" width="30" height="20" rx="6" fill="#f4e2d1" stroke="#cd9f78" stroke-width="2.6"/><rect x="9" y="21" width="30" height="4.5" fill="#cd9f78"/><circle cx="30.5" cy="30" r="3.4" fill="#e7b98e" stroke="#cd9f78" stroke-width="1.4"/></svg>',
+  event:'<svg viewBox="0 0 48 48"><path d="M24 9 l4.2 8.5 9.3 1 -6.7 6.4 1.6 9.3 -8.4-4.7 -8.4 4.7 1.6-9.3 -6.7-6.4 9.3-1Z" fill="#f4d97a" stroke="#e0b84a" stroke-width="2.2" stroke-linejoin="round"/><circle cx="21" cy="24" r="1.5" fill="#b8892e"/><circle cx="27" cy="24" r="1.5" fill="#b8892e"/><path d="M22 27 q2 1.7 4 0" stroke="#b8892e" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+  recipe:'<svg viewBox="0 0 48 48"><path d="M10 25 h28 a2 2 0 0 1 2 2 a13 13 0 0 1-13 13 h-6 a13 13 0 0 1-13-13 a2 2 0 0 1 2-2Z" fill="#cfe0ef" stroke="#7fa8cf" stroke-width="2.6"/><path d="M17 20 q-1-4 2-6 M23 18 q-1-4 2-6" stroke="#a9c4de" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="31" y1="14" x2="23" y2="27" stroke="#c99a6a" stroke-width="2.2" stroke-linecap="round"/><line x1="35" y1="16" x2="27" y2="28" stroke="#c99a6a" stroke-width="2.2" stroke-linecap="round"/><circle cx="20.5" cy="31" r="1.6" fill="#5f7d9a"/><circle cx="27.5" cy="31" r="1.6" fill="#5f7d9a"/><path d="M21.5 34 q2.5 2 5 0" stroke="#5f7d9a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'
+};
+
+/* ---------- 水彩水果背景 ---------- */
+const FR={
+  avocado:'<svg viewBox="0 0 60 68" width="100%" height="100%"><ellipse cx="30" cy="42" rx="22" ry="25" fill="#a9c98f"/><ellipse cx="30" cy="44" rx="15" ry="18" fill="#eef1cf"/><circle cx="30" cy="46" r="9" fill="#c9a27e"/></svg>',
+  straw:'<svg viewBox="0 0 56 62" width="100%" height="100%"><path d="M28 12 C48 12 50 34 28 58 C6 34 8 12 28 12Z" fill="#eaa0ab"/><path d="M17 13 h22 l-5 7 h-12Z" fill="#9cbf7f"/><g fill="#fff"><circle cx="24" cy="30" r="1.4"/><circle cx="32" cy="34" r="1.4"/><circle cx="27" cy="42" r="1.4"/></g></svg>',
+  melon:'<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="32" cy="32" r="26" fill="#9ec98f"/><g stroke="#5f7d4a" stroke-width="3" fill="none" opacity=".85"><path d="M16 16 Q32 32 16 48"/><path d="M32 6 Q32 32 32 58"/><path d="M48 16 Q32 32 48 48"/></g></svg>',
+  orange:'<svg viewBox="0 0 60 60" width="100%" height="100%"><circle cx="30" cy="33" r="24" fill="#efb26f"/><circle cx="21" cy="24" r="2.4" fill="#d99a55"/><path d="M27 9 q4-4 8 0" stroke="#9cbf7f" stroke-width="3" fill="none"/></svg>',
+  cherry:'<svg viewBox="0 0 60 56" width="100%" height="100%"><circle cx="20" cy="42" r="10" fill="#e58a8a"/><circle cx="40" cy="42" r="10" fill="#e58a8a"/><path d="M20 32 C26 14 40 14 40 32" stroke="#9cbf7f" stroke-width="3" fill="none"/></svg>',
+  flower:'<svg viewBox="0 0 54 54" width="100%" height="100%"><g fill="#b8c6e6"><circle cx="27" cy="11" r="8"/><circle cx="27" cy="43" r="8"/><circle cx="11" cy="27" r="8"/><circle cx="43" cy="27" r="8"/></g><circle cx="27" cy="27" r="8" fill="#f3e07a"/></svg>',
+  peach:'<svg viewBox="0 0 60 60" width="100%" height="100%"><circle cx="24" cy="34" r="19" fill="#f2b7a6"/><circle cx="37" cy="34" r="19" fill="#eea391"/><path d="M30 15 q3-5 7-3" stroke="#9cbf7f" stroke-width="3" fill="none"/></svg>'
+};
+const spots=[['avocado',-4,6,120,-8],['straw',74,2,74,10],['melon',30,16,96,0],['orange',80,30,86,6],
+  ['cherry',52,40,70,-6],['flower',10,34,54,0],['peach',-6,52,104,4],['straw',66,58,72,-10],
+  ['flower',44,72,50,0],['avocado',18,80,92,12],['orange',78,80,80,-6],['melon',-4,90,84,0]];
+document.getElementById('bg').innerHTML=spots.map(([k,x,y,s,r],i)=>
+  `<span style="left:${x}%;top:${y}%;width:${s}px;height:${s}px;opacity:.5;--r:${r}deg;animation-duration:${(9+(i%5)*1.6).toFixed(1)}s;animation-delay:${(i*0.5).toFixed(1)}s">${FR[k]}</span>`).join('');
+
+/* ---------- 分类配置 ---------- */
+const CATS={
+  gomi:{name:'垃圾分类',jp:'ゴミ分別',c:'var(--green)',ct:'var(--green-t)',hex:'#7fa86f',lab:'#5a7a4a'},
+  medical:{name:'看病问诊',jp:'受診・分診',c:'var(--purple)',ct:'var(--purple-t)',hex:'#9d7bc0',lab:'#8a6ba8'},
+  admin:{name:'行政流程',jp:'行政手続き',c:'var(--blue)',ct:'var(--blue-t)',hex:'#6f97bd',lab:'#4f7aa5'},
+  work:{name:'打工助手',jp:'アルバイト',c:'var(--coral)',ct:'var(--coral-t)',hex:'#cd9f78',lab:'#b07a4a'},
+  recipe:{name:'留学生食谱',jp:'自炊レシピ',c:'var(--blue)',ct:'var(--blue-t)',hex:'#7fa8cf',lab:'#5f7d9a'},
+  event:{name:'活动推送',jp:'イベント',c:'var(--yellow)',ct:'var(--yellow-t)',hex:'#d8a83e',lab:'#b58a2e'}
+};
+
+/* ---------- 用户资料 ---------- */
+const USERKEY='jp_user';
+const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
+let USER=null; try{USER=JSON.parse(localStorage.getItem(USERKEY)||'null');}catch(e){}
+if(!USER) USER={name:'小留同学',pref:'東京都',city:'新宿区',avatar:'pot'};
+USER.pref=USER.pref||'東京都'; USER.city=USER.city||USER.ward||'新宿区'; delete USER.ward;
+USER.avatar=USER.avatar||'pot';
+function saveUser(){try{localStorage.setItem(USERKEY,JSON.stringify(USER));}catch(e){}}
+function prefOptions(sel){return PREFS.map(p=>`<option value="${p}"${p===sel?' selected':''}>${p}</option>`).join('');}
+
+/* ---------- 头像库(不同性别/性格偏好) ---------- */
+const AVATARS=[
+  {id:'pot',bg:'#e6f0dc',svg:IC.gomi},
+  {id:'cat',bg:'#fbe1d4',em:'🐱'},
+  {id:'bunny',bg:'#fbe6ee',em:'🐰'},
+  {id:'bear',bg:'#f3e2d1',em:'🐻'},
+  {id:'frog',bg:'#e6f0dc',em:'🐸'},
+  {id:'whale',bg:'#e2ecf6',em:'🐳'},
+  {id:'chick',bg:'#f8eecd',em:'🐤'},
+  {id:'fox',bg:'#fbe1d4',em:'🦊'},
+  {id:'panda',bg:'#eeeae2',em:'🐼'},
+  {id:'star',bg:'#f8eecd',em:'⭐'},
+  {id:'flower',bg:'#eee6f6',em:'🌸'},
+  {id:'ghost',bg:'#eae6f2',em:'👻'}
+];
+function avatarObj(id){return AVATARS.find(a=>a.id===id)||AVATARS[0];}
+function renderAvatarInto(el,id,px){ if(!el)return; const a=avatarObj(id); el.style.background=a.bg; el.innerHTML=a.em?`<span style="font-size:${px}px;line-height:1">${a.em}</span>`:a.svg; }
+
+/* 详细收集日(示例,仅东京部分区):[星期, 颜色, 类别, 说明] */
+const GOMI_WARDS={
+  '新宿区':[['火','var(--green)','可燃垃圾','燃えるゴミ · 沥干厨余'],['木','var(--blue)','塑料容器','プラ · 洗净后投'],['日','var(--yellow)','资源垃圾','瓶/罐/纸/塑料瓶'],['水','var(--coral)','不可燃','第2·4周 · 玻璃陶瓷']],
+  '涩谷区':[['月','var(--green)','可燃垃圾','燃えるゴミ'],['木','var(--green)','可燃垃圾','燃えるゴミ'],['火','var(--blue)','塑料容器','プラ'],['水','var(--yellow)','资源垃圾','瓶/罐/塑料瓶'],['土','var(--coral)','不可燃/纸','第1·3周 不燃']],
+  '丰岛区':[['月','var(--green)','可燃(含塑料)','燃える+プラ'],['木','var(--green)','可燃(含塑料)','燃える+プラ'],['土','var(--yellow)','资源垃圾','瓶/罐/纸'],['金','var(--coral)','不可燃','第2·4周']]
+};
+const GOMI_ALIAS={'渋谷区':'涩谷区','豊島区':'丰岛区'};
+function findGomiDays(city){return GOMI_WARDS[city]||GOMI_WARDS[GOMI_ALIAS[city]];}
+let currentGomi={pref:'東京都',city:'新宿区'};
+function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=document.getElementById('gomiPref'); if(ps)ps.value='東京都'; const ci=document.getElementById('gomiCity'); if(ci)ci.value=city; renderGomiSched(); }
+function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiSched(); }
+function renderGomiSched(){
+  const el=document.getElementById('gomiSched'); if(!el) return;
+  const {pref,city}=currentGomi;
+  const days=(pref==='東京都')?findGomiDays(city):null;
+  let inner;
+  if(days){ inner=days.map(([d,col,w,s])=>`<div class="row-day"><div class="daybadge" style="background:${col}">${d}<span style="font-size:8px;opacity:.85">曜日</span></div><div><div class="what">${w}</div><div class="sub">${s}</div></div></div>`).join(''); }
+  else { inner=`<div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.7;padding:6px 0">${esc(pref)} ${esc(city||'')} 的收集日各地不同。直接问我「${esc(city||pref)}的xx怎么扔」,或查当地役所 / 「ゴミ分別アプリ」。</div>`; }
+  el.innerHTML=`<h3>📍 ${esc(pref)} ${esc(city||'')} · 本周收集日</h3>${inner}`;
+}
+function renderProfile(){
+  const n=document.getElementById('pfName'); if(n)n.textContent=USER.name||'小留同学';
+  const s=document.getElementById('pfSub'); if(s)s.textContent='留学中 · '+USER.pref+' '+USER.city;
+  const u=document.getElementById('uInfo'); if(u)u.textContent=USER.pref+' · '+(USER.city||'—');
+  renderAvatarInto(document.getElementById('pfAva'), USER.avatar, 52);
+}
+let selectedAvatar='pot';
+function pickAvatar(id){ selectedAvatar=id; document.querySelectorAll('#avaGrid .ava-opt').forEach((el,i)=>el.classList.toggle('on',AVATARS[i].id===id)); }
+function openUserEdit(){
+  selectedAvatar=USER.avatar||'pot';
+  document.getElementById('avaGrid').innerHTML=AVATARS.map(a=>`<div class="ava-opt${a.id===selectedAvatar?' on':''}" style="background:${a.bg}" onclick="pickAvatar('${a.id}')">${a.em?`<span style="font-size:20px">${a.em}</span>`:a.svg}</div>`).join('');
+  document.getElementById('uName').value=USER.name||'';
+  document.getElementById('uPref').innerHTML=prefOptions(USER.pref);
+  document.getElementById('uCity').value=USER.city||'';
+  document.getElementById('maskUser').classList.add('on');
+}
+function saveUserInfo(){
+  USER.name=document.getElementById('uName').value.trim()||'小留同学';
+  USER.pref=document.getElementById('uPref').value;
+  USER.city=document.getElementById('uCity').value.trim();
+  USER.avatar=selectedAvatar;
+  saveUser(); currentGomi={pref:USER.pref,city:USER.city}; renderProfile();
+  document.getElementById('maskUser').classList.remove('on'); toast('已保存 ✓');
+}
+/* 首页气泡:大而柔,散落 [key,left%,top%,直径,气泡底色,图标圈色] */
+const LAYOUT=[
+  ['admin',  4,  3,118,'rgba(226,236,246,.62)','#dcebf7'],
+  ['gomi',  53,  5,118,'rgba(230,240,220,.62)','#e2efd6'],
+  ['medical',27, 28,134,'rgba(238,230,246,.66)','#e9def4'],
+  ['work',   2, 50,112,'rgba(251,230,221,.62)','#fbe1d4'],
+  ['event', 55, 49,120,'rgba(248,238,205,.64)','#f7ecc6'],
+  ['recipe',27, 68,118,'rgba(226,236,246,.62)','#dcebf7']
+];
+document.getElementById('bubbles').innerHTML=LAYOUT.map(([k,x,y,s,bg,ic],i)=>{
+  const c=CATS[k], isz=Math.round(s*0.44);
+  const dur=(3.8+Math.random()*1.6).toFixed(2), fdel=(i*0.4).toFixed(2), bdel=(i*0.09).toFixed(2);
+  return `<div class="bubble" style="left:${x}%;top:${y}%;width:${s}px;height:${s}px;animation-delay:${bdel}s" onclick="openCat('${k}')">
+    <div class="fl" style="background:${bg};animation-duration:${dur}s;animation-delay:${fdel}s">
+      <div class="ico" style="width:${isz}px;height:${isz}px;background:${ic}">${IC[k]}</div>
+      <div class="lbl" style="color:${c.lab}">${c.name}</div></div></div>`;
+}).join('');
+
+/* ---------- 水彩日历(可折叠 + 翻月) ---------- */
+const _now=new Date(), NY=_now.getFullYear(), NM=_now.getMonth(), ND=_now.getDate();
+const EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CN=['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+const SEA=['冬','冬','春','春','春','夏','夏','夏','秋','秋','秋','冬'];
+let calState={y:NY,m:NM,exp:false};
+function renderCal(){
+  const {y,m,exp}=calState;
+  document.getElementById('calM').innerHTML=EN[m]+' <small>'+CN[m]+'月</small>';
+  document.getElementById('calSub').textContent=y+' · '+SEA[m];
+  document.getElementById('calCard').classList.toggle('exp',exp);
+  const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+  const isCur=(y===NY&&m===NM);
+  const wmark=workDaysFor(y,m), amark=agendaDaysFor(y,m);
+  const cells=[]; for(let i=0;i<first;i++) cells.push(null); for(let d=1;d<=days;d++) cells.push(d);
+  while(cells.length%7) cells.push(null);
+  const weeks=[]; for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+  let show=weeks;
+  if(!exp){ const anchor=isCur?ND:1; let wi=weeks.findIndex(w=>w.includes(anchor)); if(wi<0)wi=0; show=[weeks[wi]]; }
+  let h=['日','一','二','三','四','五','六'].map((w,i)=>`<div class="wd${i===0?' sun':i===6?' sat':''}">${w}</div>`).join('');
+  show.forEach(week=>week.forEach((d,dow)=>{
+    if(d==null){ h+='<div class="d"></div>'; return; }
+    const dot = wmark.has(d)?' mark':(amark.has(d)?' amark':'');
+    h+=`<div class="d${dow===0?' sun':dow===6?' sat':''}${(isCur&&d===ND)?' today':''}${dot}">${d}</div>`;
+  }));
+  document.getElementById('calGrid').innerHTML=h;
+}
+function calToggle(){ calState.exp=!calState.exp; renderCal(); }
+function calMove(n){ let m=calState.m+n, y=calState.y; if(m<0){m=11;y--;} if(m>11){m=0;y++;} calState.m=m; calState.y=y; renderCal(); }
+function workDaysFor(y,m){
+  const s=new Set(), pre=y+'-'+String(m+1).padStart(2,'0');
+  try{ (WL||[]).forEach(w=>{ if((w.date||'').slice(0,7)===pre) s.add(+(w.date).slice(8,10)); }); }catch(e){}
+  return s;
+}
+
+/* ---------- 行政子分类 ---------- */
+const ADMIN_DATA={
+  在留卡:{k:'在留期間更新',mat:'在留卡 / 护照 / 申请书 / 证件照 / 在学·成绩证明 / 经费证明',win:'地方出入国在留管理局',rsv:'可在线申请或到场取号',note:'期限前3个月内可办;出勤率过低可能不予更新。'},
+  国保:{k:'国民健康保险加入',mat:'在留卡 / 护照 / 个人编号 / 已完成住民登录',win:'市/区役所 保险年金课',rsv:'多为现场办理',note:'入国后14天内办;保费按前年收入算,可申请减免。'},
+  年金:{k:'国民年金',mat:'在留卡 / 个人编号 / 年金手册',win:'市役所 / 年金事务所',rsv:'现场办理为主',note:'留学生可申请「学生纳付特例」暂缓缴纳,每年申请。'},
+  个人编号:{k:'マイナンバーカード',mat:'通知卡 / 在留卡 / 证件照 / 本人确认',win:'市役所 或 在线申请',rsv:'支持在线申请',note:'制卡约1个月;可绑定健康保险证。'}
+};
+function admCard(o){return `<div class="matrow"><span class="k">材料</span><span class="v">${o.mat}</span></div>
+  <div class="matrow"><span class="k">窗口</span><span class="v">${o.win}</span></div>
+  <div class="matrow"><span class="k">预约</span><span class="v">${o.rsv}</span></div>
+  <div class="matrow"><span class="k">提醒</span><span class="v" style="color:#c58a4a">${o.note}</span></div>`;}
+
+function content(key){
+  const c=CATS[key];
+  if(key==='gomi'){
+    return `<div class="panel"><h3>📍 查询地点</h3>
+      <div class="frm">
+        <div class="r">
+          <select id="gomiPref" onchange="onGomiLoc()">${prefOptions(currentGomi.pref)}</select>
+          <input id="gomiCity" value="${esc(currentGomi.city)}" placeholder="市区町村,如 新宿区" oninput="onGomiLoc()"/>
+        </div>
+        <div class="chips" style="margin-top:2px">${['新宿区','涩谷区','丰岛区'].map(w=>`<span class="qa-chip" style="background:var(--green-t);color:#5a7a4a" onclick="setGomiWard('${w}')">${w}(详细)</span>`).join('')}</div>
+      </div></div>
+    <div class="panel" id="gomiSched"></div>
+    <div class="panel"><h3>🔎 分类速查</h3><div class="chips">${['塑料瓶怎么扔?','喷雾罐怎么处理?','大件垃圾怎么办?','旧衣服算什么?'].map(q=>
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
+  }
+  if(key==='medical'){
+    const g=[['发烧咳嗽','内科'],['肚子痛/腹泻','消化器内科'],['皮疹/过敏','皮肤科'],['牙疼','歯科'],['扭伤/骨折','整形外科'],['眼睛不适','眼科']];
+    return `<div class="panel" style="padding:12px 14px"><div class="banner" style="background:var(--coral-t);color:#b5624c">🚑 急症拨 <b>119</b>;拿不准是否就医拨 <b>#7119</b></div></div>
+    <div class="panel"><h3>🩺 科室速查(点一下问我)</h3><div class="chips">${g.map(([s,k])=>
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('我${s},在日本该挂什么科?')">${s} → ${k}</span>`).join('')}</div>
+      <div class="sub" style="margin-top:9px;font-size:11.5px;color:var(--ink2)">描述症状后,我会判断科室并生成<b>日语症状卡</b>给医生看。</div></div>`;
+  }
+  if(key==='admin'){
+    const keys=Object.keys(ADMIN_DATA);
+    return `<div class="tabs" id="admTabs">${keys.map((t,i)=>`<div class="tab ${i===0?'on':''}" style="${i===0?'background:var(--blue)':''}" onclick="admTab('${t}',this)">${t}</div>`).join('')}</div>
+    <div class="panel"><h3 id="admH">📄 ${ADMIN_DATA['在留卡'].k}</h3><div id="admC">${admCard(ADMIN_DATA['在留卡'])}</div></div>
+    <div class="panel"><h3>💬 常见问题</h3><div class="chips">${['国保要多少钱?','在留卡能提前多久更新?','年金可以不交吗?'].map(q=>
+      `<span class="qa-chip" style="background:var(--blue-t);color:#4f7aa5" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
+  }
+  if(key==='work'){
+    return `<div class="panel"><h3>💴 收入「壁」提醒</h3>
+      <div class="matrow"><span class="k">103万</span><span class="v">超过开始产生所得税</span></div>
+      <div class="matrow"><span class="k">130万</span><span class="v">脱离扶养,需自付社保</span></div>
+      <div class="matrow"><span class="k">28h/周</span><span class="v" style="color:#c58a4a">留学生打工上限,超时影响签证</span></div></div>
+    <div class="panel"><h3>💬 问问我</h3><div class="chips">${['打工超过103万会怎样?','面接常用敬语有哪些?','留学生每周能打工多久?'].map(q=>
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
+  }
+  if(key==='recipe'){
+    return `<div class="panel"><h3>🍳 单人快手餐</h3><div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.6">买菜时告诉我你有的食材,我推荐单人/双人餐、做法和大致热量,热量高还会给后几天的饮食建议。<br><b>更多菜谱库即将上线。</b></div>
+      <div class="chips" style="margin-top:10px">${['我有鸡蛋和西红柿,能做什么?','想吃日式简单的,推荐一下','这道菜热量高吗?'].map(q=>
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
+  }
+  if(key==='event'){
+    return `<div class="panel"><h3>🎡 关注领域</h3><div class="chips">${['三丽鸥','自嘲熊','初音未来','宝可梦'].map(t=>
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('最近${t}在东京有什么活动?')">${t}</span>`).join('')}</div>
+      <div class="sub" style="font-size:12px;color:var(--ink2);margin-top:10px;line-height:1.6">添加感兴趣的 IP,我会帮你留意快闪/活动的时间地点。<b>自动推送即将上线。</b></div></div>`;
+  }
+  return '';
+}
+
+/* ---------- 屏幕切换 ---------- */
+const state={}; let cur=null; let originScreen='home';
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id)); }
+function setNav(s){ document.querySelectorAll('.navb').forEach(n=>n.classList.toggle('on',n.dataset.s===s)); }
+function curScreen(){ const a=document.querySelector('.screen.active'); return a?a.id:'home'; }
+function navHL(id){ setNav(id==='profile'?'profile':(id==='sched'||id==='timetable')?'sched':'home'); }
+function nav(s){
+  if(s==='home'){showScreen('home');setNav('home');}
+  else if(s==='sched'){renderCal();showScreen('sched');setNav('sched');}
+  else if(s==='profile'){renderProfile();showScreen('profile');setNav('profile');}
+  else if(s==='timetable'){ originScreen=curScreen(); renderGrid(); showScreen('timetable'); navHL('timetable'); }
+  else if(s==='favorites'){ originScreen=curScreen(); renderFav(); showScreen('favorites'); navHL(originScreen); }
+  else if(s==='worklog'){ originScreen=curScreen(); renderWL(); showScreen('worklog'); navHL(originScreen); }
+}
+/* 返回到进入前的页面 */
+function goBack(){
+  if(cur&&document.getElementById('chatlog')) state[cur].msgs=document.getElementById('chatlog').innerHTML;
+  showScreen(originScreen); navHL(originScreen);
+}
+function openCat(key){
+  const from=curScreen();
+  if(from!=='detail') originScreen=from;
+  if(cur&&document.getElementById('chatlog')) state[cur].msgs=document.getElementById('chatlog').innerHTML;
+  cur=key; const c=CATS[key];
+  if(key==='gomi') currentGomi={pref:USER.pref,city:USER.city};
+  if(!state[key]) state[key]={history:[]};
+  document.getElementById('dHead').style.background=c.ct;
+  document.getElementById('dTitle').innerHTML=`${c.name}<span class="jp">${c.jp}</span>`;
+  document.getElementById('dBody').innerHTML=content(key)+`
+    <div class="aiwrap">
+      <div class="aihead"><span style="font-size:16px">🤖</span><span class="t">AI 问答</span>
+        <span class="tag" id="modeTag" style="background:${c.c}">…</span></div>
+      <div class="chatlog" id="chatlog"></div>
+      <div class="inbar">
+        <div class="iobtn" onclick="soon('拍照识别')">📷</div>
+        <div class="iobtn" onclick="soon('语音输入')">🎤</div>
+        <input id="inp" placeholder="问问关于${c.name}的问题…" autocomplete="off" onkeydown="if(event.key==='Enter')send()"/>
+        <button class="sendb" style="background:${c.c}" onclick="send()">➤</button>
+      </div></div>`;
+  if(key==='gomi') renderGomiSched();
+  const log=document.getElementById('chatlog');
+  log.innerHTML=state[key].msgs||`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
+  fetch('/api/meta').then(r=>r.json()).then(m=>{const t=document.getElementById('modeTag');if(t)t.textContent=m.mode==='real'?'在线':'演示模式';}).catch(()=>{});
+  showScreen('detail'); navHL(originScreen);
+  document.getElementById('detail').scrollTop=0;
+}
+function admTab(name,el){
+  document.querySelectorAll('#admTabs .tab').forEach(t=>{t.classList.remove('on');t.style.background='';});
+  el.classList.add('on'); el.style.background=CATS.admin.c;
+  const o=ADMIN_DATA[name]; document.getElementById('admH').textContent='📄 '+o.k; document.getElementById('admC').innerHTML=admCard(o);
+}
+function soon(w){const t=document.getElementById('toast');t.textContent=w+' 功能开发中,可先手动添加~';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
+
+/* ---------- 我的课表(节次×星期 网格) ---------- */
+const TTKEY='jp_timetable_v2';
+const WD=['周一','周二','周三','周四','周五'];
+const WDS=['一','二','三','四','五'];
+const PERIODS=[['1限','9:00'],['2限','10:40'],['3限','13:00'],['4限','14:40'],['5限','16:20']];
+const DAYTINT=['#e6f0dc','#e2ecf6','#fbe6dd','#eee6f6','#f8eecd'];
+let TT=[]; try{ TT=JSON.parse(localStorage.getItem(TTKEY)||'[]'); }catch(e){ TT=[]; }
+function saveTT(){ try{ localStorage.setItem(TTKEY,JSON.stringify(TT)); }catch(e){} }
+function findCls(p,d){ return TT.find(x=>x.period===p&&x.day===d); }
+
+function renderGrid(){
+  const el=document.getElementById('ttGrid'); if(!el) return;
+  let h='<div class="tt-cell tt-corner"></div>'+WDS.map(d=>`<div class="tt-cell tt-wd">${d}</div>`).join('');
+  PERIODS.forEach(([p,t],pi)=>{
+    h+=`<div class="tt-cell tt-per">${p}<span>${t}</span></div>`;
+    for(let d=0;d<5;d++){
+      const c=findCls(pi+1,d);
+      if(c) h+=`<div class="tt-cell tt-cls" style="background:${DAYTINT[d]}" onclick="openCell(${pi+1},${d})">${esc(c.name)}${c.room?`<small>${esc(c.room)}</small>`:''}</div>`;
+      else h+=`<div class="tt-cell tt-add" onclick="openCell(${pi+1},${d})">＋</div>`;
+    }
+  });
+  el.innerHTML=h;
+  renderTTSum();
+}
+function renderTTSum(){
+  const s=document.getElementById('ttSum'); if(!s) return;
+  s.textContent = TT.length ? `已添加 ${TT.length} 门课 · 点击查看` : '还没有课程,点击导入';
+}
+
+let editing=null;
+function openSheet(){ document.getElementById('mask').classList.add('on'); }
+function closeSheet(){ document.getElementById('mask').classList.remove('on'); editing=null; }
+function openAdd(){
+  editing=null;
+  document.getElementById('shTitle').textContent='添加课程';
+  document.getElementById('fName').value='';
+  document.getElementById('fDay').value='0'; document.getElementById('fPeriod').value='1';
+  document.getElementById('shDel').style.display='none';
+  openSheet(); setTimeout(()=>document.getElementById('fName').focus(),100);
+}
+function openCell(p,d){
+  const c=findCls(p,d);
+  document.getElementById('fDay').value=String(d);
+  document.getElementById('fPeriod').value=String(p);
+  if(c){ editing=c; document.getElementById('shTitle').textContent='编辑课程'; document.getElementById('fName').value=c.name;
+    document.getElementById('shDel').style.display='block'; }
+  else{ editing=null; document.getElementById('shTitle').textContent='添加课程'; document.getElementById('fName').value='';
+    document.getElementById('shDel').style.display='none'; }
+  openSheet(); setTimeout(()=>document.getElementById('fName').focus(),100);
+}
+function saveClass(){
+  const n=document.getElementById('fName').value.trim(); if(!n){ document.getElementById('fName').focus(); return; }
+  const d=+document.getElementById('fDay').value, p=+document.getElementById('fPeriod').value;
+  const t=PERIODS[p-1][1];
+  const existed=findCls(p,d);
+  if(editing){ editing.name=n; editing.day=d; editing.period=p; editing.time=t; }
+  else if(existed){ existed.name=n; existed.time=t; }
+  else{ TT.push({name:n,day:d,period:p,time:t}); }
+  saveTT(); renderGrid(); closeSheet();
+  const to=document.getElementById('toast'); to.textContent='已保存 ✓'; to.classList.add('show'); setTimeout(()=>to.classList.remove('show'),1400);
+}
+function removeClass(){ if(editing){ TT=TT.filter(x=>x!==editing); saveTT(); renderGrid(); } closeSheet(); }
+
+/* ---------- 我的收藏(食谱) ---------- */
+const FAVKEY='jp_fav_recipes';
+const TINTS=['linear-gradient(135deg,#fbe6dd,#f7d9c0)','linear-gradient(135deg,#e6f0dc,#d6e8c4)','linear-gradient(135deg,#e2ecf6,#cfe0ef)','linear-gradient(135deg,#f8eecd,#f2e0a8)','linear-gradient(135deg,#eee6f6,#e0d0ee)'];
+function SEED(){return [
+  {id:'s1',title:'番茄炒蛋',emoji:'🍅',tint:TINTS[0],cal:'约 320 kcal',ingredients:['鸡蛋 3个','番茄 2个','盐 / 糖 少许','葱花'],steps:['鸡蛋打散加少许盐,热油炒至半凝固盛出','番茄切块下锅炒出汁,加少许糖','倒回鸡蛋翻炒均匀,撒葱花'],tip:'番茄先炒出汁更入味;一点糖能中和酸味。'},
+  {id:'s2',title:'日式亲子丼',emoji:'🍚',tint:TINTS[3],cal:'约 550 kcal',ingredients:['鸡腿肉 150g','鸡蛋 2个','洋葱 半个','日式高汤 / 酱油 / 味醂','米饭 1碗'],steps:['洋葱切丝,鸡肉切块','高汤+酱油+味醂煮开,下洋葱和鸡肉煮熟','倒入打散的蛋液,半熟即关火','盖在热米饭上'],tip:'蛋液不要煮太老,滑嫩最好吃。'},
+  {id:'s3',title:'味噌汤',emoji:'🍲',tint:TINTS[1],cal:'约 90 kcal',ingredients:['味噌 1大勺','豆腐 半块','裙带菜 少许','葱花','高汤(だし)'],steps:['高汤烧开,下豆腐块','关小火,化开味噌(别煮沸)','放裙带菜和葱花即可'],tip:'味噌煮沸会失去香味,最后化开最佳。'}
+];}
+let FAV=null; try{FAV=JSON.parse(localStorage.getItem(FAVKEY)||'null');}catch(e){}
+if(!FAV){ FAV=SEED(); saveFav(); }
+function saveFav(){try{localStorage.setItem(FAVKEY,JSON.stringify(FAV));}catch(e){}}
+function renderFavCount(){const el=document.getElementById('favCount'); if(el) el.textContent=`已保存 ${FAV.length} 道菜谱`;}
+function renderFav(){
+  const el=document.getElementById('favGrid'); if(!el) return;
+  if(!FAV.length){ el.innerHTML='<div class="fav-empty">还没有收藏的食谱~<br>去「留学生食谱」问我做什么菜,<br>点「收藏为完整食谱」就会存到这里 🍳</div>'; renderFavCount(); return; }
+  el.innerHTML=FAV.map(r=>`<div class="fav-card" onclick="openRecipe('${r.id}')">
+    <div class="fav-cover" style="background:${r.tint}">${r.emoji}</div>
+    <div class="fav-meta"><b>${esc(r.title)}</b><div class="m">🔥 ${esc(r.cal||'AI 生成')}</div></div></div>`).join('');
+  renderFavCount();
+}
+function openRecipe(id){
+  const r=FAV.find(x=>x.id===id); if(!r) return;
+  document.getElementById('rvTitle').textContent=r.title;
+  let b=`<div class="rv-cover" style="background:${r.tint}">${r.emoji}</div>`;
+  if(r.raw){ b+=`<div class="rv-sec"><h4>🍳 ${esc(r.title)}</h4><div class="rv-raw">${esc(mdClean(r.raw))}</div></div>`; }
+  else{
+    b+=`<div class="rv-sec"><h4>🥕 食材</h4><ul>${r.ingredients.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`;
+    b+=`<div class="rv-sec"><h4>👩‍🍳 做法</h4><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`;
+    b+=`<div class="rv-sec"><h4>💡 热量 · 小贴士</h4><div class="rv-raw">🔥 ${esc(r.cal||'—')}\n${esc(r.tip||'')}</div></div>`;
+  }
+  b+=`<button class="rv-del" onclick="delRecipe('${r.id}')">删除收藏</button>`;
+  document.getElementById('rvBody').innerHTML=b;
+  showScreen('recipeView');
+}
+function delRecipe(id){ FAV=FAV.filter(x=>x.id!==id); saveFav(); renderFav(); showScreen('favorites'); }
+
+const recCache=[];
+function emojiFor(t){const M=[['蛋','🥚'],['番茄','🍅'],['西红柿','🍅'],['面','🍜'],['丼','🍚'],['饭','🍚'],['汤','🍲'],['肉','🍖'],['鸡','🍗'],['鱼','🐟'],['沙拉','🥗'],['咖喱','🍛'],['饺','🥟']];for(const[k,e]of M)if(t.includes(k))return e;return '🍽️';}
+function recipeTitle(q,a){ let t=(q||'').replace(/[?？。!!,,、]/g,'').trim(); if(t.length>14)t=t.slice(0,14); return t||'AI 推荐食谱'; }
+function saveRecipeFromChat(idx,btn){
+  const it=recCache[idx]; if(!it) return;
+  FAV.unshift({id:'r'+Date.now(),title:recipeTitle(it.q,it.a),emoji:emojiFor(it.q+it.a),tint:TINTS[FAV.length%TINTS.length],cal:'AI 生成',raw:it.a});
+  saveFav(); renderFavCount();
+  btn.textContent='✓ 已收藏到「我的」'; btn.classList.add('done'); btn.onclick=null;
+  toast('已收藏到我的收藏 ❤');
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
+
+/* ---------- 打工记录 ---------- */
+const WLKEY='jp_work_log', PRIOR_INCOME=640000, WALL103=1030000, WALL130=1300000;
+function SEEDWL(){return [
+  {id:'w1',date:NY+'-07-02',place:'セブンイレブン',hours:6,wage:1200},
+  {id:'w2',date:NY+'-07-05',place:'カフェ',hours:7,wage:1150},
+  {id:'w3',date:NY+'-07-08',place:'居酒屋',hours:6,wage:1250},
+  {id:'w4',date:NY+'-07-11',place:'塾講師',hours:4,wage:2000},
+  {id:'w5',date:NY+'-07-14',place:'セブンイレブン',hours:8,wage:1200},
+  {id:'w6',date:NY+'-07-17',place:'居酒屋',hours:7,wage:1250},
+  {id:'w7',date:NY+'-07-19',place:'カフェ',hours:6,wage:1150}
+];}
+let WL=null; try{WL=JSON.parse(localStorage.getItem(WLKEY)||'null');}catch(e){}
+if(!WL){ WL=SEEDWL(); saveWL(); }
+function saveWL(){try{localStorage.setItem(WLKEY,JSON.stringify(WL));}catch(e){}}
+function yen(n){return '¥'+Math.round(n).toLocaleString();}
+function calcWL(){
+  const tm=NY+'-'+String(NM+1).padStart(2,'0'); let mh=0,mi=0,yi=PRIOR_INCOME;
+  WL.forEach(w=>{const e=(+w.hours||0)*(+w.wage||0); if((w.date||'').slice(0,4)==String(NY)) yi+=e; if((w.date||'').slice(0,7)===tm){mh+=(+w.hours||0);mi+=e;}});
+  return {mh,mi,yi};
+}
+function updateWLCount(){ const {mh,mi}=calcWL(); const el=document.getElementById('wlCount'); if(el) el.textContent=`本月 ${mh} 小时 · ${yen(mi)}`; }
+function renderWL(){
+  const {mh,mi,yi}=calcWL();
+  const sum=document.getElementById('wlSum');
+  if(sum){
+    const fill=Math.min(yi/WALL130,1)*100, mark=WALL103/WALL130*100;
+    let cap;
+    if(yi<WALL103) cap=`距「103万之壁」还有 <b>${yen(WALL103-yi)}</b>,继续加油~`;
+    else if(yi<WALL130) cap=`⚠️ 已过 103万,距 130万还有 ${yen(WALL130-yi)}(超过将脱离扶养)`;
+    else cap=`🚨 已超 130万,请留意社保与扶养、以及每周 28h 上限`;
+    sum.innerHTML=`<div class="wl-stats">
+      <div class="wl-stat"><b>${mh} h</b><span>本月工时</span></div>
+      <div class="wl-stat"><b>${yen(mi)}</b><span>本月收入</span></div></div>
+      <div class="wl-yline">今年累计 <b>${yen(yi)}</b> / 103万</div>
+      <div class="wl-bar"><div class="wl-fill" style="width:${fill}%"></div><div class="wl-mark" style="left:${mark}%"></div></div>
+      <div class="wl-cap">${cap}</div>`;
+  }
+  const list=document.getElementById('wlList');
+  if(list){
+    if(!WL.length){ list.innerHTML='<div class="fav-empty" style="padding:24px">还没有打工记录~点下方按钮添加</div>'; }
+    else{
+      WL.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      list.innerHTML=WL.map(w=>{const dd=(w.date||'').slice(8,10),mm=+((w.date||'').slice(5,7));
+        return `<div class="wl-item"><div class="wl-date"><b>${dd}</b><span>${mm}月</span></div>
+          <div class="wl-info"><b>${esc(w.place||'打工')}</b><span>${w.hours}h × ¥${w.wage}</span></div>
+          <div class="wl-earn">${yen((+w.hours||0)*(+w.wage||0))}</div>
+          <div class="wl-del" onclick="delWork('${w.id}')">✕</div></div>`;}).join('');
+    }
+  }
+  updateWLCount();
+}
+function openWLAdd(){
+  const d=new Date(); document.getElementById('wDate').value=d.toISOString().slice(0,10);
+  document.getElementById('wPlace').value=''; document.getElementById('wHours').value=''; document.getElementById('wWage').value='1200';
+  document.getElementById('maskWork').classList.add('on');
+}
+function addWork(){
+  const date=document.getElementById('wDate').value, place=document.getElementById('wPlace').value.trim();
+  const hours=+document.getElementById('wHours').value, wage=+document.getElementById('wWage').value;
+  if(!date||!hours||!wage){ toast('请填日期、时长和时薪'); return; }
+  WL.push({id:'w'+Date.now(),date,place:place||'打工',hours,wage}); saveWL(); renderWL();
+  document.getElementById('maskWork').classList.remove('on'); toast('已保存 ✓');
+}
+function delWork(id){ WL=WL.filter(x=>x.id!==id); saveWL(); renderWL(); }
+
+/* ---------- 本次安排(日程事项) ---------- */
+const AGKEY='jp_agenda_v1';
+function isoAdd(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function isoNextSat(){const d=new Date();const add=((6-d.getDay())%7)||7;d.setDate(d.getDate()+add);return d.toISOString().slice(0,10);}
+function SEEDAG(){return [
+  {id:'a1',date:NY+'-08-15',title:'在留カード更新〆切',color:'#e2937c'},
+  {id:'a2',date:isoAdd(1),title:'燃えるゴミ 收集日',color:'#8fbf7f'},
+  {id:'a3',date:isoNextSat(),title:'三丽鸥快闪 · 涩谷 开始',color:'#e7bf6b'}
+];}
+let AG=null; try{AG=JSON.parse(localStorage.getItem(AGKEY)||'null');}catch(e){}
+if(!AG){ AG=SEEDAG(); saveAG(); }
+function saveAG(){try{localStorage.setItem(AGKEY,JSON.stringify(AG));}catch(e){}}
+function fmtDate(iso){const p=(iso||'').split('-');return p.length===3?`${+p[1]}月${+p[2]}日`:iso;}
+function agendaDaysFor(y,m){const s=new Set(),pre=y+'-'+String(m+1).padStart(2,'0');try{(AG||[]).forEach(a=>{if((a.date||'').slice(0,7)===pre)s.add(+(a.date).slice(8,10));});}catch(e){}return s;}
+function renderAgenda(){
+  const el=document.getElementById('agList'); if(!el) return;
+  if(!AG.length){ el.innerHTML='<div class="ag-card" style="color:var(--ink2)">暂无安排</div>'; return; }
+  AG.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  el.innerHTML=AG.map(a=>`<div class="ag-card"><span class="ag-dot" style="background:${a.color||'#8fbf7f'}"></span>${esc(a.title)} · ${fmtDate(a.date)}${a.time?' '+esc(a.time):''}<span class="wl-del" style="margin-left:auto" onclick="delAgenda('${a.id}')">✕</span></div>`).join('');
+}
+function delAgenda(id){ AG=AG.filter(x=>x.id!==id); saveAG(); renderAgenda(); renderCal(); }
+
+/* ---------- Agent 动作:把结构化指令写进本地数据 ---------- */
+const ACTION_LABEL={add_schedule:['📅','已加入日程'],add_work:['💼','已记打工'],add_class:['📚','已加课程']};
+function applyAction(name,a){
+  a=a||{};
+  if(name==='add_schedule'){ AG.push({id:'a'+Date.now(),date:a.date,title:a.title||'新事项',time:a.time||'',color:'#8fbf7f'}); saveAG(); renderAgenda(); renderCal(); }
+  else if(name==='add_work'){ WL.push({id:'w'+Date.now(),date:a.date,place:a.place||'打工',hours:+a.hours||0,wage:+a.wage||0}); saveWL(); renderWL(); }
+  else if(name==='add_class'){ const dmap={'周一':0,'周二':1,'周三':2,'周四':3,'周五':4}; const d=(a.day in dmap)?dmap[a.day]:(parseInt(a.day)||0); const p=+a.period||1; TT=TT.filter(x=>!(x.day===d&&x.period===p)); TT.push({name:a.name||'课程',day:d,period:p,time:(PERIODS[p-1]||['',''])[1]}); saveTT(); renderGrid(); }
+}
+
+/* ---------- 聊天 ---------- */
+const TL={search_gomi:['🗑️','垃圾分类库'],search_admin:['🏛️','行政手续库'],triage_medical:['🏥','分诊知识库'],search_tips:['💡','生活小知识']};
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+/* 把模型偶尔输出的 Markdown 记号清理成干净文本 */
+function mdClean(t){
+  if(!t) return '';
+  return t
+    .replace(/^\s{0,3}#{1,6}\s*/gm,'')          // 去标题 ###
+    .replace(/\*\*(.+?)\*\*/g,'$1')             // 去 **加粗**
+    .replace(/(^|\n)\s*[\*\-]\s+/g,'$1· ')       // 列表 * / - → ·
+    .replace(/`([^`]+)`/g,'$1')                 // 去行内代码
+    .replace(/\n{3,}/g,'\n\n')                  // 压缩多余空行
+    .trim();
+}
+let busy=false;
+function ask(q){const i=document.getElementById('inp');if(i){i.value=q;send();}}
+async function send(){
+  const inp=document.getElementById('inp'),log=document.getElementById('chatlog');
+  if(!inp||busy)return; const text=inp.value.trim(); if(!text)return;
+  busy=true; const c=CATS[cur];
+  log.insertAdjacentHTML('beforeend',`<div class="msg me" style="background:${c.c}">${esc(text)}</div>`); inp.value='';
+  const tp=document.createElement('div'); tp.className='msg bot'; tp.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
+  log.appendChild(tp); log.scrollTop=log.scrollHeight;
+  try{
+    const catName = cur==='gomi' ? c.name+'·'+currentGomi.pref+currentGomi.city : c.name;
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text,history:state[cur].history,category:catName})});
+    const d=await r.json(); tp.remove();
+    if(d.tools&&d.tools.length){
+      const reads=d.tools.filter(t=>!ACTION_LABEL[t.name]);
+      const acts=d.tools.filter(t=>ACTION_LABEL[t.name]);
+      if(reads.length){const chips=reads.map(t=>{const m=TL[t.name]||['🔧',t.name];
+        return `<span class="toolchip" style="background:${c.ct};color:${c.hex}">${m[0]} 已查${m[1]}</span>`;}).join('');
+        log.insertAdjacentHTML('beforeend',`<div class="toolchips">${chips}</div>`);}
+      if(acts.length){const chips=acts.map(t=>{applyAction(t.name,t.args);const m=ACTION_LABEL[t.name];
+        return `<span class="toolchip" style="background:#e6f0dc;color:#5a7a4a;border:1px solid #bcd9aa">${m[0]} ${m[1]} ✓</span>`;}).join('');
+        log.insertAdjacentHTML('beforeend',`<div class="toolchips">${chips}</div>`);}
+    }
+    if(d.error) log.insertAdjacentHTML('beforeend',`<div class="msg bot">⚠️ ${esc(d.error)}</div>`);
+    else{
+      log.insertAdjacentHTML('beforeend',`<div class="msg bot">${esc(mdClean(d.answer))}</div>`); state[cur].history=d.history||state[cur].history;
+      if(cur==='recipe'&&d.answer){ const i=recCache.push({q:text,a:d.answer})-1;
+        log.insertAdjacentHTML('beforeend',`<div class="save-rec" onclick="saveRecipeFromChat(${i},this)">＋ 收藏为完整食谱</div>`); }
+    }
+  }catch(e){tp.remove(); log.insertAdjacentHTML('beforeend',`<div class="msg bot">⚠️ 网络错误:${esc(e.message)}</div>`);}
+  log.scrollTop=log.scrollHeight; busy=false; inp.focus();
+}
+
+currentGomi={pref:USER.pref,city:USER.city};
+renderProfile();
+renderTTSum();
+renderFavCount();
+updateWLCount();
+renderAgenda();
+renderCal();
+</script>
+</body>
+</html>
