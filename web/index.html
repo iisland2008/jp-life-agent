@@ -86,7 +86,9 @@
   .cal-grid .wd.sun{color:#d06a54;}.cal-grid .wd.sat{color:#6f93c4;}
   .cal-grid .d{font-family:"Baloo 2";font-size:13px;color:#7a5c44;padding:7px 0;border-radius:10px;position:relative;}
   .cal-grid .d.sun{color:#d47a63;}.cal-grid .d.sat{color:#7ea0cd;}
+  .cal-grid .d.holi{color:#d06a54;}
   .cal-grid .d.today{color:#8a5a3c;font-weight:700;}
+  .cal-holi{font-size:11px;color:#b06a48;margin-top:9px;line-height:1.8;position:relative;z-index:1;}
   .cal-grid .d.today::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border:2.5px solid #c06a44;border-radius:50%;}
   .cal-grid .d.mark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:#d98872;}
   .cal-grid .d.amark::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:var(--dot,#8fbf7f);}
@@ -290,6 +292,7 @@
       </div>
       <div class="cal-grid" id="calGrid"></div>
       <div class="cal-legend"><i></i>打工日<i class="g"></i>日程(颜色对应类型)</div>
+      <div class="cal-holi" id="calHoli"></div>
     </div>
     <div class="tt-head"><div class="h">📚 我的课表</div></div>
     <div class="tt-enter" onclick="nav('timetable')">
@@ -575,6 +578,14 @@ const _now=new Date(), NY=_now.getFullYear(), NM=_now.getMonth(), ND=_now.getDat
 const EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CN=['一','二','三','四','五','六','七','八','九','十','十一','十二'];
 const SEA=['冬','冬','春','春','春','夏','夏','夏','秋','秋','秋','冬'];
+/* 日本の祝日:固定(每年相同) + 移动(按年,含振替休日/春分秋分等) */
+const HOL_FIXED={'01-01':'元日','02-11':'建国記念の日','02-23':'天皇誕生日','04-29':'昭和の日','05-03':'憲法記念日','05-04':'みどりの日','05-05':'こどもの日','08-11':'山の日','11-03':'文化の日','11-23':'勤労感謝の日'};
+const HOL_YEARLY={
+  '2026-01-12':'成人の日','2026-03-20':'春分の日','2026-05-06':'振替休日','2026-07-20':'海の日','2026-09-21':'敬老の日','2026-09-22':'国民の休日','2026-09-23':'秋分の日','2026-10-12':'スポーツの日',
+  '2027-01-11':'成人の日','2027-03-21':'春分の日','2027-03-22':'振替休日','2027-07-19':'海の日','2027-09-20':'敬老の日','2027-09-23':'秋分の日','2027-10-11':'スポーツの日'
+};
+function holidayName(y,m,d){const mmdd=String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');return HOL_YEARLY[y+'-'+mmdd]||HOL_FIXED[mmdd]||null;}
+function monthHolidays(y,m){const out=[],days=new Date(y,m+1,0).getDate();for(let d=1;d<=days;d++){const n=holidayName(y,m,d);if(n)out.push([d,n]);}return out;}
 let calState={y:NY,m:NM,exp:false};
 function renderCal(){
   const {y,m,exp}=calState;
@@ -595,9 +606,12 @@ function renderCal(){
     const inA = amap[d]!=null;
     const dot = inA?' amark':(wmark.has(d)?' mark':'');
     const st = inA?` style="--dot:${amap[d]}"`:'';
-    h+=`<div class="d${dow===0?' sun':dow===6?' sat':''}${(isCur&&d===ND)?' today':''}${dot}"${st}>${d}</div>`;
+    const hn = holidayName(y,m,d);
+    h+=`<div class="d${dow===0?' sun':dow===6?' sat':''}${hn?' holi':''}${(isCur&&d===ND)?' today':''}${dot}"${st}${hn?` title="${hn}"`:''}>${d}</div>`;
   }));
   document.getElementById('calGrid').innerHTML=h;
+  const hs=monthHolidays(y,m), ch=document.getElementById('calHoli');
+  if(ch) ch.innerHTML = hs.length ? ('🎌 '+hs.map(([d,n])=>`${d}日 ${n}`).join('　')) : '';
 }
 function calToggle(){ calState.exp=!calState.exp; renderCal(); }
 function calMove(n){ let m=calState.m+n, y=calState.y; if(m<0){m=11;y--;} if(m>11){m=0;y++;} calState.m=m; calState.y=y; renderCal(); }
