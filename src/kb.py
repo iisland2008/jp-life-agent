@@ -23,6 +23,7 @@ GOMI = _load("gomi.json")
 ADMIN = _load("admin.json")
 MEDICAL = _load("medical.json")
 TIPS = _load("tips.json")
+EXPERIENCE = _load("experience.json")
 
 
 # ---------- 通用文本打分 (轻量语义检索,无需外部 embedding) ----------
@@ -117,6 +118,20 @@ def search_tips(query: str, top_k: int = 3) -> list:
         scored.append((s, tip))
     scored.sort(key=lambda x: -x[0])
     return [{"text": t["text"], "tags": t["tags"], "score": round(s, 3)} for s, t in scored[:top_k] if s > 0.2]
+
+
+# ---------- 留学生亲身经验库检索(优先参考) ----------
+def search_experience(query: str, top_k: int = 3) -> list:
+    scored = []
+    for e in EXPERIENCE["experiences"]:
+        s = _score(query, e["topic"] + e["text"], tags=e["tags"])
+        scored.append((s, e))
+    scored.sort(key=lambda x: -x[0])
+    return [
+        {"topic": e["topic"], "text": e["text"], "tags": e["tags"], "score": round(s, 3)}
+        for s, e in scored[:top_k]
+        if s > 0.15
+    ]
 
 
 if __name__ == "__main__":

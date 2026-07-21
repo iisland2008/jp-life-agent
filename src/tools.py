@@ -55,6 +55,17 @@ TOOL_SCHEMAS = [
             "required": ["query"],
         },
     },
+    {
+        "name": "search_experience",
+        "description": "检索『留学生亲身经验库』——基于真实留学生活总结的经验/踩坑(开户、手机卡、入管、打工、看病、退租、省钱等)。这是最贴近留学生实际的信息,回答生活类问题时应【优先】调用它,再结合其他知识库补充。",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "话题关键词,如『开银行账户』『手机卡怎么办』『退租押金』"}
+            },
+            "required": ["query"],
+        },
+    },
     # ===== 动作工具(由前端真正执行:写入用户本地数据)=====
     {
         "name": "add_schedule",
@@ -104,6 +115,7 @@ TOOL_IMPL = {
     "search_admin": lambda a: kb.search_admin(a.get("query", "")),
     "triage_medical": lambda a: kb.triage_medical(a.get("symptoms", "")),
     "search_tips": lambda a: kb.search_tips(a.get("query", "")),
+    "search_experience": lambda a: kb.search_experience(a.get("query", "")),
     # 动作工具:真正的写入在前端完成,这里只回执让模型确认
     "add_schedule": lambda a: {"status": "ok", "action": "add_schedule", "added": a},
     "add_work": lambda a: {"status": "ok", "action": "add_work", "added": a},
