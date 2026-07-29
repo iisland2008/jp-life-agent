@@ -775,7 +775,7 @@ function nav(s){
   else if(s==='worklog'){ originScreen=curScreen(); renderWL(); showScreen('worklog'); navHL(originScreen); }
 }
 function showWelcome(){ document.getElementById('welcome').classList.add('on'); }
-function closeWelcome(){ document.getElementById('welcome').classList.remove('on'); try{localStorage.setItem('jp_onboarded','1');}catch(e){} }
+function closeWelcome(){ document.getElementById('welcome').classList.remove('on'); try{localStorage.setItem('jp_onboarded_v2','1');}catch(e){} }
 /* 返回到进入前的页面 */
 function goBack(){
   if(cur&&document.getElementById('chatlog')) state[cur].msgs=document.getElementById('chatlog').innerHTML;
@@ -1125,7 +1125,7 @@ renderFavCount();
 updateWLCount();
 renderAgenda();
 renderCal();
-if(!localStorage.getItem('jp_onboarded')) showWelcome();
+if(!localStorage.getItem('jp_onboarded_v2')) showWelcome();
 </script>
 </body>
 </html>
