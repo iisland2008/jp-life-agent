@@ -221,6 +221,30 @@
   .fav-meta b{font-size:13.5px;color:#5f5245;display:block;line-height:1.35;}
   .fav-meta .m{font-size:11px;color:var(--ink2);margin-top:5px;}
   .fav-empty{grid-column:1/-1;text-align:center;color:var(--ink2);font-size:13px;padding:44px 24px;line-height:1.8;}
+  /* ===== 租房卡片 ===== */
+  .house-card{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 3px 12px rgba(150,120,80,.1);margin:0 2px 14px;position:relative;}
+  .house-cover{height:96px;display:flex;align-items:center;justify-content:center;font-size:44px;}
+  .house-info{padding:11px 13px 13px;}
+  .house-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .house-top b{font-size:14.5px;color:#c56a8a;font-weight:800;line-height:1.3;}
+  .house-meta{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.6;}
+  .heart{font-size:21px;color:#c9b8ae;cursor:pointer;flex:none;transition:transform .15s;line-height:1;}
+  .heart:active{transform:scale(1.3);}
+  .heart.on{color:#e86a8f;}
+  /* ===== 首次使用引导 ===== */
+  .welcome-mask{position:absolute;inset:0;background:rgba(120,100,90,.34);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:200;padding:26px;}
+  .welcome-mask.on{display:flex;animation:wfade .3s ease;}
+  @keyframes wfade{from{opacity:0}to{opacity:1}}
+  .welcome-card{background:linear-gradient(160deg,#fff,#fff6fb);border-radius:26px;padding:26px 22px 22px;text-align:center;box-shadow:0 14px 40px rgba(150,110,120,.28);max-width:320px;animation:wpop .35s cubic-bezier(.2,1.2,.4,1);}
+  @keyframes wpop{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
+  .welcome-emoji{font-size:40px;margin-bottom:6px;}
+  .welcome-card h3{margin:2px 0 10px;font-size:18px;color:#7a5a68;}
+  .welcome-card p{font-size:13px;color:var(--ink2);line-height:1.7;margin:0 0 12px;}
+  .welcome-tips{background:rgba(251,224,236,.4);border-radius:16px;padding:12px 14px;text-align:left;}
+  .welcome-tips div{font-size:12.5px;color:#6b5548;padding:4px 0;line-height:1.5;}
+  .welcome-bless{font-size:13.5px!important;color:#c56a8a!important;font-weight:700;margin:14px 0 16px!important;}
+  .welcome-btn{width:100%;border:none;background:linear-gradient(135deg,#f7b5cf,#f291b6);color:#fff;font-size:15px;font-weight:700;padding:13px;border-radius:16px;cursor:pointer;box-shadow:0 5px 14px rgba(242,145,182,.4);}
+  .welcome-btn:active{transform:scale(.97);}
   .rv-cover{height:150px;display:flex;align-items:center;justify-content:center;font-size:72px;border-radius:20px;margin:2px 16px 0;}
   .rv-sec{margin:14px 16px 0;background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px rgba(150,120,80,.08);}
   .rv-sec h4{margin:0 0 8px;font-size:14px;color:#6b4e3d;}
@@ -356,12 +380,35 @@
     <div class="pf-list">
       <div class="pf-item" onclick="openUserEdit()"><span class="pf-ic">🧑</span><span class="t"><b>个人信息</b><span id="uInfo">居住区 · 新宿区</span></span><span class="arw">›</span></div>
       <div class="pf-item" onclick="nav('favorites')"><span class="pf-ic">🍜</span><span class="t"><b>收藏的食谱</b><span id="favCount">已保存 0 道菜谱</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="nav('housefav')"><span class="pf-ic">🏠</span><span class="t"><b>收藏的房源</b><span id="hfCount">已收藏 0 套房源</span></span><span class="arw">›</span></div>
       <div class="pf-item" onclick="nav('timetable')"><span class="pf-ic">📚</span><span class="t"><b>我的课表</b><span>查看和编辑周间时间割</span></span><span class="arw">›</span></div>
       <div class="pf-item" onclick="nav('worklog')"><span class="pf-ic">💼</span><span class="t"><b>打工记录</b><span id="wlCount">本月 0 小时</span></span><span class="arw">›</span></div>
-      <div class="pf-item" onclick="soon('语言设置')"><span class="pf-ic">🌏</span><span class="t"><b>语言设置</b><span>中文 / 日本語</span></span><span class="arw">›</span></div>
+      <div class="pf-item" onclick="showWelcome()"><span class="pf-ic">🌸</span><span class="t"><b>使用引导</b><span>再看一次欢迎介绍</span></span><span class="arw">›</span></div>
       <div class="pf-item" onclick="soon('关于')"><span class="pf-ic">ℹ️</span><span class="t"><b>关于小助手</b><span>版本 1.0.0 · 示例项目</span></span><span class="arw">›</span></div>
     </div>
   </section>
+
+  <!-- 收藏的房源 -->
+  <section class="screen" id="housefav">
+    <div class="d-head"><div class="back" onclick="goBack()">‹</div><div class="d-title">收藏的房源<span class="jp">お気に入り物件</span></div></div>
+    <div id="hfList" style="padding:6px 16px"></div>
+  </section>
+
+  <!-- 首次使用引导 -->
+  <div class="welcome-mask" id="welcome">
+    <div class="welcome-card">
+      <div class="welcome-emoji">🐰🌸</div>
+      <h3>欢迎来到 日留生活の小助手</h3>
+      <p>把在日本的生活琐事集中到一处——<br>行政手续、垃圾分类、看病、打工、找房、食谱……<br>不懂就问,AI 帮你查、帮你记。</p>
+      <div class="welcome-tips">
+        <div>🗑️ 拍照 / 提问,秒懂本地规则</div>
+        <div>🤖 AI 还能帮你写日程、记打工</div>
+        <div>🏠 收藏房源、管理课表与打工</div>
+      </div>
+      <p class="welcome-bless">祝你在日本的留学生活,顺利 landing 🌸</p>
+      <button class="welcome-btn" onclick="closeWelcome()">开始使用 →</button>
+    </div>
+  </div>
 
   <!-- 添加/编辑课程 弹层 -->
   <div class="mask" id="mask">
@@ -454,7 +501,8 @@ const IC={
   medical:'<svg viewBox="0 0 48 48"><rect x="9" y="17" width="30" height="21" rx="7" fill="#efe4f7" stroke="#ab8fd0" stroke-width="2.6"/><path d="M18 17 v-3 a2.5 2.5 0 0 1 2.5-2.5 h7 a2.5 2.5 0 0 1 2.5 2.5 v3" fill="none" stroke="#ab8fd0" stroke-width="2.6"/><rect x="21.4" y="22.5" width="5.2" height="12" rx="2" fill="#9d7bc0"/><rect x="18" y="25.9" width="12" height="5.2" rx="2" fill="#9d7bc0"/></svg>',
   work:'<svg viewBox="0 0 48 48"><rect x="9" y="16" width="30" height="20" rx="6" fill="#f4e2d1" stroke="#cd9f78" stroke-width="2.6"/><rect x="9" y="21" width="30" height="4.5" fill="#cd9f78"/><circle cx="30.5" cy="30" r="3.4" fill="#e7b98e" stroke="#cd9f78" stroke-width="1.4"/></svg>',
   event:'<svg viewBox="0 0 48 48"><path d="M24 9 l4.2 8.5 9.3 1 -6.7 6.4 1.6 9.3 -8.4-4.7 -8.4 4.7 1.6-9.3 -6.7-6.4 9.3-1Z" fill="#f4d97a" stroke="#e0b84a" stroke-width="2.2" stroke-linejoin="round"/><circle cx="21" cy="24" r="1.5" fill="#b8892e"/><circle cx="27" cy="24" r="1.5" fill="#b8892e"/><path d="M22 27 q2 1.7 4 0" stroke="#b8892e" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
-  recipe:'<svg viewBox="0 0 48 48"><path d="M10 25 h28 a2 2 0 0 1 2 2 a13 13 0 0 1-13 13 h-6 a13 13 0 0 1-13-13 a2 2 0 0 1 2-2Z" fill="#cfe0ef" stroke="#7fa8cf" stroke-width="2.6"/><path d="M17 20 q-1-4 2-6 M23 18 q-1-4 2-6" stroke="#a9c4de" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="31" y1="14" x2="23" y2="27" stroke="#c99a6a" stroke-width="2.2" stroke-linecap="round"/><line x1="35" y1="16" x2="27" y2="28" stroke="#c99a6a" stroke-width="2.2" stroke-linecap="round"/><circle cx="20.5" cy="31" r="1.6" fill="#5f7d9a"/><circle cx="27.5" cy="31" r="1.6" fill="#5f7d9a"/><path d="M21.5 34 q2.5 2 5 0" stroke="#5f7d9a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'
+  recipe:'<svg viewBox="0 0 48 48"><path d="M10 25 h28 a2 2 0 0 1 2 2 a13 13 0 0 1-13 13 h-6 a13 13 0 0 1-13-13 a2 2 0 0 1 2-2Z" fill="#cfe0ef" stroke="#7fa8cf" stroke-width="2.6"/><path d="M17 20 q-1-4 2-6 M23 18 q-1-4 2-6" stroke="#a9c4de" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="31" y1="14" x2="23" y2="27" stroke="#c99a6a" stroke-width="2.2" stroke-linecap="round"/><line x1="35" y1="16" x2="27" y2="28" stroke="#c99a6a" stroke-width="2.2" stroke-linecap="round"/><circle cx="20.5" cy="31" r="1.6" fill="#5f7d9a"/><circle cx="27.5" cy="31" r="1.6" fill="#5f7d9a"/><path d="M21.5 34 q2.5 2 5 0" stroke="#5f7d9a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+  rent:'<svg viewBox="0 0 48 48"><path d="M24 10 L38 22 v13 a2 2 0 0 1-2 2 H14 a2 2 0 0 1-2-2 V22 Z" fill="#fbe6ee" stroke="#d98aa8" stroke-width="2.6" stroke-linejoin="round"/><path d="M9 24 L24 11 L39 24" fill="none" stroke="#d98aa8" stroke-width="2.6" stroke-linecap="round"/><rect x="20.5" y="27" width="7" height="10" rx="1.2" fill="#e79fb6"/><circle cx="26" cy="32" r="0.9" fill="#fff"/></svg>'
 };
 
 /* ---------- 水彩水果背景 ---------- */
@@ -480,8 +528,45 @@ const CATS={
   admin:{name:'行政流程',jp:'行政手続き',c:'var(--blue)',ct:'var(--blue-t)',hex:'#6f97bd',lab:'#4f7aa5'},
   work:{name:'打工助手',jp:'アルバイト',c:'var(--coral)',ct:'var(--coral-t)',hex:'#cd9f78',lab:'#b07a4a'},
   recipe:{name:'留学生食谱',jp:'自炊レシピ',c:'var(--blue)',ct:'var(--blue-t)',hex:'#7fa8cf',lab:'#5f7d9a'},
-  event:{name:'活动推送',jp:'イベント',c:'var(--yellow)',ct:'var(--yellow-t)',hex:'#d8a83e',lab:'#b58a2e'}
+  event:{name:'活动推送',jp:'イベント',c:'var(--yellow)',ct:'var(--yellow-t)',hex:'#d8a83e',lab:'#b58a2e'},
+  rent:{name:'租房找房',jp:'お部屋探し',c:'var(--pink)',ct:'var(--pink-t)',hex:'#c56a8a',lab:'#c56a8a'}
 };
+
+/* ---------- 租房:示例房源 + 收藏 ---------- */
+const HOUSES=[
+  {id:'h1',emoji:'🏠',tint:'linear-gradient(135deg,#fbe6ee,#f7d0e0)',area:'新宿区',station:'新大久保 步行8分',rent:'¥68,000/月',layout:'1K · 20㎡',deposit:'敷1 礼1',tag:'留学生友好 · 可用保证公司'},
+  {id:'h2',emoji:'🏢',tint:'linear-gradient(135deg,#e6f0dc,#d6e8c4)',area:'丰岛区',station:'池袋 步行12分',rent:'¥59,000/月',layout:'1R · 18㎡',deposit:'敷0 礼0',tag:'免敷礼 · 近超市'},
+  {id:'h3',emoji:'🏡',tint:'linear-gradient(135deg,#e2ecf6,#cfe0ef)',area:'北区',station:'赤羽 步行6分',rent:'¥72,000/月',layout:'1DK · 26㎡',deposit:'敷1 礼0',tag:'独立卫浴 · 采光好'},
+  {id:'h4',emoji:'🏠',tint:'linear-gradient(135deg,#f8eecd,#f2e0a8)',area:'江户川区',station:'西葛西 步行10分',rent:'¥55,000/月',layout:'1K · 19㎡',deposit:'敷1 礼1',tag:'房租低 · 华人多'}
+];
+const HFKEY='jp_fav_house';
+let HF=[]; try{HF=JSON.parse(localStorage.getItem(HFKEY)||'[]');}catch(e){}
+function saveHF(){try{localStorage.setItem(HFKEY,JSON.stringify(HF));}catch(e){}}
+function isHFav(id){return HF.includes(id);}
+function houseCard(h,withDel){
+  const fav=isHFav(h.id);
+  return `<div class="house-card">
+    <div class="house-cover" style="background:${h.tint}">${h.emoji}</div>
+    <div class="house-info">
+      <div class="house-top"><b>${h.area} · ${h.rent}</b><span class="heart${fav?' on':''}" onclick="toggleHouse('${h.id}',this)">${fav?'❤':'♡'}</span></div>
+      <div class="house-meta">${h.layout} ｜ ${h.station}</div>
+      <div class="house-meta">敷礼:${h.deposit} ｜ <span style="color:#c56a8a">${h.tag}</span></div>
+      ${withDel?`<div class="wl-del" style="text-align:right;margin-top:2px" onclick="toggleHouse('${h.id}')">取消收藏 ✕</div>`:''}
+    </div></div>`;
+}
+function toggleHouse(id,el){
+  if(isHFav(id)) HF=HF.filter(x=>x!==id); else HF.push(id);
+  saveHF();
+  if(el){ const f=isHFav(id); el.textContent=f?'❤':'♡'; el.classList.toggle('on',f); toast(f?'已收藏房源 ❤':'已取消收藏'); }
+  renderHouseFav(); renderHFCount();
+}
+function renderHFCount(){const el=document.getElementById('hfCount'); if(el) el.textContent=`已收藏 ${HF.length} 套房源`;}
+function renderHouseFav(){
+  const el=document.getElementById('hfList'); if(!el) return;
+  const list=HOUSES.filter(h=>isHFav(h.id));
+  el.innerHTML=list.length?list.map(h=>houseCard(h,true)).join(''):'<div class="fav-empty">还没有收藏的房源~<br>去「租房找房」点 ♡ 收藏喜欢的房子</div>';
+  renderHFCount();
+}
 
 /* ---------- 用户资料 ---------- */
 const USERKEY='jp_user';
@@ -557,12 +642,13 @@ function saveUserInfo(){
 }
 /* 首页气泡:大而柔,散落 [key,left%,top%,直径,气泡底色,图标圈色] */
 const LAYOUT=[
-  ['admin',  4,  3,118,'rgba(226,236,246,.62)','#dcebf7'],
-  ['gomi',  53,  5,118,'rgba(230,240,220,.62)','#e2efd6'],
-  ['medical',27, 28,134,'rgba(238,230,246,.66)','#e9def4'],
-  ['work',   2, 50,112,'rgba(251,230,221,.62)','#fbe1d4'],
-  ['event', 55, 49,120,'rgba(248,238,205,.64)','#f7ecc6'],
-  ['recipe',27, 68,118,'rgba(226,236,246,.62)','#dcebf7']
+  ['admin',  5,  1,110,'rgba(226,236,246,.62)','#dcebf7'],
+  ['gomi',  55,  2,110,'rgba(230,240,220,.62)','#e2efd6'],
+  ['medical',29, 22,126,'rgba(238,230,246,.66)','#e9def4'],
+  ['work',   3, 44,104,'rgba(251,230,221,.62)','#fbe1d4'],
+  ['event', 57, 43,110,'rgba(248,238,205,.64)','#f7ecc6'],
+  ['recipe', 5, 70,108,'rgba(226,236,246,.62)','#dcebf7'],
+  ['rent',  52, 68,112,'rgba(251,224,236,.66)','#fbe0ec']
 ];
 document.getElementById('bubbles').innerHTML=LAYOUT.map(([k,x,y,s,bg,ic],i)=>{
   const c=CATS[k], isz=Math.round(s*0.44);
@@ -680,6 +766,12 @@ function content(key){
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('最近${t}在东京有什么活动?')">${t}</span>`).join('')}</div>
       <div class="sub" style="font-size:12px;color:var(--ink2);margin-top:10px;line-height:1.6">添加感兴趣的 IP,我会帮你留意快闪/活动的时间地点。<b>自动推送即将上线。</b></div></div>`;
   }
+  if(key==='rent'){
+    return `<div class="panel" style="padding:12px 14px"><div class="banner" style="background:var(--pink-t);color:#c56a8a">🏠 示例房源,点 ♡ 收藏;真实找房请配合 SUUMO / 不动产 / UR。</div></div>
+    <div id="houseList">${HOUSES.map(h=>houseCard(h,false)).join('')}</div>
+    <div class="panel"><h3>💬 租房问问我</h3><div class="chips">${['敷金礼金是什么?','没有保证人怎么办?','初期费用大概多少?','UR住宅适合留学生吗?'].map(q=>
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
+  }
   return '';
 }
 
@@ -696,7 +788,10 @@ function nav(s){
   else if(s==='timetable'){ originScreen=curScreen(); renderGrid(); showScreen('timetable'); navHL('timetable'); }
   else if(s==='favorites'){ originScreen=curScreen(); renderFav(); showScreen('favorites'); navHL(originScreen); }
   else if(s==='worklog'){ originScreen=curScreen(); renderWL(); showScreen('worklog'); navHL(originScreen); }
+  else if(s==='housefav'){ originScreen=curScreen(); renderHouseFav(); showScreen('housefav'); navHL(originScreen); }
 }
+function showWelcome(){ document.getElementById('welcome').classList.add('on'); }
+function closeWelcome(){ document.getElementById('welcome').classList.remove('on'); try{localStorage.setItem('jp_onboarded','1');}catch(e){} }
 /* 返回到进入前的页面 */
 function goBack(){
   if(cur&&document.getElementById('chatlog')) state[cur].msgs=document.getElementById('chatlog').innerHTML;
@@ -1043,9 +1138,11 @@ currentGomi={pref:USER.pref,city:USER.city};
 renderProfile();
 renderTTSum();
 renderFavCount();
+renderHFCount();
 updateWLCount();
 renderAgenda();
 renderCal();
+if(!localStorage.getItem('jp_onboarded')) showWelcome();
 </script>
 </body>
 </html>
