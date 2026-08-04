@@ -292,6 +292,49 @@
   .navb svg{width:23px;height:23px;}
   .navb span{font-size:10.5px;}
   .navb.on{color:var(--nav);}
+
+  /* ============================================================
+     设计系统打磨 · UI UX Pro Max 方法论
+     风格:柔和 UI 进化版 + 粘土拟态(治愈/生活方式)
+     交付前检查清单:对比度 / 光标 / 悬停过渡 / focus / 减弱动效
+     ============================================================ */
+  :root{
+    /* 统一圆角与阴影 tokens(粘土质感:柔和外阴影 + 内高光) */
+    --r-sm:12px; --r-md:18px; --r-lg:24px; --r-pill:999px;
+    --sh-soft:0 4px 14px rgba(150,120,80,.10);
+    --sh-lift:0 10px 26px rgba(150,120,80,.16);
+    --clay: 0 6px 16px rgba(150,120,80,.14), inset 0 1px 0 rgba(255,255,255,.7);
+    --ease:cubic-bezier(.2,.8,.3,1); --dur:200ms;
+    --ink2:#8a7c68; /* 提高小字对比度,满足 4.5:1 */
+  }
+  /* 所有可交互元素:光标 + 平滑过渡(150–300ms)*/
+  .navb,.pf-item,.qa-chip,.bubble,.back,.fav-card,.welcome-btn,.btn-add,.btn-close,
+  .pill,.chips span,.day.sel,.ava,select,input,button,[onclick]{
+    cursor:pointer; transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+  /* 统一「按下」反馈,替代生硬点击 */
+  .pf-item:active,.fav-card:active,.qa-chip:active,.welcome-btn:active,
+  .btn-add:active,.back:active,.pill:active{ transform:scale(.97); }
+  .bubble:active .fl{ transform:scale(.94); }
+  /* 悬停微抬升(桌面浏览器)*/
+  @media(hover:hover){
+    .pf-item:hover{ box-shadow:var(--sh-soft); transform:translateY(-1px); }
+    .fav-card:hover,.panel:hover{ box-shadow:var(--sh-lift); }
+    .qa-chip:hover{ filter:brightness(.98); transform:translateY(-1px); }
+    .welcome-btn:hover{ box-shadow:0 7px 18px rgba(242,145,182,.5); }
+  }
+  /* 键盘可达:清晰的 focus 环 */
+  a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
+  .pf-item:focus-visible,.qa-chip:focus-visible,.bubble:focus-visible,[onclick]:focus-visible{
+    outline:2.5px solid rgba(231,159,182,.9); outline-offset:2px; border-radius:var(--r-sm);
+  }
+  /* 粘土质感:主要卡片统一柔和阴影 */
+  .panel,.fav-card,.h-title{ box-shadow:var(--clay); }
+  /* 尊重系统「减弱动效」偏好,关闭飘动/摇摆,避免不适 */
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{ animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important; }
+    .fl{ animation:none!important; } .bg span{ animation:none!important; }
+  }
 </style>
 </head>
 <body>
