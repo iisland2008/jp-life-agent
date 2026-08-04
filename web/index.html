@@ -294,43 +294,50 @@
   .navb.on{color:var(--nav);}
 
   /* ============================================================
-     设计系统打磨 · UI UX Pro Max 方法论
-     风格:柔和 UI 进化版 + 粘土拟态(治愈/生活方式)
-     交付前检查清单:对比度 / 光标 / 悬停过渡 / focus / 减弱动效
+     设计系统 · UI UX Pro Max 引擎推荐:Claymorphism(粘土拟态)
+     规格:圆角16–24px · 边框2–3px · 内+外双层阴影 · Q弹回弹
+     交付前清单:对比度4.5:1 / 光标 / 过渡 / focus / 减弱动效
      ============================================================ */
   :root{
-    /* 统一圆角与阴影 tokens(粘土质感:柔和外阴影 + 内高光) */
-    --r-sm:12px; --r-md:18px; --r-lg:24px; --r-pill:999px;
-    --sh-soft:0 4px 14px rgba(150,120,80,.10);
-    --sh-lift:0 10px 26px rgba(150,120,80,.16);
-    --clay: 0 6px 16px rgba(150,120,80,.14), inset 0 1px 0 rgba(255,255,255,.7);
-    --ease:cubic-bezier(.2,.8,.3,1); --dur:200ms;
+    --r-sm:14px; --r-md:20px; --r-lg:26px; --r-pill:999px;
+    --bounce:cubic-bezier(.34,1.56,.64,1); --dur:220ms;
+    /* 粘土双阴影:底部柔和外阴影 + 顶部内高光 + 底部内暗影 */
+    --clay:0 8px 18px rgba(150,120,80,.16), inset 0 2px 3px rgba(255,255,255,.9), inset 0 -3px 6px rgba(150,120,80,.10);
+    --clay-lift:0 14px 26px rgba(150,120,80,.22), inset 0 2px 3px rgba(255,255,255,.9), inset 0 -3px 6px rgba(150,120,80,.10);
+    --clay-border:2px solid rgba(255,255,255,.85);
     --ink2:#8a7c68; /* 提高小字对比度,满足 4.5:1 */
   }
-  /* 所有可交互元素:光标 + 平滑过渡(150–300ms)*/
+  /* 可交互元素:光标 + 平滑过渡 */
   .navb,.pf-item,.qa-chip,.bubble,.back,.fav-card,.welcome-btn,.btn-add,.btn-close,
   .pill,.chips span,.day.sel,.ava,select,input,button,[onclick]{
-    cursor:pointer; transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+    cursor:pointer; transition:transform var(--dur) var(--bounce), box-shadow var(--dur) ease, background var(--dur) ease, filter var(--dur) ease;
   }
-  /* 统一「按下」反馈,替代生硬点击 */
-  .pf-item:active,.fav-card:active,.qa-chip:active,.welcome-btn:active,
-  .btn-add:active,.back:active,.pill:active{ transform:scale(.97); }
-  .bubble:active .fl{ transform:scale(.94); }
-  /* 悬停微抬升(桌面浏览器)*/
+  /* 粘土卡片:圆角 + 双阴影 + 高光描边 */
+  .panel,.fav-card,.pf-item,.h-title,.welcome-tips,.welcome-sec,.welcome-hi,.pit-hint{
+    box-shadow:var(--clay); border:var(--clay-border);
+  }
+  .panel{border-radius:var(--r-lg);} .pf-item{border-radius:var(--r-md);}
+  /* 气泡:粘土立体 + 更粗高光内环 */
+  .fl{ box-shadow:0 12px 24px rgba(140,110,70,.20), inset 0 3px 4px rgba(255,255,255,.95), inset 0 -6px 12px rgba(150,120,80,.14), inset 0 0 0 6px rgba(255,255,255,.42); border:2px solid rgba(255,255,255,.7); }
+  /* 胶囊 chip:粘土小药丸 + Q弹 */
+  .qa-chip{ border-radius:var(--r-pill); box-shadow:0 4px 9px rgba(150,120,80,.16), inset 0 1.5px 2px rgba(255,255,255,.85); border:1.5px solid rgba(255,255,255,.6); font-weight:600; }
+  /* 主按钮:粘土糖果 */
+  .welcome-btn,.btn-add{ box-shadow:0 8px 16px rgba(242,145,182,.42), inset 0 2px 3px rgba(255,255,255,.55); }
+  /* Q弹「按下」反馈 */
+  .pf-item:active,.fav-card:active,.qa-chip:active,.welcome-btn:active,.btn-add:active,.back:active,.pill:active{ transform:scale(.93); }
+  .bubble:active .fl{ transform:scale(.9); box-shadow:0 6px 14px rgba(140,110,70,.18), inset 0 4px 8px rgba(150,120,80,.2); }
+  /* 悬停微抬升(桌面)*/
   @media(hover:hover){
-    .pf-item:hover{ box-shadow:var(--sh-soft); transform:translateY(-1px); }
-    .fav-card:hover,.panel:hover{ box-shadow:var(--sh-lift); }
-    .qa-chip:hover{ filter:brightness(.98); transform:translateY(-1px); }
-    .welcome-btn:hover{ box-shadow:0 7px 18px rgba(242,145,182,.5); }
+    .pf-item:hover,.fav-card:hover,.panel:hover{ box-shadow:var(--clay-lift); transform:translateY(-2px); }
+    .qa-chip:hover{ transform:translateY(-2px); filter:brightness(1.02); }
+    .welcome-btn:hover{ box-shadow:0 11px 22px rgba(242,145,182,.55), inset 0 2px 3px rgba(255,255,255,.55); }
   }
-  /* 键盘可达:清晰的 focus 环 */
+  /* 键盘可达 focus 环 */
   a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
   .pf-item:focus-visible,.qa-chip:focus-visible,.bubble:focus-visible,[onclick]:focus-visible{
     outline:2.5px solid rgba(231,159,182,.9); outline-offset:2px; border-radius:var(--r-sm);
   }
-  /* 粘土质感:主要卡片统一柔和阴影 */
-  .panel,.fav-card,.h-title{ box-shadow:var(--clay); }
-  /* 尊重系统「减弱动效」偏好,关闭飘动/摇摆,避免不适 */
+  /* 尊重「减弱动效」*/
   @media(prefers-reduced-motion:reduce){
     *,*::before,*::after{ animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important; }
     .fl{ animation:none!important; } .bg span{ animation:none!important; }
