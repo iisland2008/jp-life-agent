@@ -178,6 +178,8 @@
   .row-day{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--line);}
   .row-day:last-child{border-bottom:none;}
   .daybadge{width:44px;height:44px;border-radius:14px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;line-height:1.1;}
+  .freqbadge{min-width:62px;padding:7px 9px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;text-align:center;line-height:1.2;}
+  .gomi-note{font-size:11.5px;color:#8a6b4a;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:12px;padding:8px 11px;margin-top:9px;line-height:1.6;}
   .row-day .what{font-size:13.5px;color:#5f574c;font-weight:500;}
   .row-day .sub{font-size:11px;color:var(--ink2);}
   .tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
@@ -653,25 +655,27 @@ const AVATARS=[
 function avatarObj(id){return AVATARS.find(a=>a.id===id)||AVATARS[0];}
 function renderAvatarInto(el,id,px){ if(!el)return; const a=avatarObj(id); el.style.background=a.bg; el.innerHTML=a.em?`<span style="font-size:${px}px;line-height:1">${a.em}</span>`:a.svg; }
 
-/* 详细收集日(示例,仅东京部分区):[星期, 颜色, 类别, 说明] */
-const GOMI_WARDS={
-  '新宿区':[['火','var(--green)','可燃垃圾','燃えるゴミ · 沥干厨余'],['木','var(--blue)','塑料容器','プラ · 洗净后投'],['日','var(--yellow)','资源垃圾','瓶/罐/纸/塑料瓶'],['水','var(--coral)','不可燃','第2·4周 · 玻璃陶瓷']],
-  '涩谷区':[['月','var(--green)','可燃垃圾','燃えるゴミ'],['木','var(--green)','可燃垃圾','燃えるゴミ'],['火','var(--blue)','塑料容器','プラ'],['水','var(--yellow)','资源垃圾','瓶/罐/塑料瓶'],['土','var(--coral)','不可燃/纸','第1·3周 不燃']],
-  '丰岛区':[['月','var(--green)','可燃(含塑料)','燃える+プラ'],['木','var(--green)','可燃(含塑料)','燃える+プラ'],['土','var(--yellow)','资源垃圾','瓶/罐/纸'],['金','var(--coral)','不可燃','第2·4周']]
+/* 各区『收集频率』(按区固定,已核实):[类别, 频率, 颜色, 备注]。注意:具体星期按住址不同,不在此固定。 */
+const GOMI_FREQ={
+  '新宿区':[['可燃垃圾','每周2次','var(--green)','燃やすごみ'],['资源塑料','每周1次','var(--blue)','資源プラ'],['瓶/罐/塑料瓶/电池','每周1次','var(--yellow)','資源'],['金属·陶器·玻璃','每月2次','var(--coral)','']],
+  '涩谷区':[['可燃垃圾','每周2次','var(--green)','可燃ごみ'],['资源','每周1次','var(--yellow)','瓶/罐/PET/古纸'],['不可燃','每月1次','var(--coral)','玻璃陶器金属等']],
+  '丰岛区':[['可燃垃圾','每周2次','var(--green)','燃やすごみ'],['塑料','每周1次','var(--blue)','プラ'],['瓶/罐/塑料瓶','每周1次','var(--yellow)',''],['纸箱/纸/布','每周1次','var(--yellow)',''],['金属·陶器·玻璃','每月2次','var(--coral)','']],
+  '大田区':[['可燃垃圾','每周2次','var(--green)',''],['塑料','每周1次','var(--blue)',''],['资源(7品目)','每周1次','var(--yellow)',''],['不燃','每月2次','var(--coral)','']]
 };
 const GOMI_ALIAS={'渋谷区':'涩谷区','豊島区':'丰岛区'};
-function findGomiDays(city){return GOMI_WARDS[city]||GOMI_WARDS[GOMI_ALIAS[city]];}
+function findGomiDays(city){return GOMI_FREQ[city]||GOMI_FREQ[GOMI_ALIAS[city]];}
 let currentGomi={pref:'東京都',city:'新宿区'};
 function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=document.getElementById('gomiPref'); if(ps)ps.value='東京都'; const ci=document.getElementById('gomiCity'); if(ci)ci.value=city; renderGomiSched(); refreshRefLinks(); }
 function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiSched(); refreshRefLinks(); }
 function renderGomiSched(){
   const el=document.getElementById('gomiSched'); if(!el) return;
   const {pref,city}=currentGomi;
-  const days=(pref==='東京都')?findGomiDays(city):null;
+  const freq=(pref==='東京都')?findGomiDays(city):null;
+  const addrNote=`<div class="gomi-note">📅 具体收集『星期』按你的住址(丁目)不同,请点下方官方链接按地址查询。</div>`;
   let inner;
-  if(days){ inner=days.map(([d,col,w,s])=>`<div class="row-day"><div class="daybadge" style="background:${col}">${d}<span style="font-size:8px;opacity:.85">曜日</span></div><div><div class="what">${w}</div><div class="sub">${s}</div></div></div>`).join(''); }
-  else { inner=`<div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.7;padding:6px 0">${esc(pref)} ${esc(city||'')} 的收集日各地不同。直接问我「${esc(city||pref)}的xx怎么扔」,或查当地役所 / 「ゴミ分別アプリ」。</div>`; }
-  el.innerHTML=`<h3>📍 ${esc(pref)} ${esc(city||'')} · 本周收集日</h3>${inner}`;
+  if(freq){ inner=freq.map(([w,fr,col,s])=>`<div class="row-day"><div class="freqbadge" style="background:${col}">${fr}</div><div><div class="what">${w}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`).join('')+addrNote; }
+  else { inner=`<div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.7;padding:2px 0 6px">${esc(city||pref)} 的分类体系与收集频率见下方官方链接。</div>`+addrNote; }
+  el.innerHTML=`<h3>📍 ${esc(pref)} ${esc(city||'')} · 收集频率</h3>${inner}`;
 }
 function renderProfile(){
   const n=document.getElementById('pfName'); if(n)n.textContent=USER.name||'小留同学';
