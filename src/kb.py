@@ -24,7 +24,16 @@ ADMIN = _load("admin.json")
 MEDICAL = _load("medical.json")
 TIPS = _load("tips.json")
 EXPERIENCE = _load("experience.json")
-GOMI_SJK = _load("gomi_shinjuku.json")  # 新宿区官方垃圾数据(带来源URL)
+# 各区官方垃圾数据(带来源URL);合并成一个带『区』标签的文档列表,便于按区检索
+_GOMI_FILES = ["gomi_shinjuku.json", "gomi_shibuya.json", "gomi_toshima.json"]
+GOMI_LOCAL_DOCS = []
+for _f in _GOMI_FILES:
+    try:
+        GOMI_LOCAL_DOCS += _load(_f)["docs"]
+    except Exception:
+        pass
+# 有本地官方数据的区(用于判断是否走本地检索)
+WARDS_WITH_DATA = sorted({d.get("区") for d in GOMI_LOCAL_DOCS if d.get("区")})
 
 
 # ---------- 通用文本打分 (轻量语义检索,无需外部 embedding) ----------
@@ -64,10 +73,26 @@ def _score_doc(query: str, doc: dict) -> float:
     return score
 
 
-def search_gomi_shinjuku(query: str = "", k: int = 3) -> dict:
-    """对新宿区官方数据做 Top-K 检索,每条附官方来源 URL 供引用。"""
+def _ward_of(ward: str):
+    """把传入地区归一化到有本地数据的区名(支持中/日写法的模糊匹配)。"""
+    if not ward:
+        return None
+    alias = {"新宿": "新宿区", "渋谷": "涩谷区", "涩谷": "涩谷区", "豊島": "丰岛区", "丰岛": "丰岛区"}
+    for key, canon in alias.items():
+        if key in ward and canon in WARDS_WITH_DATA:
+            return canon
+    for w in WARDS_WITH_DATA:
+        if w in ward or ward in w:
+            return w
+    return None
+
+
+def search_gomi_local(query: str = "", ward: str = "", k: int = 3) -> dict:
+    """对『指定区』的官方数据做 Top-K 检索,每条附官方来源 URL 供引用。"""
+    canon = _ward_of(ward)
+    docs = [d for d in GOMI_LOCAL_DOCS if d.get("区") == canon]
     scored = []
-    for doc in GOMI_SJK["docs"]:
+    for doc in docs:
         s = _score_doc(query, doc)
         if doc.get("type") == "item":
             s += 0.3  # 物品级条目对『XX怎么扔』更精确,轻微加权
@@ -84,24 +109,24 @@ def search_gomi_shinjuku(query: str = "", k: int = 3) -> dict:
                 "source": {
                     "title": doc["source_title"],
                     "url": doc["source_url"],
-                    "updated": doc["last_updated"],
+                    "updated": doc.get("last_updated", ""),
                 },
             }
         )
     return {
-        "区": "新宿区",
+        "区": canon,
         "query": query,
-        "source_mode": "新宿区官方数据(带出处)",
+        "source_mode": f"{canon}官方数据(带出处)",
         "hits": hits,
-        "disclaimer": GOMI_SJK["_meta"]["免责"],
+        "disclaimer": "规则可能调整,请以官方页面最新信息为准。",
     }
 
 
 # ---------- 垃圾分类检索 ----------
 def search_gomi(item: str = "", ward: str = "") -> dict:
-    # 新宿区:走官方结构化数据,返回带来源的检索结果
-    if ward and "新宿" in ward:
-        return search_gomi_shinjuku(item, k=3)
+    # 有本地官方数据的区(新宿/涩谷/丰岛):走官方结构化数据,返回带来源的检索结果
+    if _ward_of(ward):
+        return search_gomi_local(item, ward, k=3)
 
     result = {"ward": ward or "default", "matched_items": [], "ward_info": None, "notes": []}
 

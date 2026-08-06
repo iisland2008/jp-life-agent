@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "区": "涩谷区",
+    "来源机构": "涩谷区役所(渋谷区 官方网站 city.shibuya.tokyo.jp)",
+    "采集日": "2026-08-06",
+    "说明": "涩谷区(渋谷区)家庭垃圾分类官方规则。涩谷区采用『可燃/不燃/资源』三分法,和新宿/丰岛不同。具体某个物品的分类请查官方『品目别分别一览(50音顺)』。收集曜日各地区不同,以当地集积所看板或清扫事务所为准。",
+    "免责": "规则可能调整,请以官方页面最新信息为准。"
+  },
+  "docs": [
+    {"id":"sby-overview","区":"涩谷区","type":"overview","category":"总览","keywords_cn":["涩谷区","渋谷区","垃圾","分类","收集日","几点","集积所","繁华街","品目一览","50音"],"keywords_jp":["ごみ","分別","収集日","集積所"],"text_cn":"涩谷区采用三分法:①可燃ごみ(适合焚烧的垃圾,周2次)②不燃ごみ(不适合焚烧的垃圾,月1次)③资源(可再资源化,周1次)。注意涩谷区和新宿/丰岛不同——玻璃陶器金属这类在涩谷是『不燃ごみ(月1次)』,不是单独的金属陶器玻璃类。垃圾要放到指定集积所,收集日『早上8点前』(繁华街地区早上7点半前)。收集曜日按地区不同,看当地集积所看板、或问清扫事务所/房东/邻居。具体物品分类查官方『品目别分别一览(50音顺)』。清扫事务所电话 03-5467-4300。","source_title":"涩谷区 · 垃圾与回收(生活信息)","source_url":"https://www.city.shibuya.tokyo.jp/contents/living-in-shibuya/ja/daily/garbage.html","related_urls":{"品目别分别一览(50音)":"https://www.city.shibuya.tokyo.jp/kurashi/gomi/kateigomi/gomi_hinmoku.html"},"last_updated":""},
+    {"id":"sby-burnable","区":"涩谷区","type":"category","category":"可燃ごみ / 可燃垃圾","keywords_cn":["可燃","厨余","生垃圾","纸屑","焚烧","厨房垃圾"],"keywords_jp":["可燃ごみ","燃やすごみ","生ごみ"],"text_cn":"【可燃ごみ 可燃垃圾｜周2次】适合焚烧的垃圾,如厨房的厨余、纸屑等。装进容器或内容物可见的袋子,收集日早上8点前(繁华街7点半前)放到集积所。具体某物品是否可燃请查官方『品目别分别一览(50音)』。","source_title":"涩谷区 · 可燃ごみの出し方","source_url":"https://www.city.shibuya.tokyo.jp/contents/living-in-shibuya/ja/daily/garbage.html","related_urls":{"品目别一览":"https://www.city.shibuya.tokyo.jp/kurashi/gomi/kateigomi/gomi_hinmoku.html"},"last_updated":""},
+    {"id":"sby-funen","区":"涩谷区","type":"category","category":"不燃ごみ / 不可燃垃圾","keywords_cn":["不燃","不可燃","玻璃","陶器","陶瓷","金属","小家电","喷雾罐","灯泡","不适合焚烧"],"keywords_jp":["不燃ごみ","焼却に適さない"],"text_cn":"【不燃ごみ 不可燃垃圾｜月1次(每月只收1次,要留意收集日)】不适合焚烧的垃圾,一般包括玻璃、陶器、金属类、小型家电、喷雾罐等。涩谷区把这些归为『不燃ごみ』(和新宿的『金属・陶器・ガラスごみ』类似,但涩谷是月1次)。喷雾罐等务必用完。具体物品请查官方『品目别分别一览(50音)』确认。","source_title":"涩谷区 · 不燃ごみの出し方","source_url":"https://www.city.shibuya.tokyo.jp/contents/living-in-shibuya/ja/daily/garbage.html","related_urls":{"品目别一览":"https://www.city.shibuya.tokyo.jp/kurashi/gomi/kateigomi/gomi_hinmoku.html"},"last_updated":""},
+    {"id":"sby-shigen","区":"涩谷区","type":"category","category":"资源 / 资源回收","keywords_cn":["资源","瓶","罐","塑料瓶","PET","古纸","报纸","纸箱","回收"],"keywords_jp":["資源","びん","かん","ペットボトル","古紙"],"text_cn":"【资源｜周1次】可再资源化的东西集中回收,通常包括瓶、罐、塑料瓶、古纸(报纸/杂志/纸箱)等。收集日早上8点前放到指定位置。塑料瓶去盖去标签、轻洗。各类具体投放方式与是否收塑料容器,以官方『品目别分别一览(50音)』为准。","source_title":"涩谷区 · 资源回收","source_url":"https://www.city.shibuya.tokyo.jp/contents/living-in-shibuya/ja/daily/garbage.html","related_urls":{"品目别一览":"https://www.city.shibuya.tokyo.jp/kurashi/gomi/kateigomi/gomi_hinmoku.html"},"last_updated":""},
+    {"id":"sby-large","区":"涩谷区","type":"item","category":"粗大ごみ","keywords_cn":["大件","粗大垃圾","家具","30cm"],"keywords_jp":["粗大ごみ"],"text_cn":"大件(粗大ごみ)不能放集积所,需事先向涩谷区粗大垃圾受理中心预约、买处理券、付费收集。具体尺寸标准与费用以官方为准。","source_title":"涩谷区 · 家庭から出るごみ・资源","source_url":"https://www.city.shibuya.tokyo.jp/kurashi/gomi/kateigomi/gomi_hinmoku.html","last_updated":""}
+  ]
+}
