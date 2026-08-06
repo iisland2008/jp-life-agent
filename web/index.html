@@ -286,6 +286,30 @@
   .gloss-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);}
   .gloss-row b{flex:none;width:96px;font-size:13px;color:#5f5245;}
   .gloss-row span{font-size:12.5px;color:var(--ink2);line-height:1.5;}
+  /* 通用免责小字 */
+  .mini-note{font-size:10.5px;color:var(--ink2);line-height:1.6;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);}
+  /* 租房初期费用计算器 */
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .calc-cell{display:flex;flex-direction:column;gap:4px;}
+  .calc-cell span{font-size:11.5px;color:var(--ink2);}
+  .calc-in{border:1.5px solid #ece1cd;background:var(--card);border-radius:11px;padding:9px 11px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;width:100%;box-sizing:border-box;}
+  .calc-in:focus{border-color:#dcccac;}
+  .calc-out{margin-top:12px;}
+  .calc-hint{font-size:12px;color:var(--ink2);text-align:center;padding:10px;}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:13px;color:#6b5f52;}
+  .calc-row b{font-size:15px;color:#5f5245;}
+  .calc-row.big{background:var(--pink-t);border-radius:12px;padding:11px 13px;border-bottom:none;margin-bottom:4px;}
+  .calc-row.big span{color:#a55c7a;font-weight:600;}
+  .calc-row.big b{font-size:19px;color:#c56a8a;}
+  .calc-warn{font-size:11.5px;color:#b6862f;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:11px;padding:8px 11px;margin-top:9px;line-height:1.6;}
+  /* 打工日语模板弹窗 */
+  .tpl-body{max-height:60vh;overflow-y:auto;}
+  .tpl-to{font-size:11.5px;color:var(--ink2);margin-bottom:10px;}
+  .tpl-sec{background:rgba(0,0,0,.03);border-radius:13px;padding:10px 12px;margin-bottom:9px;}
+  .tpl-lb{font-size:11px;color:var(--ink2);font-weight:700;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+  .tpl-copy{color:#b07a4a;font-weight:700;cursor:pointer;font-size:11px;padding:2px 9px;background:var(--coral-t);border-radius:9px;}
+  .tpl-jp{font-size:13.5px;color:#5f5245;line-height:1.65;}
+  .tpl-cn{font-size:12px;color:var(--ink2);margin-top:2px;}
   .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
   .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
   .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
@@ -707,6 +731,9 @@
     </div>
     <button class="btn-close" onclick="document.getElementById('maskActNew').classList.remove('on')">取消</button></div></div>
 
+  <!-- 打工:日语模板 -->
+  <div class="mask" id="maskTpl"><div class="sheet"><h4 id="tplTitle"></h4><div id="tplBody" class="tpl-body"></div><button class="btn-close" onclick="document.getElementById('maskTpl').classList.remove('on')">关闭</button></div></div>
+
   <!-- 活动:日文术语 -->
   <div class="mask" id="maskGloss"><div class="sheet"><h4>📖 日文票务术语</h4><div id="glossBody" class="gloss-body"></div><button class="btn-close" onclick="document.getElementById('maskGloss').classList.remove('on')">关闭</button></div></div>
 
@@ -1011,8 +1038,12 @@ function content(key){
       <div class="matrow"><span class="k">103万</span><span class="v">超过开始产生所得税</span></div>
       <div class="matrow"><span class="k">130万</span><span class="v">脱离扶养,需自付社保</span></div>
       <div class="matrow"><span class="k">28h/周</span><span class="v" style="color:#c58a4a">留学生打工上限,超时影响签证</span></div></div>
+    <div class="panel"><h3>🗣️ 打工日语模板</h3>
+      <div class="pit-hint" style="margin-bottom:8px">点场景看「礼貌 / 简短」说法,复制即用——<b>不会自动发送</b>给雇主。</div>
+      <div class="chips">${WORK_TPL.map(t=>`<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="openTpl('${t.id}')">${t.scene}</span>`).join('')}</div></div>
     <div class="panel"><h3>💬 问问我</h3><div class="chips">${['打工超过103万会怎样?','面接常用敬语有哪些?','留学生每周能打工多久?'].map(q=>
-      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
+      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div>
+      <div class="mini-note">ℹ️ 本功能仅辅助整理信息,不构成法律/劳动意见;工时、工资、合同等重要事项以官方与雇主答复为准。</div></div>`;
   }
   if(key==='recipe'){
     return `<div class="panel"><h3>🍳 单人快手餐</h3><div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.6">买菜时告诉我你有的食材,我推荐单人/双人餐、做法和大致热量,热量高还会给后几天的饮食建议。<br><b>更多菜谱库即将上线。</b></div>
@@ -1040,6 +1071,10 @@ function content(key){
   }
   if(key==='rent'){
     return `<div class="panel" style="padding:12px 14px"><div class="banner" style="background:var(--pink-t);color:#c56a8a">🏠 租房不踩坑指南。找房源用 SUUMO / HOME'S / UR,这里帮你看懂套路、审合同。</div></div>
+    <div class="panel"><h3>🧮 初期费用计算器</h3>
+      <div class="calc-grid">${[['cRent','月租'],['cMgmt','管理费'],['cDep','敷金'],['cKey','礼金'],['cAgy','中介费'],['cGua','保证会社'],['cIns','火灾保险'],['cLock','换锁费'],['cCln','清扫费'],['cOth','其他']].map(([id,l])=>`<label class="calc-cell"><span>${l}</span><input id="${id}" type="number" inputmode="numeric" placeholder="0" class="calc-in" oninput="calcRent()"></label>`).join('')}</div>
+      <div id="calcOut" class="calc-out"></div>
+      <div class="mini-note">ℹ️ 未填的费用视为「未确认」,不等于 0;签约前请逐项向中介确认。计算仅供参考。</div></div>
     <div class="panel"><h3>⚠️ 常见的坑,先看这些</h3>
       ${PITFALLS.map(p=>`<div class="pit"><div class="pit-ic">${p.ic}</div><div class="pit-b"><b>${p.t}</b><span>${p.d}</span></div></div>`).join('')}
     </div>
@@ -1351,6 +1386,50 @@ function refLinksHTML(key){
   return `<div id="refLinks"><div class="panel"><div class="src-hd" style="font-size:12.5px;color:#6b4e3d;font-weight:600;margin-bottom:8px">📎 官方 / 参考链接(可点击查最新)</div>${cards}</div></div>`;
 }
 function refreshRefLinks(){ const rl=document.getElementById('refLinks'); if(rl) rl.outerHTML=refLinksHTML(cur); }
+/* ===== 打工日语模板 ===== */
+const WORK_TPL=[
+  {id:'sick',scene:'😷 生病请假',to:'店长/责任者',polite:'お疲れ様です。本日、体調不良のためお休みをいただけますでしょうか。ご迷惑をおかけし申し訳ありません。',short:'すみません、体調不良で本日お休みしたいです。',cn:'今天身体不适,想请假'},
+  {id:'swap',scene:'🔄 申请换班',to:'店长/同事',polite:'恐れ入ります。◯月◯日のシフトについて、交代をお願いできる方はいらっしゃいますでしょうか。',short:'◯日のシフト、代わってもらえませんか?',cn:'某天的班想找人换'},
+  {id:'confirm',scene:'📅 确认排班',to:'店长',polite:'お疲れ様です。来週のシフトはいつ頃確定しますでしょうか。確認させてください。',short:'来週のシフトはいつ分かりますか?',cn:'确认下周排班'},
+  {id:'pay',scene:'💴 询问工资单',to:'店长/経理',polite:'恐れ入ります。今月の給与明細について、勤務時間の記載を確認させていただけますでしょうか。',short:'給与明細の勤務時間を確認したいです。',cn:'工资单工时想确认'},
+  {id:'trans',scene:'🚃 确认交通费',to:'店长',polite:'交通費の支給について、支給の有無と上限を教えていただけますでしょうか。',short:'交通費は出ますか?上限はありますか?',cn:'确认有没有交通费'},
+  {id:'refuse',scene:'🙅 拒绝加班',to:'店长',polite:'申し訳ありません。本日はこの後予定があり、追加の勤務は難しいです。次回ご相談させてください。',short:'すみません、今日はこの後は入れません。',cn:'今天没法加班'},
+  {id:'avail',scene:'🕒 说明可上班时间',to:'店长',polite:'私の勤務可能時間ですが、平日は18時以降、週末は終日入れます。週28時間まででお願いします。',short:'平日は18時以降、週末は終日OKです。',cn:'说明可上班时间'},
+  {id:'quit',scene:'👋 提出辞职',to:'店长',polite:'お世話になっております。一身上の都合により、◯月末をもって退職させていただきたく、ご相談させてください。',short:'◯月末で退職したいです。ご相談させてください。',cn:'想在某月底辞职'},
+  {id:'notice',scene:'📄 索取劳动条件通知书',to:'店长',polite:'恐れ入ります。労働条件通知書をいただくことは可能でしょうか。',short:'労働条件通知書をもらえますか?',cn:'索取劳动条件通知书'},
+  {id:'injury',scene:'🩹 报告工作受伤',to:'店长',polite:'業務中に怪我をしてしまいました。労災の手続きについて教えていただけますでしょうか。',short:'仕事中に怪我をしました。労災の対応をお願いします。',cn:'工作中受伤,问工伤处理'}
+];
+function openTpl(id){ const t=WORK_TPL.find(x=>x.id===id); if(!t)return;
+  document.getElementById('tplTitle').textContent=t.scene;
+  document.getElementById('tplBody').innerHTML=`<div class="tpl-to">发给:${t.to}</div>
+    <div class="tpl-sec"><div class="tpl-lb">礼貌(推荐)<span class="tpl-copy" onclick="copyTpl('${t.id}','polite')">复制</span></div><div class="tpl-jp">${t.polite}</div></div>
+    <div class="tpl-sec"><div class="tpl-lb">简短<span class="tpl-copy" onclick="copyTpl('${t.id}','short')">复制</span></div><div class="tpl-jp">${t.short}</div></div>
+    <div class="tpl-cn">中文意思:${t.cn}</div>`;
+  document.getElementById('maskTpl').classList.add('on'); }
+function copyTpl(id,f){ const t=WORK_TPL.find(x=>x.id===id); if(t)copyText(t[f]); }
+function copyText(s){ try{ (navigator.clipboard&&navigator.clipboard.writeText(s))||Promise.reject(); toast('已复制 ✓'); }catch(e){ toast('复制失败,请手动选择'); } }
+
+/* ===== 租房初期费用计算器 ===== */
+function calcRent(){
+  const out=document.getElementById('calcOut'); if(!out) return;
+  const g=id=>{ const el=document.getElementById(id); const v=el?parseFloat(el.value):NaN; return {v:isNaN(v)?0:v, filled:!!(el&&el.value.trim()!=='')}; };
+  const rent=g('cRent').v, mgmt=g('cMgmt').v;
+  const oneoff=g('cDep').v+g('cKey').v+g('cAgy').v+g('cGua').v+g('cIns').v+g('cLock').v+g('cCln').v+g('cOth').v;
+  const init=oneoff+rent+mgmt;         // 初期 = 一次性费用 + 首月(房租+管理费)
+  const monthly=rent+mgmt;
+  const year1=init+monthly*11;
+  const twoYr=init+monthly*23+rent;    // 两年:含一次更新料(约1个月租)
+  const monAvg=twoYr/24;
+  const unconfirmed=['cDep','cKey','cAgy','cGua','cIns','cLock','cCln'].filter(id=>!g(id).filled).length;
+  const yen=n=>'¥'+Math.round(n).toLocaleString('en-US');
+  if(!rent&&!oneoff){ out.innerHTML='<div class="calc-hint">填入各项费用(至少月租),自动算出初期与长期成本。</div>'; return; }
+  out.innerHTML=`<div class="calc-row big"><span>初期费用合计</span><b>${yen(init)}</b></div>
+    <div class="calc-row"><span>每月固定(房租+管理费)</span><b>${yen(monthly)}</b></div>
+    <div class="calc-row"><span>首年预计总成本</span><b>${yen(year1)}</b></div>
+    <div class="calc-row"><span>两年月均(含更新料)</span><b>${yen(monAvg)}/月</b></div>
+    ${unconfirmed?`<div class="calc-warn">⚠️ 有 ${unconfirmed} 项费用未填 → 视为「未确认」,不等于 0,签约前请逐项确认。</div>`:''}`;
+}
+
 function openCat(key){
   const from=curScreen();
   if(from!=='detail') originScreen=from;
@@ -1374,6 +1453,7 @@ function openCat(key){
       </div></div>`;
   if(key==='gomi') renderGomiSched();
   if(key==='event') renderActs();
+  if(key==='rent') calcRent();
   const log=document.getElementById('chatlog');
   log.innerHTML=state[key].msgs||`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
   fetch('/api/meta').then(r=>r.json()).then(m=>{const t=document.getElementById('modeTag');if(t)t.textContent=m.mode==='real'?'在线':'演示模式';}).catch(()=>{});
