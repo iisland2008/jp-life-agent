@@ -594,7 +594,7 @@
     <div class="sheet">
       <h4 id="gdTitle">设置收集日</h4>
       <div class="gd-opts" id="gdChips"></div>
-      <div id="gdFreqWrap" style="margin-top:13px;display:none"><div style="font-size:12px;color:var(--ink2);margin-bottom:7px">收集频率(隔周/每周)</div><div class="gd-opts" id="gdFreq"></div></div>
+      <div id="gdFreqWrap" style="margin-top:13px;display:none"><div style="font-size:12px;color:var(--ink2);margin-bottom:7px">多久收一次?(隔周收的选第1·3周或第2·4周)</div><div class="gd-opts" id="gdFreq"></div></div>
       <div class="frm" style="margin-top:13px"><button class="btn-add" onclick="saveGomiDay()">保存</button></div>
       <button class="btn-close" onclick="document.getElementById('maskGomiDay').classList.remove('on')">取消</button>
     </div>
@@ -707,23 +707,16 @@ function saveGS(){try{localStorage.setItem(GSKEY,JSON.stringify(GS));}catch(e){}
 const GFREQS=['每周','第1·3周','第2·4周'];
 function weekOfMonth(d){return Math.ceil(d.getDate()/7);}
 function freqActive(f,wk){ if(f==='第1·3周')return wk%2===1; if(f==='第2·4周')return wk%2===0; return true; }
-let gomiViewWk=weekOfMonth(new Date());
-function setGomiWk(w){ gomiViewWk=w; renderGomiDays(); }
 function renderGomiDays(){
   const el=document.getElementById('gPageDays'); if(!el) return;
-  const now=new Date(), todayIdx=(now.getDay()+6)%7; // 月=0…日=6
-  const wkTabs=[1,2,3,4,5].map(w=>`<span class="wk-pill${w===gomiViewWk?' on':''}" onclick="event.stopPropagation();setGomiWk(${w})">第${w}周</span>`).join('');
+  const todayIdx=(new Date().getDay()+6)%7; // 月=0…日=6
   const rows=GWD.map(([jp,cn],idx)=>{
     const rec=GS[jp], arr=(rec&&rec.t)||[], f=(rec&&rec.f)||'每周';
     const rest=arr.includes('休息'), isToday=idx===todayIdx;
-    const active=!arr.length||rest||freqActive(f,gomiViewWk);
-    let chips;
-    if(!arr.length) chips=`<span class="gday-empty">未设置 · 点击添加</span>`;
-    else if(!active) chips=`<span class="gday-empty">本周不收</span>`;
-    else chips=arr.map(gTypeChip).join('')+((f!=='每周'&&!rest)?`<span class="gfreq">${f}</span>`:'');
-    return `<div class="gday-row${rest?' is-rest':''}${isToday?' is-today':''}${(arr.length&&!active)?' is-off':''}" onclick="openGomiDay('${jp}')"><div class="gday-badge"><b>${jp}</b><i>${cn}</i>${isToday?'<span class="today-tag">今日</span>':''}</div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
+    const chips=arr.length?(arr.map(gTypeChip).join('')+((f!=='每周'&&!rest)?`<span class="gfreq">${f}</span>`:'')):`<span class="gday-empty">未设置 · 点击添加</span>`;
+    return `<div class="gday-row${rest?' is-rest':''}${isToday?' is-today':''}" onclick="openGomiDay('${jp}')"><div class="gday-badge"><b>${jp}</b><i>${cn}</i>${isToday?'<span class="today-tag">今日</span>':''}</div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
   }).join('');
-  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日<span>点每天设置(可设休息日/隔周)</span></div><div class="wk-row"><span class="wk-lb">查看</span>${wkTabs}</div>${rows}`;
+  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日<span>点每天设置收什么(可设休息/隔周)</span></div>${rows}`;
 }
 let gEditDay=null, gEditSel=[], gEditFreq='每周';
 function renderGdChips(){
