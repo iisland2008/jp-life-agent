@@ -25,7 +25,7 @@ MEDICAL = _load("medical.json")
 TIPS = _load("tips.json")
 EXPERIENCE = _load("experience.json")
 # 各区官方垃圾数据(带来源URL);合并成一个带『区』标签的文档列表,便于按区检索
-_GOMI_FILES = ["gomi_shinjuku.json", "gomi_shibuya.json", "gomi_toshima.json"]
+_GOMI_FILES = ["gomi_shinjuku.json", "gomi_shibuya.json", "gomi_toshima.json", "gomi_tokyo23.json"]
 GOMI_LOCAL_DOCS = []
 for _f in _GOMI_FILES:
     try:
@@ -77,7 +77,12 @@ def _ward_of(ward: str):
     """把传入地区归一化到有本地数据的区名(支持中/日写法的模糊匹配)。"""
     if not ward:
         return None
-    alias = {"新宿": "新宿区", "渋谷": "涩谷区", "涩谷": "涩谷区", "豊島": "丰岛区", "丰岛": "丰岛区"}
+    # 日文写法 / 别名 → 本地数据里的区名(繁简差异归一)
+    alias = {
+        "渋谷": "涩谷区", "豊島": "丰岛区", "台東": "台东区", "江東": "江东区",
+        "目黒": "目黑区", "杉並": "杉并区", "板橋": "板桥区", "練馬": "练马区",
+        "葛飾": "葛饰区", "江戸川": "江户川区",
+    }
     for key, canon in alias.items():
         if key in ward and canon in WARDS_WITH_DATA:
             return canon
@@ -99,8 +104,12 @@ def search_gomi_local(query: str = "", ward: str = "", k: int = 3) -> dict:
         if s > 0.5:
             scored.append((s, doc))
     scored.sort(key=lambda x: -x[0])
+    picked = [doc for _, doc in scored[:k]]
+    # 兜底:若没命中任何条目,返回该区的『总览』条目,保证始终给出本区信息+官方来源
+    if not picked and docs:
+        picked = [next((d for d in docs if d.get("type") == "overview"), docs[0])]
     hits = []
-    for s, doc in scored[:k]:
+    for doc in picked:
         hits.append(
             {
                 "category": doc["category"],

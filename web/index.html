@@ -786,7 +786,7 @@ function content(key){
           <select id="gomiPref" onchange="onGomiLoc()">${prefOptions(currentGomi.pref)}</select>
           <select id="gomiCity" onchange="onGomiLoc()">${wardOptions(currentGomi.city)}</select>
         </div>
-        <div style="font-size:11px;color:var(--ink2);margin:7px 0 4px">🟢 已有官方数据 · 点击快速选择</div>
+        <div style="font-size:11px;color:var(--ink2);margin:7px 0 4px">🟢 东京23区均有官方数据(新宿/涩谷/丰岛最详细) · 常用区快速选</div>
         <div class="chips">${['新宿区','涩谷区','丰岛区'].map(w=>`<span class="qa-chip" style="background:var(--green-t);color:#5a7a4a" onclick="setGomiWard('${w}')">${w}</span>`).join('')}</div>
       </div></div>
     <div class="panel" id="gomiSched"></div>
