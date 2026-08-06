@@ -193,16 +193,25 @@
   .gday-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f3ecdd;cursor:pointer;}
   .gday-row:last-child{border-bottom:none;}
   .gday-row:active{opacity:.6;}
-  .gday-badge{width:44px;height:44px;border-radius:14px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(158deg,#fdf7ee,#f0e6d3);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 6px rgba(150,120,80,.08);}
-  .gday-badge b{font-size:17px;font-weight:800;color:#8a6f52;line-height:1;}
+  .gday-badge{position:relative;width:46px;height:46px;border-radius:15px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(158deg,#fdf7ee,#efe4d0);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),0 3px 7px rgba(150,120,80,.1);border:1.5px solid rgba(255,255,255,.6);}
+  .gday-badge b{font-size:18px;font-weight:800;color:#8a6f52;line-height:1;}
   .gday-badge i{font-size:9px;font-style:normal;color:#ab9a80;margin-top:2px;}
+  .today-tag{position:absolute;top:-8px;right:-9px;background:linear-gradient(135deg,#f2a07f,#e8896f);color:#fff;font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:9px;box-shadow:0 2px 5px rgba(232,137,111,.5);}
+  .gday-row.is-today .gday-badge{background:linear-gradient(158deg,#fcddd0,#f6b49c);border-color:rgba(255,255,255,.8);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),0 4px 10px rgba(232,137,111,.28);}
+  .gday-row.is-today .gday-badge b{color:#b2543a;}
   .gday-row.is-rest .gday-badge{background:linear-gradient(158deg,#f3f0ea,#e8e2d6);}
   .gday-row.is-rest .gday-badge b{color:#a89a86;}
-  .gday-types{flex:1;display:flex;flex-wrap:wrap;gap:5px;}
+  .gday-row.is-off{opacity:.5;}
+  .gday-types{flex:1;display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
   .gtchip{color:#fff;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:11px;}
   .gtchip.rest{background:#c3b4a2;}
+  .gfreq{font-size:10px;color:#9a7b3c;background:rgba(231,191,107,.22);border:1px solid rgba(231,191,107,.5);padding:2px 7px;border-radius:9px;}
   .gday-empty{font-size:12px;color:#b3a894;}
   .arw{color:#cbbfa8;}
+  .wk-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 11px;}
+  .wk-lb{font-size:11px;color:var(--ink2);}
+  .wk-pill{padding:4px 11px;border-radius:20px;background:rgba(0,0,0,.045);color:var(--ink2);font-size:11.5px;cursor:pointer;transition:.15s;}
+  .wk-pill.on{background:var(--green);color:#fff;font-weight:700;}
   .gcat-item{padding:8px 0;border-bottom:1px dashed var(--line);}
   .gcat-item:last-of-type{border-bottom:none;}
   .gcat-item b{font-size:13px;color:#5f5245;display:block;margin-bottom:3px;font-weight:700;}
@@ -599,7 +608,8 @@
     <div class="sheet">
       <h4 id="gdTitle">设置收集日</h4>
       <div class="gd-opts" id="gdChips"></div>
-      <div class="frm" style="margin-top:12px"><button class="btn-add" onclick="saveGomiDay()">保存</button></div>
+      <div id="gdFreqWrap" style="margin-top:13px;display:none"><div style="font-size:12px;color:var(--ink2);margin-bottom:7px">收集频率(隔周/每周)</div><div class="gd-opts" id="gdFreq"></div></div>
+      <div class="frm" style="margin-top:13px"><button class="btn-add" onclick="saveGomiDay()">保存</button></div>
       <button class="btn-close" onclick="document.getElementById('maskGomiDay').classList.remove('on')">取消</button>
     </div>
   </div>
@@ -706,24 +716,40 @@ const GTYPES=[['可燃','var(--green)'],['不燃','var(--coral)'],['资源','var
 function gColor(t){const f=GTYPES.find(x=>x[0]===t);return f?f[1]:'var(--ink2)';}
 function gTypeChip(t){return t==='休息'?`<span class="gtchip rest">😴 休息日</span>`:`<span class="gtchip" style="background:${gColor(t)}">${t}</span>`;}
 const GSKEY='jp_gomi_sched'; let GS={}; try{GS=JSON.parse(localStorage.getItem(GSKEY)||'{}');}catch(e){}
+Object.keys(GS).forEach(k=>{ if(Array.isArray(GS[k])) GS[k]={t:GS[k],f:'每周'}; }); // 兼容旧格式
 function saveGS(){try{localStorage.setItem(GSKEY,JSON.stringify(GS));}catch(e){}}
+const GFREQS=['每周','第1·3周','第2·4周'];
+function weekOfMonth(d){return Math.ceil(d.getDate()/7);}
+function freqActive(f,wk){ if(f==='第1·3周')return wk%2===1; if(f==='第2·4周')return wk%2===0; return true; }
+let gomiViewWk=weekOfMonth(new Date());
+function setGomiWk(w){ gomiViewWk=w; renderGomiDays(); }
 function renderGomiDays(){
   const el=document.getElementById('gPageDays'); if(!el) return;
-  const rows=GWD.map(([jp,cn])=>{
-    const arr=GS[jp]||[];
-    const rest=arr.includes('休息');
-    const chips=arr.length?arr.map(gTypeChip).join(''):`<span class="gday-empty">未设置 · 点击添加</span>`;
-    return `<div class="gday-row${rest?' is-rest':''}" onclick="openGomiDay('${jp}')"><div class="gday-badge"><b>${jp}</b><i>${cn}</i></div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
+  const now=new Date(), todayIdx=(now.getDay()+6)%7; // 月=0…日=6
+  const wkTabs=[1,2,3,4,5].map(w=>`<span class="wk-pill${w===gomiViewWk?' on':''}" onclick="event.stopPropagation();setGomiWk(${w})">第${w}周</span>`).join('');
+  const rows=GWD.map(([jp,cn],idx)=>{
+    const rec=GS[jp], arr=(rec&&rec.t)||[], f=(rec&&rec.f)||'每周';
+    const rest=arr.includes('休息'), isToday=idx===todayIdx;
+    const active=!arr.length||rest||freqActive(f,gomiViewWk);
+    let chips;
+    if(!arr.length) chips=`<span class="gday-empty">未设置 · 点击添加</span>`;
+    else if(!active) chips=`<span class="gday-empty">本周不收</span>`;
+    else chips=arr.map(gTypeChip).join('')+((f!=='每周'&&!rest)?`<span class="gfreq">${f}</span>`:'');
+    return `<div class="gday-row${rest?' is-rest':''}${isToday?' is-today':''}${(arr.length&&!active)?' is-off':''}" onclick="openGomiDay('${jp}')"><div class="gday-badge"><b>${jp}</b><i>${cn}</i>${isToday?'<span class="today-tag">今日</span>':''}</div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
   }).join('');
-  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日<span>点每天设置收什么(可设休息日)</span></div>${rows}`;
+  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日<span>点每天设置(可设休息日/隔周)</span></div><div class="wk-row"><span class="wk-lb">查看</span>${wkTabs}</div>${rows}`;
 }
-let gEditDay=null, gEditSel=[];
+let gEditDay=null, gEditSel=[], gEditFreq='每周';
 function renderGdChips(){
-  const box=document.getElementById('gdChips'); if(!box) return;
-  const opts=GTYPES.map(([t,c])=>`<span class="gd-opt${gEditSel.includes(t)?' on':''}" style="--gc:${c}" onclick="toggleGd('${t}')">${t}</span>`).join('');
-  box.innerHTML=opts+`<span class="gd-opt rest${gEditSel.includes('休息')?' on':''}" onclick="toggleGd('休息')">😴 休息日</span>`;
+  const box=document.getElementById('gdChips');
+  if(box){ const opts=GTYPES.map(([t,c])=>`<span class="gd-opt${gEditSel.includes(t)?' on':''}" style="--gc:${c}" onclick="toggleGd('${t}')">${t}</span>`).join('');
+    box.innerHTML=opts+`<span class="gd-opt rest${gEditSel.includes('休息')?' on':''}" onclick="toggleGd('休息')">😴 休息日</span>`; }
+  const fw=document.getElementById('gdFreqWrap'), fb=document.getElementById('gdFreq'), isRest=gEditSel.includes('休息');
+  if(fw) fw.style.display=(gEditSel.length&&!isRest)?'block':'none';
+  if(fb) fb.innerHTML=GFREQS.map(f=>`<span class="gd-opt${gEditFreq===f?' on':''}" style="--gc:var(--green)" onclick="setGdFreq('${f}')">${f}</span>`).join('');
 }
-function openGomiDay(d){ gEditDay=d; gEditSel=(GS[d]||[]).slice();
+function setGdFreq(f){ gEditFreq=f; renderGdChips(); }
+function openGomiDay(d){ gEditDay=d; const rec=GS[d]; gEditSel=((rec&&rec.t)||[]).slice(); gEditFreq=(rec&&rec.f)||'每周';
   document.getElementById('gdTitle').textContent=d+'曜日 · 收什么垃圾';
   renderGdChips();
   document.getElementById('maskGomiDay').classList.add('on');
@@ -733,7 +759,7 @@ function toggleGd(t){
   else { gEditSel=gEditSel.filter(x=>x!=='休息'); const i=gEditSel.indexOf(t); if(i<0)gEditSel.push(t); else gEditSel.splice(i,1); }
   renderGdChips();
 }
-function saveGomiDay(){ if(gEditDay!=null){ if(gEditSel.length)GS[gEditDay]=gEditSel; else delete GS[gEditDay]; saveGS(); renderGomiDays(); } document.getElementById('maskGomiDay').classList.remove('on'); toast('已保存收集日 ✓'); }
+function saveGomiDay(){ if(gEditDay!=null){ if(gEditSel.length)GS[gEditDay]={t:gEditSel,f:gEditSel.includes('休息')?'每周':gEditFreq}; else delete GS[gEditDay]; saveGS(); renderGomiDays(); } document.getElementById('maskGomiDay').classList.remove('on'); toast('已保存收集日 ✓'); }
 
 /* ===== 分类标准(按区,包含什么)===== */
 const WARD_CAT={
