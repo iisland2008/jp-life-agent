@@ -292,26 +292,30 @@
   .welcome-mask{position:absolute;inset:0;background:rgba(120,100,90,.34);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:200;padding:26px;}
   .welcome-mask.on{display:flex;animation:wfade .3s ease;}
   @keyframes wfade{from{opacity:0}to{opacity:1}}
-  .welcome-card{background:linear-gradient(160deg,#fff,#fff6fb);border-radius:26px;padding:24px 20px 20px;text-align:center;box-shadow:0 14px 40px rgba(150,110,120,.28);max-width:340px;max-height:82vh;overflow-y:auto;animation:wpop .35s cubic-bezier(.2,1.2,.4,1);}
-  @keyframes wpop{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
-  .welcome-emoji{font-size:40px;margin-bottom:6px;}
-  .welcome-card h3{margin:2px 0 10px;font-size:18px;color:#7a5a68;}
-  .welcome-intro{font-size:12.5px;color:var(--ink2);line-height:1.7;margin:0 0 14px;}
-  .welcome-sec{background:rgba(251,224,236,.34);border-radius:16px;padding:12px 13px;text-align:left;margin-bottom:12px;}
-  .welcome-sec-t{font-size:13px;font-weight:700;color:#a55c7a;margin-bottom:8px;}
-  .welcome-eg{padding:6px 0;border-top:1px solid rgba(197,106,138,.14);}
-  .welcome-eg:first-of-type{border-top:none;}
-  .welcome-eg .q{display:block;font-size:12.5px;color:#5f5245;font-weight:600;line-height:1.5;}
-  .welcome-eg .a{display:block;font-size:11.5px;color:var(--ink2);line-height:1.55;margin-top:2px;}
-  .welcome-hi{background:linear-gradient(135deg,#eef6ff,#e7f0e2);border-radius:16px;padding:12px 13px;text-align:left;margin-bottom:14px;}
-  .welcome-hi-t{font-size:13px;font-weight:700;color:#5a7a68;margin-bottom:5px;}
-  .welcome-hi p{font-size:11.5px;color:#5f6b58;line-height:1.65;margin:0;}
-  .welcome-note{font-size:11.5px;color:#6b5548;line-height:1.65;text-align:left;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:14px;padding:9px 12px;margin-bottom:12px;}
+  /* ===== 多步引导向导 ===== */
+  .wz-card{background:linear-gradient(165deg,#fffdf9,#fff4f8);border-radius:28px;padding:30px 24px 22px;width:100%;max-width:350px;min-height:64vh;display:flex;flex-direction:column;box-shadow:0 18px 46px rgba(150,110,120,.3);animation:wpop .4s cubic-bezier(.2,1.2,.4,1);}
+  @keyframes wpop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .wz-body{flex:1;animation:wfade .3s ease;}
+  .wz-hero{font-size:48px;margin-bottom:14px;}
+  .wz-title{font-size:26px;font-weight:800;color:#6b4e5a;line-height:1.28;margin:0 0 14px;letter-spacing:.5px;}
+  .wz-sub{font-size:13.5px;color:var(--ink2);line-height:1.75;margin:0;}
+  .wz-sub b{color:#a55c7a;}
+  .wz-bless{font-size:17px;font-weight:800;color:#c56a8a;line-height:1.6;margin:22px 0 0;}
+  .wz-egs{margin-top:4px;}
+  .wz-eg{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid rgba(197,106,138,.12);}
+  .wz-eg:first-child{border-top:none;}
+  .wz-eg .i{font-size:24px;flex:none;line-height:1.2;}
+  .wz-eg b{display:block;font-size:14px;color:#5f5245;margin-bottom:2px;}
+  .wz-eg span{font-size:12px;color:var(--ink2);line-height:1.55;}
+  .welcome-note{font-size:11.5px;color:#6b5548;line-height:1.65;text-align:left;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:14px;padding:9px 12px;}
   .welcome-note b{color:#b6862f;}
-  .welcome-bless{font-size:13.5px!important;color:#c56a8a!important;font-weight:700;margin:4px 0 14px!important;}
-  .welcome-btn2{width:100%;border:none;background:transparent;color:var(--ink2);font-size:12.5px;padding:9px;margin-top:8px;cursor:pointer;}
-  .welcome-btn{width:100%;border:none;background:linear-gradient(135deg,#f7b5cf,#f291b6);color:#fff;font-size:15px;font-weight:700;padding:13px;border-radius:16px;cursor:pointer;box-shadow:0 5px 14px rgba(242,145,182,.4);}
-  .welcome-btn:active{transform:scale(.97);}
+  .wz-dots{display:flex;justify-content:center;gap:7px;margin:16px 0 14px;}
+  .wz-dot{width:7px;height:7px;border-radius:50%;background:rgba(197,106,138,.25);transition:.25s;}
+  .wz-dot.on{width:22px;border-radius:5px;background:linear-gradient(135deg,#f7b5cf,#f291b6);}
+  .wz-foot{}
+  .wz-btn{width:100%;border:none;background:linear-gradient(135deg,#f7b5cf,#f291b6);color:#fff;font-size:16px;font-weight:800;padding:15px;border-radius:18px;cursor:pointer;box-shadow:0 7px 18px rgba(242,145,182,.42);}
+  .wz-btn:active{transform:scale(.97);}
+  .wz-skip{width:100%;border:none;background:transparent;color:var(--ink2);font-size:12.5px;padding:11px 0 2px;margin-top:6px;cursor:pointer;}
   .rv-cover{height:150px;display:flex;align-items:center;justify-content:center;font-size:72px;border-radius:20px;margin:2px 16px 0;}
   .rv-sec{margin:14px 16px 0;background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px rgba(150,120,80,.08);}
   .rv-sec h4{margin:0 0 8px;font-size:14px;color:#6b4e3d;}
@@ -504,30 +508,12 @@
     </div>
   </section>
 
-  <!-- 首次使用引导 -->
+  <!-- 首次使用引导(多步) -->
   <div class="welcome-mask" id="welcome">
-    <div class="welcome-card">
-      <div class="welcome-emoji">🐰🌸</div>
-      <h3>欢迎来到 日留生活の小助手</h3>
-      <p class="welcome-intro">初来日本,行政手续、垃圾分类、看病、打工、租房……样样都要从头摸索。<br>把这些琐事都交给我——<b>不懂就问,AI 帮你查、帮你记、帮你办。</b></p>
-
-      <div class="welcome-sec">
-        <div class="welcome-sec-t">💡 可以这样用我</div>
-        <div class="welcome-eg"><span class="q">「这个垃圾怎么分类?哪天丢?」</span><span class="a">📷 拍张照发我,秒回你所在区的规则和收集日</span></div>
-        <div class="welcome-eg"><span class="q">「我发烧喉咙痛,该看什么科?」</span><span class="a">🏥 帮你分诊,并生成日语「症状卡」直接给医生看</span></div>
-        <div class="welcome-eg"><span class="q">「在留卡要更新,去哪办、带什么?」</span><span class="a">🗂️ 一步步告诉你区役所流程和所需材料</span></div>
-        <div class="welcome-eg"><span class="q">「租房要注意什么坑?帮我看看合同」</span><span class="a">🏠 讲清敷礼金/保证人套路,还能帮你读合同挑雷点</span></div>
-      </div>
-
-      <div class="welcome-hi">
-        <div class="welcome-hi-t">🤖 我还能自动帮你写日程</div>
-        <p>比如你说「<b>帮我在新宿区役所预约明天下午办在留卡更新,并加到日程</b>」——我会直接把这条日程写进你的日历,不用手动再记一遍。打工工时、上课时间也一样能自动记录。</p>
-      </div>
-
-      <div class="welcome-note">📍 目前主要面向<b>东京地区</b>留学生,东京(尤其新宿区)的信息最准确、且附官方来源;其他地区会给通用性回答,请以当地役所为准。</div>
-      <p class="welcome-bless">祝你在日本的留学生活,顺利 landing 🌸</p>
-      <button class="welcome-btn" onclick="closeWelcome();openUserEdit()">先设置我的所在地区 →</button>
-      <button class="welcome-btn2" onclick="closeWelcome()">稍后再说,先逛逛</button>
+    <div class="wz-card">
+      <div class="wz-body" id="wzBody"></div>
+      <div class="wz-dots" id="wzDots"></div>
+      <div class="wz-foot" id="wzFoot"></div>
     </div>
   </div>
 
@@ -962,8 +948,45 @@ function nav(s){
   else if(s==='favorites'){ originScreen=curScreen(); renderFav(); showScreen('favorites'); navHL(originScreen); }
   else if(s==='worklog'){ originScreen=curScreen(); renderWL(); showScreen('worklog'); navHL(originScreen); }
 }
-function showWelcome(){ document.getElementById('welcome').classList.add('on'); }
-function closeWelcome(){ document.getElementById('welcome').classList.remove('on'); try{localStorage.setItem('jp_onboarded_v2','1');}catch(e){} }
+/* ===== 多步首次引导 ===== */
+let wzStep=0;
+const WZ=[
+  ()=>`<div class="wz-hero">🐰🌸</div>
+    <h2 class="wz-title">欢迎来到<br>日留生活の小助手</h2>
+    <p class="wz-sub">初来日本,行政、垃圾、看病、打工、租房……样样从头摸索。把这些琐事都交给我——<b>不懂就问,AI 帮你查、帮你记、帮你办。</b></p>`,
+  ()=>`<div class="wz-hero">📍</div>
+    <h2 class="wz-title">先告诉我<br>你住在哪个区</h2>
+    <p class="wz-sub">垃圾分类、区役所等本地信息会<b>按你的地区</b>给,更准确。</p>
+    <div class="frm" style="margin-top:6px">
+      <div class="r"><select id="wzPref" onchange="wzSaveLoc()">${prefOptions(USER.pref)}</select><select id="wzCity" onchange="wzSaveLoc()">${wardOptions(USER.city)}</select></div>
+    </div>
+    <div class="welcome-note" style="margin-top:14px">📍 目前主要面向<b>东京地区</b>留学生,东京23区信息最准(新宿/涩谷/丰岛最详细,带官方来源);其他地区给通用回答,以当地役所为准。</div>`,
+  ()=>`<div class="wz-hero">💡</div>
+    <h2 class="wz-title">我能帮你做这些</h2>
+    <div class="wz-egs">
+      <div class="wz-eg"><span class="i">📷</span><div><b>拍照分垃圾</b><span>拍张照,秒回你所在区的分类和收集日</span></div></div>
+      <div class="wz-eg"><span class="i">🏥</span><div><b>看病分诊</b><span>说症状→该挂哪个科,还生成日语症状卡</span></div></div>
+      <div class="wz-eg"><span class="i">🗂️</span><div><b>行政陪办</b><span>在留卡/国保/年金:去哪办、带什么材料</span></div></div>
+      <div class="wz-eg"><span class="i">🤖</span><div><b>AI 自动记日程</b><span>「帮我把明天区役所预约加到日程」——直接写进日历</span></div></div>
+    </div>`,
+  ()=>`<div class="wz-hero">🌸</div>
+    <h2 class="wz-title">准备好啦!</h2>
+    <p class="wz-sub">有任何在日生活的问题,随时来问我。<br>「我的 → 使用引导」可以再看一遍这个介绍。</p>
+    <p class="wz-bless">祝你在日本的留学生活,<br>顺利 landing 🌸</p>`,
+];
+function wzSaveLoc(){ const p=document.getElementById('wzPref'),c=document.getElementById('wzCity'); if(p)USER.pref=p.value; if(c)USER.city=c.value; saveUser(); currentGomi={pref:USER.pref,city:USER.city}; }
+function renderWz(){
+  document.getElementById('wzBody').innerHTML=WZ[wzStep]();
+  document.getElementById('wzDots').innerHTML=WZ.map((_,i)=>`<span class="wz-dot${i===wzStep?' on':''}"></span>`).join('');
+  const last=wzStep===WZ.length-1, first=wzStep===0;
+  document.getElementById('wzFoot').innerHTML=
+    `<button class="wz-btn" onclick="wzNext()">${last?'开始使用 →':'下一步 →'}</button>`+
+    (first?`<button class="wz-skip" onclick="closeWelcome()">跳过</button>`:`<button class="wz-skip" onclick="wzPrev()">上一步</button>`);
+}
+function wzNext(){ if(wzStep>=WZ.length-1){ closeWelcome(); return; } wzStep++; renderWz(); }
+function wzPrev(){ if(wzStep>0){ wzStep--; renderWz(); } }
+function showWelcome(){ wzStep=0; renderWz(); document.getElementById('welcome').classList.add('on'); }
+function closeWelcome(){ document.getElementById('welcome').classList.remove('on'); renderProfile(); try{localStorage.setItem('jp_onboarded_v2','1');}catch(e){} }
 /* 返回到进入前的页面 */
 function goBack(){
   if(cur&&document.getElementById('chatlog')) state[cur].msgs=document.getElementById('chatlog').innerHTML;
