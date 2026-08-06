@@ -531,7 +531,17 @@
         <input id="uName" placeholder="昵称,如 小留同学"/>
         <div class="r">
           <select id="uPref"></select>
-          <input id="uCity" placeholder="市区町村,如 新宿区"/>
+          <input id="uCity" list="wardList" autocomplete="off" placeholder="市区町村,如 新宿区"/>
+          <datalist id="wardList">
+            <option value="新宿区"></option><option value="涩谷区"></option><option value="丰岛区"></option>
+            <option value="千代田区"></option><option value="中央区"></option><option value="港区"></option>
+            <option value="文京区"></option><option value="台东区"></option><option value="墨田区"></option>
+            <option value="江东区"></option><option value="品川区"></option><option value="目黑区"></option>
+            <option value="大田区"></option><option value="世田谷区"></option><option value="中野区"></option>
+            <option value="杉并区"></option><option value="北区"></option><option value="荒川区"></option>
+            <option value="板桥区"></option><option value="练马区"></option><option value="足立区"></option>
+            <option value="葛饰区"></option><option value="江户川区"></option>
+          </datalist>
         </div>
         <button class="btn-add" onclick="saveUserInfo()">保存</button>
       </div>
