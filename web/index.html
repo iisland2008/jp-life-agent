@@ -662,8 +662,8 @@ const GOMI_WARDS={
 const GOMI_ALIAS={'渋谷区':'涩谷区','豊島区':'丰岛区'};
 function findGomiDays(city){return GOMI_WARDS[city]||GOMI_WARDS[GOMI_ALIAS[city]];}
 let currentGomi={pref:'東京都',city:'新宿区'};
-function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=document.getElementById('gomiPref'); if(ps)ps.value='東京都'; const ci=document.getElementById('gomiCity'); if(ci)ci.value=city; renderGomiSched(); }
-function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiSched(); }
+function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=document.getElementById('gomiPref'); if(ps)ps.value='東京都'; const ci=document.getElementById('gomiCity'); if(ci)ci.value=city; renderGomiSched(); refreshRefLinks(); }
+function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiSched(); refreshRefLinks(); }
 function renderGomiSched(){
   const el=document.getElementById('gomiSched'); if(!el) return;
   const {pref,city}=currentGomi;
@@ -881,11 +881,32 @@ const REFLINKS={
     {t:'UR 都市机构 · UR 赁贷住宅',u:'https://www.ur-net.go.jp/',d:'免礼金/免中介/免保证人'},
     {t:'SUUMO 租房信息',u:'https://suumo.jp/',d:'房源检索(信息网站)'},
   ],
-  gomi:[
-    {t:'新宿区 · 资源与垃圾收集日',u:'https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00001.html',d:'查你所在地区的收集曜日'},
-    {t:'新宿区 · 垃圾分别辞典',u:'https://www.city.shinjuku.lg.jp/seikatsu/seiso01_001025.html',d:'逐个物品检索'},
-    {t:'新宿区 · 塑料分类 中文传单(PDF)',u:'https://www.city.shinjuku.lg.jp/content/000409301.pdf',d:'2024年4月新规'},
-  ],
+};
+/* 垃圾分类:各区官方页 + 50音辞典,跟随所选区(23区已核实) */
+const WARD_GOMI={
+  '新宿区':[{t:'新宿区 · 资源与垃圾收集日',u:'https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00001.html',d:'查你所在地区的收集曜日'},{t:'新宿区 · 垃圾分别辞典',u:'https://www.city.shinjuku.lg.jp/seikatsu/seiso01_001025.html',d:'逐个物品检索'},{t:'新宿区 · 塑料分类 中文传单(PDF)',u:'https://www.city.shinjuku.lg.jp/content/000409301.pdf',d:'2024年4月新规'}],
+  '涩谷区':[{t:'涩谷区 · 垃圾与回收',u:'https://www.city.shibuya.tokyo.jp/contents/living-in-shibuya/ja/daily/garbage.html',d:'可燃/不燃/资源(不燃月1次)'},{t:'涩谷区 · 品目别分别一览(50音)',u:'https://www.city.shibuya.tokyo.jp/kurashi/gomi/kateigomi/gomi_hinmoku.html',d:'逐个物品检索'}],
+  '丰岛区':[{t:'丰岛区 · 分类方法(外国人页)',u:'https://www.city.toshima.lg.jp/info/jp/garbage.html',d:'含中文说明'},{t:'丰岛区 · 塑料分类中文传单(PDF)',u:'https://www.city.toshima.lg.jp/documents/15278/plastic-pamphlet-2023-china-web.pdf',d:'中文'},{t:'丰岛区 · 收集曜日一览(PDF)',u:'https://www.city.toshima.lg.jp/documents/15278/youbiitiran.pdf',d:'多语言'}],
+  '千代田区':[{t:'千代田区 · 分类·出法',u:'https://www.city.chiyoda.lg.jp/koho/kurashi/gomi/wakekata/index.html',d:'可燃/不燃/资源'},{t:'千代田区 · 垃圾分别辞典',u:'https://www.city.chiyoda.lg.jp/koho/kurashi/gomi/gomijiten.html',d:'逐个物品检索'}],
+  '中央区':[{t:'中央区 · 分类·出法',u:'https://www.city.chuo.lg.jp/kurashi/gomi/bunbetsu/index.html',d:'可燃/不燃/资源/塑料容器包装'},{t:'中央区 · 分别一览(50音)',u:'https://www.city.chuo.lg.jp/kurashi/gomi/bunbetsu/wakekata/ichiran-ka.html',d:'逐个物品检索'}],
+  '港区':[{t:'港区 · 资源的分类·出法',u:'https://www.city.minato.tokyo.jp/gomigenryou/kurashi/gomi/kate/s-wakekata/',d:'可燃/不燃/资源/资源塑料'},{t:'港区 · 不燃ごみの出し方',u:'https://www.city.minato.tokyo.jp/gomigenryou/kurashi/gomi/kate/k-wakekata/funen.html',d:'玻璃刀荧光灯等'}],
+  '文京区':[{t:'文京区 · 分类·出法',u:'https://www.city.bunkyo.lg.jp/b039/p000928.html',d:'可燃/不燃/塑料/资源'},{t:'文京区 · 垃圾回收首页',u:'https://www.city.bunkyo.lg.jp/tetsuzuki/gomi/index.html',d:'官方入口'}],
+  '台东区':[{t:'台东区 · 资源与垃圾的出法',u:'https://www.city.taito.lg.jp/kurashi/gomi/wakekata/index.html',d:'2025年4月起塑料分类'},{t:'台东区 · 塑料',u:'https://www.city.taito.lg.jp/kurashi/gomi/wakekata/shigenjoho/plastics.html',d:'塑料回收'}],
+  '墨田区':[{t:'墨田区 · 资源·垃圾·回收',u:'https://www.city.sumida.lg.jp/kurashi/gomi_recycle/index.html',d:'官方入口'},{t:'墨田区 · 分别一览(50音)',u:'https://www.city.sumida.lg.jp/kurashi/gomi_recycle/kateikei/gomi-50onbunbetu.html',d:'逐个物品检索'}],
+  '江东区':[{t:'江东区 · 垃圾·回收',u:'https://www.city.koto.lg.jp/kurashi/gomi/index.html',d:'瓶黄/罐蓝/PET绿网'},{t:'江东区 · 分类·出法',u:'https://www.city.koto.lg.jp/388010/kurashi/gomi/kate/7348.html',d:'详细'}],
+  '品川区':[{t:'品川区 · 各种垃圾的出法',u:'https://www.city.shinagawa.tokyo.jp/PC/kankyo/kankyo-gomi/gomi-kateigomi/gomi-kateigomi-dashikata/index.html',d:'可燃/陶瓷玻璃金属/资源'},{t:'品川区 · 分类·出法(全)',u:'https://www.city.shinagawa.tokyo.jp/PC/kankyo/kankyo-gomi/gomi-kateigomi/gomi-kateigomi-dashikata/hpg000005617.html',d:'详细'}],
+  '目黑区':[{t:'目黑区 · 家庭垃圾分类·出法',u:'https://www.city.meguro.tokyo.jp/kurashi/gomi/bunbetsu/kateigomi/index.html',d:'官方入口'},{t:'目黑区 · 收集日·分别检索',u:'https://www.city.meguro.tokyo.jp/kurashi/gomi/bunbetsu/kensaku/index.html',d:'按住址查'}],
+  '大田区':[{t:'大田区 · 资源与垃圾',u:'https://www.city.ota.tokyo.jp/seikatsu/gomi/shigentogomi/index.html',d:'塑料/资源7品目/可燃/不燃'},{t:'大田区 · 垃圾分别辞典',u:'https://www.city.ota.tokyo.jp/seikatsu/gomi/topics/gomisaku.html',d:'逐个物品检索'}],
+  '世田谷区':[{t:'世田谷区 · 资源·垃圾出法',u:'https://www.city.setagaya.lg.jp/kurashi/gomi/11683.html',d:'官方入口'},{t:'世田谷区 · 分别(50音)',u:'https://www.city.setagaya.lg.jp/02241/407.html',d:'逐个物品检索'}],
+  '中野区':[{t:'中野区 · 垃圾·资源的出法',u:'https://www.city.tokyo-nakano.lg.jp/kurashi/gomi/dashikata/index.html',d:'官方入口'},{t:'中野区 · 出法基本',u:'https://www.city.tokyo-nakano.lg.jp/kurashi/gomi/dashikata/dashikatakihon.html',d:'基本规则'}],
+  '杉并区':[{t:'杉并区 · 分类·出法',u:'https://www.city.suginami.tokyo.jp/s104/713.html',d:'官方入口'},{t:'杉并区 · 可燃ごみ',u:'https://www.city.suginami.tokyo.jp/s104/716.html',d:'可燃示例'}],
+  '北区':[{t:'北区 · 分类·出法',u:'https://www.city.kita.lg.jp/living/bins/1002013/1002027/index.html',d:'可燃/不燃/资源'},{t:'北区 · 不燃ごみ',u:'https://www.city.kita.lg.jp/living/bins/1002013/1002027/1002029.html',d:'金属/喷雾罐等'}],
+  '荒川区':[{t:'荒川区 · 分类·出法',u:'https://www.city.arakawa.tokyo.jp/recycle/bunbetsu/index.html',d:'垃圾/塑料/资源'},{t:'荒川区 · 塑料回收',u:'https://www.city.arakawa.tokyo.jp/a025/recycle/plastic/main.html',d:'塑料'}],
+  '板桥区':[{t:'板桥区 · 资源与垃圾分类',u:'https://www.city.itabashi.tokyo.jp/tetsuduki/gomi/shigen/index.html',d:'官方入口'},{t:'板桥区 · 分别一览(50音)',u:'https://www.city.itabashi.tokyo.jp/tetsuduki/gomi/bunbetsu/1001879.html',d:'逐个物品检索'}],
+  '练马区':[{t:'练马区 · 分类与出法',u:'https://www.city.nerima.tokyo.jp/kurashi/gomi/wakekata/index.html',d:'官方入口'},{t:'练马区 · 垃圾分别辞典',u:'https://www.city.nerima.tokyo.jp/kurashi/gomi/wakekata/bunbetsu/index.html',d:'逐个物品检索'}],
+  '足立区':[{t:'足立区 · 资源·垃圾的出法',u:'https://www.city.adachi.tokyo.jp/gomi/kurashi/kankyo/gomi-wakekata.html',d:'官方入口'},{t:'足立区 · 分别一览(50音)',u:'https://www.city.adachi.tokyo.jp/seso/kurashi/kankyo/gomi-wakekata/hinmoku.html',d:'逐个物品检索'}],
+  '葛饰区':[{t:'葛饰区 · 分类·出法',u:'https://www.city.katsushika.lg.jp/kurashi/1000048/1001535/1001643.html',d:'可燃/不燃/资源'},{t:'葛饰区 · 分别辞典',u:'https://www.city.katsushika.lg.jp/kurashi/1000048/1001535/1001653.html',d:'逐个物品检索'}],
+  '江户川区':[{t:'江户川区 · 分类方法',u:'https://www.city.edogawa.tokyo.jp/e025/kurashi/gomi_recycle/kategomi/bunbetsu/index.html',d:'可燃/不燃/资源'},{t:'江户川区 · 品目别一览',u:'https://www.city.edogawa.tokyo.jp/kurashi/gomi_recycle/kategomi/hinmoku/index.html',d:'逐个物品检索'}],
 };
 /* 区役所按属地办理:行政链接跟随用户所在区(已核实官方页) */
 const WARD_ADMIN={
@@ -902,6 +923,12 @@ function refLinksHTML(key){
     if(w) list.push({t:w.t,u:w.u,d:'住民登录/国保/年金等属地办理 · 你的地区:'+USER.city});
     else list.push({t:(USER.city||'你所在区')+'役所 · 住民/国保手续',u:'',d:'区役所属地办理,请查你所在区官网(目前详细链接覆盖新宿/涩谷/丰岛)'});
   }
+  if(key==='gomi'){
+    const city=(currentGomi&&currentGomi.city)||'';
+    const g=WARD_GOMI[city];
+    if(g) list=g.slice();
+    else list=[{t:(city||'你所在区')+' · 垃圾分类官方页',u:'',d:'该区官方页请在系统内搜索;目前23区已内置官方链接,请从上方选择所在区'}];
+  }
   if(!list.length) return '';
   const cards=list.map(s=>{
     const inner=`<span class="src-ic">🔗</span><span class="src-tx"><b>${esc(s.t)}</b><span>${esc(s.d)}</span></span><span class="src-go">${s.u?'›':''}</span>`;
@@ -909,8 +936,9 @@ function refLinksHTML(key){
       ? `<a class="src-card" href="${s.u}" target="_blank" rel="noopener">${inner}</a>`
       : `<div class="src-card" style="cursor:default;opacity:.85">${inner}</div>`;
   }).join('');
-  return `<div class="panel"><div class="src-hd" style="font-size:12.5px;color:#6b4e3d;font-weight:600;margin-bottom:8px">📎 官方 / 参考链接(可点击查最新)</div>${cards}</div>`;
+  return `<div id="refLinks"><div class="panel"><div class="src-hd" style="font-size:12.5px;color:#6b4e3d;font-weight:600;margin-bottom:8px">📎 官方 / 参考链接(可点击查最新)</div>${cards}</div></div>`;
 }
+function refreshRefLinks(){ const rl=document.getElementById('refLinks'); if(rl) rl.outerHTML=refLinksHTML(cur); }
 function openCat(key){
   const from=curScreen();
   if(from!=='detail') originScreen=from;
