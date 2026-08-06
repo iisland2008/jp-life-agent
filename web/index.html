@@ -859,7 +859,6 @@ const REFLINKS={
     {t:'在留卡有效期更新 · 申请',u:'https://www.moj.go.jp/isa/applications/procedures/nyuukokukanri10_00011.html',d:'所需材料与流程'},
     {t:'日本年金机构 · 学生纳付特例',u:'https://www.nenkin.go.jp/service/kokunen/menjo/20150514.html',d:'留学生年金缓缴申请'},
     {t:'マイナンバーカード 综合网站',u:'https://www.kojinbango-card.go.jp/',d:'个人编号卡申领'},
-    {t:'新宿区役所 · 生活手续',u:'https://www.city.shinjuku.lg.jp/living.html',d:'住民登录/国保等 · 以你所在区为准'},
   ],
   medical:[
     {t:'东京都医疗机关案内「ひまわり」',u:'https://www.himawari.metro.tokyo.jp/',d:'按地区/科室/外语查医院'},
@@ -881,10 +880,28 @@ const REFLINKS={
     {t:'新宿区 · 塑料分类 中文传单(PDF)',u:'https://www.city.shinjuku.lg.jp/content/000409301.pdf',d:'2024年4月新规'},
   ],
 };
+/* 区役所按属地办理:行政链接跟随用户所在区(已核实官方页) */
+const WARD_ADMIN={
+  '新宿区':{t:'新宿区役所 · 戸籍・住民票手续',u:'https://www.city.shinjuku.lg.jp/todokede/index.html'},
+  '涩谷区':{t:'涩谷区役所 · 住民登录/戸籍',u:'https://www.city.shibuya.tokyo.jp/kurashi/jumin/'},
+  '渋谷区':{t:'涩谷区役所 · 住民登录/戸籍',u:'https://www.city.shibuya.tokyo.jp/kurashi/jumin/'},
+  '丰岛区':{t:'丰岛区役所 · 手续・届出',u:'https://www.city.toshima.lg.jp/tetsuzuki/index.html'},
+  '豊島区':{t:'丰岛区役所 · 手续・届出',u:'https://www.city.toshima.lg.jp/tetsuzuki/index.html'},
+};
 function refLinksHTML(key){
-  const list=REFLINKS[key]; if(!list||!list.length) return '';
-  const cards=list.map(s=>`<a class="src-card" href="${s.u}" target="_blank" rel="noopener">
-    <span class="src-ic">🔗</span><span class="src-tx"><b>${esc(s.t)}</b><span>${esc(s.d)}</span></span><span class="src-go">›</span></a>`).join('');
+  let list=(REFLINKS[key]||[]).slice();
+  if(key==='admin'){
+    const w=WARD_ADMIN[USER.city];
+    if(w) list.push({t:w.t,u:w.u,d:'住民登录/国保/年金等属地办理 · 你的地区:'+USER.city});
+    else list.push({t:(USER.city||'你所在区')+'役所 · 住民/国保手续',u:'',d:'区役所属地办理,请查你所在区官网(目前详细链接覆盖新宿/涩谷/丰岛)'});
+  }
+  if(!list.length) return '';
+  const cards=list.map(s=>{
+    const inner=`<span class="src-ic">🔗</span><span class="src-tx"><b>${esc(s.t)}</b><span>${esc(s.d)}</span></span><span class="src-go">${s.u?'›':''}</span>`;
+    return s.u
+      ? `<a class="src-card" href="${s.u}" target="_blank" rel="noopener">${inner}</a>`
+      : `<div class="src-card" style="cursor:default;opacity:.85">${inner}</div>`;
+  }).join('');
   return `<div class="panel"><div class="src-hd" style="font-size:12.5px;color:#6b4e3d;font-weight:600;margin-bottom:8px">📎 官方 / 参考链接(可点击查最新)</div>${cards}</div>`;
 }
 function openCat(key){
