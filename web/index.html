@@ -788,9 +788,10 @@ function content(key){
       <div class="frm">
         <div class="r">
           <select id="gomiPref" onchange="onGomiLoc()">${prefOptions(currentGomi.pref)}</select>
-          <input id="gomiCity" value="${esc(currentGomi.city)}" placeholder="市区町村,如 新宿区" oninput="onGomiLoc()"/>
+          <input id="gomiCity" list="wardList" autocomplete="off" value="${esc(currentGomi.city)}" placeholder="选择或输入区,如 新宿区" oninput="onGomiLoc()"/>
         </div>
-        <div class="chips" style="margin-top:2px">${['新宿区','涩谷区','丰岛区'].map(w=>`<span class="qa-chip" style="background:var(--green-t);color:#5a7a4a" onclick="setGomiWard('${w}')">${w}(详细)</span>`).join('')}</div>
+        <div style="font-size:11px;color:var(--ink2);margin:7px 0 4px">🟢 已有官方数据 · 点击快速选择</div>
+        <div class="chips">${['新宿区','涩谷区','丰岛区'].map(w=>`<span class="qa-chip" style="background:var(--green-t);color:#5a7a4a" onclick="setGomiWard('${w}')">${w}</span>`).join('')}</div>
       </div></div>
     <div class="panel" id="gomiSched"></div>
     <div class="panel"><h3>🔎 分类速查</h3><div class="chips">${['塑料瓶怎么扔?','喷雾罐怎么处理?','大件垃圾怎么办?','旧衣服算什么?'].map(q=>
