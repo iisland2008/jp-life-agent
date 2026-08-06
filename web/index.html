@@ -236,6 +236,41 @@
   .ch-row{display:flex;flex-wrap:wrap;gap:7px;}
   .ch-chip{text-decoration:none;font-size:12px;font-weight:600;background:var(--blue-t);color:#4f7aa5;padding:6px 11px;border-radius:12px;border:1px solid #cfe0ef;}
   .ch-chip:active{transform:scale(.96);}
+  /* ===== 活动工作台 ===== */
+  .act-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .act-metric{background:rgba(0,0,0,.03);border-radius:14px;padding:11px 4px;text-align:center;cursor:pointer;}
+  .act-metric:active{transform:scale(.96);}
+  .am-n{display:block;font-size:22px;font-weight:800;line-height:1;}
+  .am-t{display:block;font-size:10.5px;color:var(--ink2);margin-top:5px;}
+  .act-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px;}
+  .act-fchip{font-size:12px;padding:5px 12px;border-radius:16px;background:rgba(0,0,0,.04);color:var(--ink2);cursor:pointer;}
+  .act-fchip.on{background:var(--coral);color:#fff;font-weight:600;}
+  .act-card{background:var(--card);border:1px solid var(--line);border-left:4px solid #ccc;border-radius:14px;padding:12px 13px;margin-bottom:10px;box-shadow:0 2px 7px rgba(150,120,80,.06);}
+  .act-top{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap;}
+  .act-src{font-size:10px;font-weight:700;color:#9a8b6f;background:rgba(0,0,0,.04);padding:2px 8px;border-radius:8px;}
+  .act-src.off{color:#5a7a4a;background:var(--green-t);}
+  .act-dl{font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:8px;}
+  .act-title{font-size:15px;font-weight:800;color:#5f5245;line-height:1.35;}
+  .act-meta{font-size:12px;color:var(--ink2);margin:3px 0 7px;}
+  .act-when,.act-where{font-size:12.5px;color:#6b5f52;margin-top:2px;}
+  .act-parts{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+  .act-part{font-size:10.5px;color:#b07a4a;background:var(--coral-t);padding:2px 8px;border-radius:8px;}
+  .act-btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;}
+  .act-b{font-size:12px;font-weight:600;color:#fff;padding:6px 12px;border-radius:11px;cursor:pointer;text-decoration:none;}
+  .act-b.out{background:rgba(0,0,0,.04);color:#6b5f52;border:1px solid var(--line);}
+  .act-b.del{color:#c98;}
+  .act-b:active{transform:scale(.95);}
+  .act-empty{text-align:center;color:var(--ink2);font-size:12.5px;padding:26px 20px;line-height:1.8;}
+  .act-newrow{display:flex;gap:8px;margin-top:4px;}
+  .act-new{flex:1;border:none;background:var(--coral);color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:14px;cursor:pointer;font-family:inherit;}
+  .act-paste,.act-gloss{border:1px solid var(--line);background:var(--card);color:#6b5f52;font-size:13px;padding:0 14px;border-radius:14px;cursor:pointer;font-family:inherit;}
+  .act-new:active,.act-paste:active,.act-gloss:active{transform:scale(.96);}
+  .disc-h{display:flex;align-items:center;cursor:pointer;}
+  .anlb{font-size:11px;color:var(--ink2);margin:2px 0 -4px;}
+  .gloss-body{max-height:56vh;overflow-y:auto;}
+  .gloss-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);}
+  .gloss-row b{flex:none;width:96px;font-size:13px;color:#5f5245;}
+  .gloss-row span{font-size:12.5px;color:var(--ink2);line-height:1.5;}
   .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
   .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
   .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
@@ -640,6 +675,26 @@
     </div>
   </div>
 
+  <!-- 活动:改状态 -->
+  <div class="mask" id="maskActSt"><div class="sheet"><h4>更新活动状态</h4><div class="gd-opts" id="astChips"></div><button class="btn-close" onclick="document.getElementById('maskActSt').classList.remove('on')">取消</button></div></div>
+
+  <!-- 活动:创建 -->
+  <div class="mask" id="maskActNew"><div class="sheet"><h4>创建活动</h4>
+    <div class="frm">
+      <input id="anTitle" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="活动名称(必填)"/>
+      <div class="r"><input id="anIp" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="关注对象/IP"/>
+        <select id="anType"><option value="popup_store">快闪店</option><option value="collab_cafe">联名咖啡</option><option value="concert">演唱会</option><option value="live">Live</option><option value="fan_meeting">见面会</option><option value="exhibition">展览</option><option value="lottery_goods">一番赏/扭蛋</option><option value="goods_release">周边发售</option><option value="musical">音乐剧</option><option value="other">其他</option></select></div>
+      <div class="anlb">活动时间</div><input id="anDate" type="datetime-local"/>
+      <div class="anlb">截止时间(抽选/付款,可留空)</div><input id="anDl" type="datetime-local"/>
+      <div class="r"><input id="anVenue" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="场馆"/><input id="anArea" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="地区,如 东京"/></div>
+      <input id="anUrl" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="官方/票务链接(可留空)"/>
+      <button class="btn-add" onclick="saveActNew()">保存</button>
+    </div>
+    <button class="btn-close" onclick="document.getElementById('maskActNew').classList.remove('on')">取消</button></div></div>
+
+  <!-- 活动:日文术语 -->
+  <div class="mask" id="maskGloss"><div class="sheet"><h4>📖 日文票务术语</h4><div id="glossBody" class="gloss-body"></div><button class="btn-close" onclick="document.getElementById('maskGloss').classList.remove('on')">关闭</button></div></div>
+
   <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)"/>
 
   <div class="toast" id="toast"></div>
@@ -950,17 +1005,21 @@ function content(key){
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
   }
   if(key==='event'){
-    return `<div class="panel"><h3>⭐ 我的关注</h3>
-      <div class="ip-add"><input id="ipInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="搜索/添加,如 三丽鸥 / SEVENTEEN / 音乐剧" onkeydown="if(event.key==='Enter')addIPInput()"/><button class="ip-addbtn" onclick="addIPInput()">添加</button></div>
-      <div id="ipFav"></div>
+    return `<div class="panel"><h3>📋 今日行动</h3><div id="actSummary" class="act-sum"></div></div>
+    <div class="panel"><h3>🎟️ 我的活动</h3>
+      <div class="act-filters" id="actFilters"></div>
+      <div id="actFeed"></div>
+      <div class="act-newrow"><button class="act-new" onclick="openActNew()">＋ 创建活动</button><button class="act-paste" onclick="pasteAct()">🔗 粘贴链接</button><button class="act-gloss" onclick="openGloss()">📖 术语</button></div>
     </div>
-    <div class="panel"><h3>🧭 按兴趣找活动 · 订票途径</h3>
-      <div class="pit-hint" style="margin-bottom:8px">按分类展开:关注感兴趣的对象,并查看这类活动一般用<b>哪个 App 订票 / 看信息</b>。</div>
-      <div id="ipCats"></div>
-    </div>
-    <div class="panel"><h3>🆕 最新动态</h3>
-      <div class="pit-hint" style="margin-bottom:10px">点每个关注对象展开,直达<b>官方</b>与<b>相关讨论(非官方)</b>看最新活动/上新。</div>
-      <div id="ipFeed"></div>
+    <div class="panel"><div class="disc-h" onclick="toggleDisc()"><h3 style="margin:0">⭐ 关注 & 发现活动途径</h3><span class="ipc-caret" id="discCaret">▸</span></div>
+      <div id="discBody" style="display:none">
+        <div class="ip-add" style="margin-top:10px"><input id="ipInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="搜索/添加,如 三丽鸥 / SEVENTEEN" onkeydown="if(event.key==='Enter')addIPInput()"/><button class="ip-addbtn" onclick="addIPInput()">添加</button></div>
+        <div id="ipFav"></div>
+        <div class="ipc-sub" style="margin-top:12px">🧭 按兴趣找活动 · 订票途径</div>
+        <div id="ipCats"></div>
+        <div class="ipc-sub" style="margin-top:12px">🆕 关注对象最新动态</div>
+        <div id="ipFeed"></div>
+      </div>
     </div>`;
   }
   if(key==='rent'){
@@ -1050,6 +1109,76 @@ function renderIP(){
     return `<div class="ip-card"><div class="ip-card-h" onclick="toggleIpCard('${x.n.replace(/'/g,"\\'")}')"><span class="ip-e">${x.e}</span><b>${x.n}</b><span class="ip-jp">${x.jp||''}</span><span class="ip-caret">${open?'▾':'▸'}</span></div>${open?`<div class="ip-body"><div class="ip-plats">${off}</div><div class="ip-social-lb">相关讨论 · 非官方(仅线索)</div><div class="ip-plats">${soc}</div></div>`:''}</div>`;
   }).join(''):`<div class="fav-empty">还没关注 IP~<br>上方搜索或点推荐添加,这里就会出现官方/社交直达。</div>`;
 }
+
+/* ===== 活动个人工作台(本地/合规;含 mock 数据)===== */
+const ACT_TYPE={concert:'演唱会',live:'Live',fan_meeting:'见面会',popup_store:'快闪店',collab_cafe:'联名咖啡',exhibition:'展览',lottery_goods:'一番赏/扭蛋',goods_release:'周边发售',musical:'音乐剧',stage:'舞台',screening:'上映/舞台挨拶',other:'其他'};
+const ACT_STATUS={interested:['想去','#5F87B2'],applied:['已申请','#5F87B2'],won:['已中签','#6F9B70'],lost:['未中签','#87796C'],payment_pending:['待付款','#D89A43'],paid:['已付款','#6F9B70'],scheduled:['已加日程','#6F9B70'],attended:['已参加','#87796C'],cancelled:['已放弃','#87796C']};
+const PART_LB={jp_phone:'日本手机号',jp_addr:'日本地址',fc:'FC会员',honnin:'本人确认'};
+const GLOSS=[['抽選','抽签,不是先到先得'],['先着','先到先得(手快有)'],['一般発売','面向普通用户公开售票'],['FC先行','粉丝俱乐部会员优先申请'],['整理番号','决定入场顺序,通常不是座位号'],['本人確認','入场核对本人证件'],['同行者登録','需提前登记同行者信息'],['分配(分配け)','把电子票发给同行者'],['発券','取票/生成电子票'],['ドリンク代','Live House 现场另付饮料费(约¥600)'],['受注生産','预约期结束后按订单生产'],['再販','再次销售']];
+const ACTKEY='jp_acts'; let ACTS=[]; try{ACTS=JSON.parse(localStorage.getItem(ACTKEY)||'[]');}catch(e){}
+function saveACTS(){try{localStorage.setItem(ACTKEY,JSON.stringify(ACTS));}catch(e){}}
+if(!localStorage.getItem('jp_acts_seed')){ ACTS=[
+  {id:'a1',title:'三丽鸥 快闪店 SANRIO POP-UP',ip:'三丽鸥',type:'popup_store',date:'2026-08-15T10:00',deadline:'',venue:'新宿マルイ',area:'东京',official:'https://www.sanrio.co.jp/',status:'interested',source:'official',part:{}},
+  {id:'a2',title:'SEVENTEEN FANMEETING 2026 抽選',ip:'SEVENTEEN',type:'fan_meeting',date:'2026-09-10T18:00',deadline:'2026-08-10T23:59',venue:'东京ドーム',area:'东京',official:'',status:'applied',source:'official',part:{jp_phone:'req',fc:'req',honnin:'req'}},
+  {id:'a3',title:'吉伊卡哇 一番くじ 新作发售',ip:'吉伊卡哇',type:'lottery_goods',date:'2026-08-09T00:00',deadline:'',venue:'各ローソン',area:'全国',official:'https://chiikawa.jp/',status:'interested',source:'official',part:{}}
+]; try{localStorage.setItem('jp_acts_seed','1');}catch(e){} saveACTS(); }
+function daysTo(s){ if(!s)return null; const d=new Date(String(s).replace(' ','T')); if(isNaN(d))return null; return Math.ceil((d-new Date())/86400000); }
+let actFilter='all';
+function setActFilter(f){ actFilter=f; renderActs(); }
+function actMatch(a){ const dd=daysTo(a.deadline), de=daysTo(a.date);
+  if(actFilter==='deadline') return dd!==null&&dd>=0&&dd<=7;
+  if(actFilter==='week') return de!==null&&de>=0&&de<=7;
+  if(actFilter==='applied') return ['applied','won','payment_pending','paid','scheduled'].includes(a.status);
+  return true; }
+function fmtDate(s){ if(!s)return ''; const d=new Date(String(s).replace(' ','T')); if(isNaN(d))return s; const wd='日一二三四五六'[d.getDay()]; const hm=(d.getHours()||d.getMinutes())?` ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:''; return `${d.getMonth()+1}月${d.getDate()}日(周${wd})${hm}`; }
+function renderActs(){
+  const sum=document.getElementById('actSummary');
+  if(sum){ const week=ACTS.filter(a=>{const d=daysTo(a.date);return d!==null&&d>=0&&d<=7;}).length;
+    const dl=ACTS.filter(a=>{const d=daysTo(a.deadline);return d!==null&&d>=0&&d<=3;}).length;
+    const pay=ACTS.filter(a=>a.status==='payment_pending').length;
+    const want=ACTS.filter(a=>a.status==='interested').length;
+    sum.innerHTML=[['本周活动',week,'week','#5F87B2'],['截止临近',dl,'deadline','#C95B55'],['待付款',pay,'applied','#D89A43'],['想去',want,'all','#8B78AD']].map(([t,n,f,c])=>`<div class="act-metric" onclick="setActFilter('${f}')"><span class="am-n" style="color:${c}">${n}</span><span class="am-t">${t}</span></div>`).join(''); }
+  const fl=document.getElementById('actFilters');
+  if(fl) fl.innerHTML=[['all','全部'],['deadline','即将截止'],['week','本周'],['applied','已申请']].map(([k,l])=>`<span class="act-fchip${actFilter===k?' on':''}" onclick="setActFilter('${k}')">${l}</span>`).join('');
+  const feed=document.getElementById('actFeed'); if(!feed) return;
+  const list=ACTS.filter(actMatch).slice().sort((a,b)=>{ const va=daysTo(a.deadline), vb=daysTo(b.deadline); const x=(va===null?9999:va), y=(vb===null?9999:vb); if(x!==y)return x-y; return (daysTo(a.date)||9999)-(daysTo(b.date)||9999); });
+  feed.innerHTML=list.length?list.map(actCard).join(''):`<div class="act-empty">还没有活动~<br>粘贴官网/票务链接,或手动创建,就能管理截止时间与参加准备。</div>`;
+}
+function actCard(a){
+  const st=ACT_STATUS[a.status]||['',''];
+  const dd=daysTo(a.deadline), de=daysTo(a.date);
+  const dlBadge=(dd!==null)?`<span class="act-dl" style="background:${dd<=1?'#C95B55':dd<=3?'#D89A43':'#5F87B2'}">${dd<0?'已截止':'截止剩 '+dd+' 天'}</span>`:'';
+  const src=a.source==='official'?`<span class="act-src off">官方 ✓</span>`:(a.source==='user'?'':`<span class="act-src">非官方</span>`);
+  const parts=Object.keys(a.part||{}).filter(k=>a.part[k]==='req').map(k=>`<span class="act-part">${PART_LB[k]}必需</span>`).join('');
+  return `<div class="act-card" style="border-left-color:${st[1]||'#ccc'}">
+    <div class="act-top">${src}${dlBadge}${(de!==null&&de>=0&&de<=1)?'<span class="act-dl" style="background:#C95B55">'+(de===0?'今天':'明天')+'</span>':''}</div>
+    <div class="act-title">${esc(a.title)}</div>
+    <div class="act-meta">${ACT_TYPE[a.type]||a.type}${a.ip?' · '+esc(a.ip):''}</div>
+    ${a.date?`<div class="act-when">📅 ${fmtDate(a.date)}</div>`:''}
+    ${a.venue?`<div class="act-where">📍 ${esc(a.venue)}${a.area?' · '+esc(a.area):''}</div>`:''}
+    ${a.deadline?`<div class="act-when" style="color:#C95B55">⏰ 截止 ${fmtDate(a.deadline)}</div>`:''}
+    ${parts?`<div class="act-parts">${parts}</div>`:''}
+    <div class="act-btns"><span class="act-b" style="background:${st[1]}" onclick="openActStatus('${a.id}')">${st[0]||'设状态'} ▾</span><span class="act-b out" onclick="icsAct('${a.id}')">📅 加日历</span>${a.official?`<a class="act-b out" href="${a.official}" target="_blank" rel="noopener">🏠 官方</a>`:''}<span class="act-b out del" onclick="delAct('${a.id}')">✕</span></div>
+  </div>`;
+}
+function delAct(id){ ACTS=ACTS.filter(a=>a.id!==id); saveACTS(); renderActs(); toast('已删除'); }
+let actStId=null;
+function openActStatus(id){ actStId=id; document.getElementById('astChips').innerHTML=Object.keys(ACT_STATUS).map(k=>`<span class="gd-opt" style="--gc:${ACT_STATUS[k][1]}" onclick="setActStatus('${k}')">${ACT_STATUS[k][0]}</span>`).join(''); document.getElementById('maskActSt').classList.add('on'); }
+function setActStatus(k){ const a=ACTS.find(x=>x.id===actStId); if(a){a.status=k;saveACTS();renderActs();} document.getElementById('maskActSt').classList.remove('on'); toast('状态已更新'); }
+function openActNew(p){ p=p||{}; const g=id=>document.getElementById(id);
+  g('anTitle').value=p.title||''; g('anIp').value=p.ip||''; g('anType').value=p.type||'popup_store'; g('anDate').value=p.date||''; g('anDl').value=p.deadline||''; g('anVenue').value=p.venue||''; g('anArea').value=p.area||''; g('anUrl').value=p.official||''; g('maskActNew').classList.add('on'); }
+function pasteAct(){ const u=prompt('粘贴活动官网 / 票务链接:'); if(u&&/^https?:/i.test(u.trim())) openActNew({official:u.trim()}); else if(u) toast('请输入 http(s) 链接'); }
+function saveActNew(){ const g=id=>document.getElementById(id); const t=g('anTitle').value.trim(); if(!t){toast('请填活动名称');return;}
+  const url=g('anUrl').value.trim();
+  ACTS.push({id:'a'+Date.now(),title:t,ip:g('anIp').value.trim(),type:g('anType').value,date:g('anDate').value,deadline:g('anDl').value,venue:g('anVenue').value.trim(),area:g('anArea').value.trim(),official:url,status:'interested',source:url?'official':'user',part:{}});
+  saveACTS(); renderActs(); g('maskActNew').classList.remove('on'); toast('已创建活动 ✓'); }
+function toICS(dt){ const d=new Date(String(dt).replace(' ','T')); return isNaN(d)?'':d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; }
+function icsAct(id){ const a=ACTS.find(x=>x.id===id); if(!a)return; const dt=a.date||a.deadline; if(!dt){toast('缺少时间');return;}
+  const start=toICS(dt), end=toICS(new Date(new Date(String(dt).replace(' ','T')).getTime()+7200000).toISOString());
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//jp-life//act//CN','BEGIN:VEVENT','UID:'+a.id+'@jp-life','DTSTART:'+start,'DTEND:'+end,'SUMMARY:'+a.title,'LOCATION:'+(a.venue||''),'DESCRIPTION:'+(ACT_TYPE[a.type]||'')+' '+(a.official||''),a.official?'URL:'+a.official:'','BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+a.title,'END:VALARM','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
+  try{ const blob=new Blob([ics],{type:'text/calendar'}); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download=(a.title||'event').slice(0,30)+'.ics'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); toast('已生成 .ics 日历文件'); }catch(e){ toast('导出失败'); } }
+function openGloss(){ document.getElementById('glossBody').innerHTML=GLOSS.map(([j,c])=>`<div class="gloss-row"><b>${j}</b><span>${c}</span></div>`).join(''); document.getElementById('maskGloss').classList.add('on'); }
+function toggleDisc(){ const b=document.getElementById('discBody'), c=document.getElementById('discCaret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; if(open) renderIP(); }
 
 /* ---------- 屏幕切换 ---------- */
 const state={}; let cur=null; let originScreen='home';
@@ -1211,7 +1340,7 @@ function openCat(key){
         <button class="sendb" style="background:${c.c}" onclick="send()">➤</button>
       </div></div>`;
   if(key==='gomi') renderGomiSched();
-  if(key==='event') renderIP();
+  if(key==='event') renderActs();
   const log=document.getElementById('chatlog');
   log.innerHTML=state[key].msgs||`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
   fetch('/api/meta').then(r=>r.json()).then(m=>{const t=document.getElementById('modeTag');if(t)t.textContent=m.mode==='real'?'在线':'演示模式';}).catch(()=>{});
