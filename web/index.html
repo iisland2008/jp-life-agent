@@ -189,6 +189,8 @@
   .banner{border-radius:14px;padding:10px 13px;font-size:12.5px;display:flex;gap:8px;align-items:center;line-height:1.5;}
   .aiwrap{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 4px 12px rgba(150,120,80,.08);margin-bottom:14px;}
   .aihead{padding:12px 15px 8px;display:flex;align-items:center;gap:7px;}
+  .chat-clear{margin-left:auto;font-size:11px;color:var(--ink2);background:rgba(0,0,0,.04);border:1px solid var(--line);padding:4px 10px;border-radius:12px;cursor:pointer;}
+  .chat-clear:active{transform:scale(.94);}
   .aihead .t{font-weight:700;font-size:16px;color:#6b4e3d;}
   .aihead .tag{margin-left:auto;font-size:10px;color:#fff;padding:2px 9px;border-radius:12px;}
   .chatlog{padding:6px 13px 8px;display:flex;flex-direction:column;gap:9px;min-height:60px;}
@@ -687,7 +689,8 @@ function saveUserInfo(){
   USER.city=document.getElementById('uCity').value.trim();
   USER.avatar=selectedAvatar;
   saveUser(); currentGomi={pref:USER.pref,city:USER.city}; renderProfile();
-  document.getElementById('maskUser').classList.remove('on'); toast('已保存 ✓');
+  document.getElementById('maskUser').classList.remove('on');
+  toast('✓ 已设为 '+USER.pref+' '+(USER.city||'')+',垃圾等本地信息将按此地区');
 }
 /* 首页气泡:大而柔,散落 [key,left%,top%,直径,气泡底色,图标圈色] */
 const LAYOUT=[
@@ -861,7 +864,8 @@ function openCat(key){
   document.getElementById('dBody').innerHTML=content(key)+`
     <div class="aiwrap">
       <div class="aihead"><span style="font-size:16px">🤖</span><span class="t">AI 问答</span>
-        <span class="tag" id="modeTag" style="background:${c.c}">…</span></div>
+        <span class="tag" id="modeTag" style="background:${c.c}">…</span>
+        <span class="chat-clear" onclick="clearChat()">🔄 清空</span></div>
       <div class="chatlog" id="chatlog"></div>
       <div class="inbar">
         <div class="iobtn" onclick="document.getElementById('photoInput').click()">📷</div>
@@ -1137,6 +1141,18 @@ function mdClean(t){
     .replace(/\n{3,}/g,'\n\n')                  // 压缩多余空行
     .trim();
 }
+/* 渲染机器人回答:转义 + 清理 Markdown + 把 URL 变成可点击链接 */
+function botHTML(t){
+  return esc(mdClean(t)).replace(/(https?:\/\/[^\s，。、）)]+)/g,
+    '<a href="$1" target="_blank" rel="noopener" style="color:#3f6ea8;word-break:break-all">$1</a>');
+}
+/* 清空当前功能的 AI 对话 */
+function clearChat(){
+  const log=document.getElementById('chatlog'); if(!log||!cur) return;
+  const c=CATS[cur]; state[cur].history=[]; state[cur].msgs='';
+  log.innerHTML=`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
+  toast('对话已清空 ✓');
+}
 let busy=false;
 function ask(q){const i=document.getElementById('inp');if(i){i.value=q;send();}}
 /* 拍照/选图:压缩到 <=1024px 再发给 AI(Gemini 支持看图) */
@@ -1181,7 +1197,7 @@ async function send(imageData){
       if(REGION_CATS[cur]){ const rg=(cur==='gomi'?(currentGomi.pref+' '+currentGomi.city):(USER.pref+' '+(USER.city||''))).trim();
         const off=(d.sources&&d.sources.length)?'<span class="off">· 依据官方数据</span>':'';
         log.insertAdjacentHTML('beforeend',`<div class="ans-region">📍 本回答针对 <b>${esc(rg)}</b> ${off}</div>`); }
-      log.insertAdjacentHTML('beforeend',`<div class="msg bot">${esc(mdClean(d.answer))}</div>`); state[cur].history=d.history||state[cur].history;
+      log.insertAdjacentHTML('beforeend',`<div class="msg bot">${botHTML(d.answer)}</div>`); state[cur].history=d.history||state[cur].history;
       // 官方来源卡片(可点击核实)
       if(d.sources&&d.sources.length){
         const cards=d.sources.map(s=>`<a class="src-card" href="${s.url}" target="_blank" rel="noopener">
