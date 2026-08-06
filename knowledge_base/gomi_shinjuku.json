@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "区": "新宿区",
+    "来源机构": "新宿区役所 环境清扫部（官方网站 city.shinjuku.lg.jp）",
+    "采集日": "2026-08-06",
+    "说明": "新宿区家庭垃圾分类官方规则。每条均附官方来源链接与该页最后更新日期,供 RAG 检索时引用出处。收集曜日各地区不同,以官方『資源・ごみの収集・回収曜日』页为准。中文为便于检索与阅读的整理,遇分歧以官方日文为准。",
+    "免责": "规则可能调整,请以官方页面最新信息为准。"
+  },
+  "docs": [
+    {
+      "id": "sjk-overview",
+      "区": "新宿区",
+      "type": "overview",
+      "category": "总览",
+      "keywords_cn": ["新宿区", "垃圾", "分类", "收集日", "怎么扔", "几点", "集积所", "分别辞典", "app", "中文指南", "塑料新规"],
+      "keywords_jp": ["ごみ", "分別", "収集日", "集積所", "さんあ～る"],
+      "text_cn": "新宿区把家庭垃圾分为:①燃やすごみ(可燃,周2次)②金属・陶器・ガラスごみ(金属陶瓷玻璃,月2次)③资源(びん瓶/缶罐/ペットボトル塑料瓶/スプレー缶喷雾罐/电池,周1次)④资源プラスチック(资源塑料,周1次,2024年4月新制度)⑤粗大ごみ(大件,需预约付费)。所有垃圾都要在收集日『早上8点前』放到指定集积所。收集曜日因地区而异,需查官方『收集曜日』页;也可查『分别辞典』逐物品检索,或用官方『さんあ～る』app。区役所还发有中文版塑料分类传单。",
+      "source_title": "新宿区 家庭から出る資源・ごみ",
+      "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/index09_01s.html",
+      "related_urls": {
+        "收集曜日": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00001.html",
+        "分别辞典": "https://www.city.shinjuku.lg.jp/seikatsu/seiso01_001025.html",
+        "塑料分类中文传单PDF": "https://www.city.shinjuku.lg.jp/content/000409301.pdf"
+      },
+      "last_updated": "2025-04-01"
+    },
+    {
+      "id": "sjk-burnable",
+      "区": "新宿区",
+      "type": "category",
+      "category": "燃やすごみ / 可燃垃圾",
+      "keywords_cn": ["可燃", "燃烧", "厨余", "生垃圾", "食用油", "纸屑", "树枝", "衣服", "纸尿裤", "橡胶", "皮革", "脏的塑料", "生理用品", "烟头", "火柴"],
+      "keywords_jp": ["燃やすごみ", "生ごみ", "食用油", "紙おむつ", "植木"],
+      "text_cn": "【燃やすごみ 可燃垃圾｜周2次收集,祝日照常(周日与年末年始除外)】属于此类:厨余、食用油、不能进古纸回收的纸类、植木的叶与枝、衣物与纸尿裤、含其他材质的塑料制品、脏到洗不掉的资源塑料、橡胶皮革制品。投放要求:装进带盖容器或『内容物可见的塑料袋』,收集日早上8点前放到集积所。特别提醒:厨余要沥干水;食用油用纸/布吸附或用凝固剂固化;植木叶枝剪成约50cm、每次2~3捆;纸尿裤先去除污物;生理用品、混纺衣物、化学抹布、烟头虽是复合材质但算可燃;火柴要先泡水再扔(防火)。",
+      "confusing_cn": "以下常被搞错但属于可燃:贝壳、蛋壳、鱼骨、纸杯、纸巾、照片、热敏纸、带塑料窗的信封、膏药、干燥剂、丝袜、连裤袜、牛仔裤、布制品、电话卡、运动鞋。注意:铝箔纸、一次性暖宝宝属『金属・陶器・ガラスごみ』而非可燃。",
+      "source_title": "新宿区 燃やすごみの出し方",
+      "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00002.html",
+      "last_updated": "2026-04-03"
+    },
+    {
+      "id": "sjk-metal-glass",
+      "区": "新宿区",
+      "type": "category",
+      "category": "金属・陶器・ガラスごみ / 金属陶瓷玻璃垃圾",
+      "keywords_cn": ["金属", "陶器", "陶瓷", "玻璃", "碎玻璃", "盘子", "镜子", "小家电", "刀", "针", "剃须刀", "荧光灯", "灯泡", "打火机", "水银温度计", "铝箔", "暖宝宝", "雨伞"],
+      "keywords_jp": ["金属", "陶器", "ガラス", "蛍光灯", "ライター", "刃物"],
+      "text_cn": "【金属・陶器・ガラスごみ｜月2次收集,祝日照常(周日与年末年始除外)】属于此类:金属类(铝箔、一次性暖宝宝/暖手宝、雨伞等)、陶器/玻璃/碎玻璃瓶(盘子、镜子等)、小型家电、刀具/针/剃须刀、荧光灯与灯泡、一次性打火机、水银温度计与血压计。投放要求:带盖容器或可见内容物的塑料袋,收集日早上8点前。安全要求:碎玻璃/碎瓷/刀针等危险物用厚纸包好并标注『危険』;一次性打火机务必用完、单独装袋标『ライター』;荧光灯灯泡装进纸盒;小型家电的电线捆好。",
+      "confusing_cn": "铝箔纸、一次性暖宝宝属此类(不是可燃)。含其他材质的塑料制品、贝壳蛋壳鱼骨、纸杯、运动鞋等属可燃。资源塑料、喷雾罐属资源。",
+      "source_title": "新宿区 金属・陶器・ガラスごみの出し方",
+      "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00003.html",
+      "last_updated": "2025-02-25"
+    },
+    {
+      "id": "sjk-plastic",
+      "区": "新宿区",
+      "type": "category",
+      "category": "資源プラスチック / 资源塑料",
+      "keywords_cn": ["资源塑料", "塑料", "塑胶", "容器包装", "制品塑料", "プラマーク", "定规", "文件夹", "衣架", "牙刷", "吸管", "洗脸盆", "海绵", "塑料袋", "瓶盖", "标签", "洗干净", "新规"],
+      "keywords_jp": ["資源プラスチック", "容器包装プラスチック", "製品プラスチック", "プラマーク"],
+      "text_cn": "【資源プラスチック 资源塑料｜周1次收集,2024年4月起新制度】新宿区自令和6年(2024)4月起,把『容器包装塑料』和『制品塑料』合并为『资源塑料』一起回收。制品塑料=100%单一材质、大小约30cm见方以内,例:直尺、文件夹、衣架、洗脸盆、餐具、吸管、牙刷、玩具、密封容器、海绵、自封袋。容器包装塑料=带『プラマーク』标志、装/包商品的塑料;注意:塑料瓶的瓶盖和标签属容器包装塑料,但瓶身不算(瓶身走瓶罐类)。投放:①用完内容物②脏的要洗净或擦干净(脏的无法回收)③容器包装与制品塑料一起装进带盖容器或可见塑料袋,资源收集日早上8点前。",
+      "confusing_cn": "回收不了的:内容物残留或很脏→可燃;一边≥约30cm→粗大ごみ;含金属等非塑料材质→可燃或金属陶瓷玻璃;在宅医疗注射器→退回药局。⚠️移动电源/充电宝、加热式香烟等内含小型充电式电池的物品、以及打火机『绝对不要』混入资源塑料,会在清扫车或处理厂引发起火事故。",
+      "source_title": "新宿区 資源プラスチックの出し方",
+      "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00005.html",
+      "related_urls": {"中文传单PDF": "https://www.city.shinjuku.lg.jp/content/000409301.pdf"},
+      "last_updated": "2025-02-25"
+    },
+    {
+      "id": "sjk-bin-can-pet",
+      "区": "新宿区",
+      "type": "category",
+      "category": "びん・缶・ペットボトル・スプレー缶・乾電池 / 瓶罐塑料瓶喷雾罐电池",
+      "keywords_cn": ["瓶", "玻璃瓶", "易拉罐", "罐", "塑料瓶", "PET", "宝特瓶", "喷雾罐", "卡式炉气罐", "电池", "干电池", "纽扣电池", "充电电池", "移动电源"],
+      "keywords_jp": ["びん", "缶", "ペットボトル", "スプレー缶", "カセットボンベ", "乾電池"],
+      "text_cn": "【びん・缶・ペットボトル・スプレー缶・カセットボンベ・乾電池 资源｜周1次收集】可回收:玻璃瓶(饮料/食品/化妆品/内服药瓶)、易拉罐(饮料食品用铝罐钢罐)、塑料瓶(带PET识别标志:饮料/酒/味淋/酱油/食醋/无油沙拉汁等)、喷雾罐/卡式炉气罐、干电池(锰/碱性/锂)与纽扣电池、小型充电式电池。投放:要分成『瓶/罐/塑料瓶/喷雾罐卡式罐/干电池纽扣电池/小型充电式电池』6类,装进可见内容物的塑料袋,早上8点前。要点:各类电池的端子要用胶带绝缘;喷雾罐/卡式炉气罐『不要扎孔』,即使没用完也回收(没用完请贴纸写『中身あり』);塑料材质的瓶盖走资源塑料。",
+      "confusing_cn": "不能进此类(要走金属陶瓷玻璃):洗不净的瓶罐塑料瓶、内服药以外的药品瓶、灯泡荧光灯、板玻璃/玻璃杯/耐热玻璃/陶器、饮料食品用以外的罐、一斗罐、涂料罐、非卡式的气罐。移动电源等『小型充电式电池』端子要绝缘后按此类投放,切勿混入资源塑料。",
+      "source_title": "新宿区 びん、缶、ペットボトル、スプレー缶・カセットボンベ・乾電池等の出し方",
+      "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00009.html",
+      "last_updated": "2025-04-01"
+    },
+
+    {"id": "it-alufoil", "区": "新宿区", "type": "item", "category": "金属・陶器・ガラスごみ", "keywords_cn": ["铝箔", "铝箔纸", "锡纸"], "keywords_jp": ["アルミホイル"], "text_cn": "铝箔纸(锡纸)→『金属・陶器・ガラスごみ』(月2次)。很多人误以为是可燃,其实属金属类。", "source_title": "新宿区 金属・陶器・ガラスごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00003.html", "last_updated": "2025-02-25"},
+    {"id": "it-kairo", "区": "新宿区", "type": "item", "category": "金属・陶器・ガラスごみ", "keywords_cn": ["暖宝宝", "暖手宝", "一次性暖贴", "怀炉"], "keywords_jp": ["使い捨てカイロ"], "text_cn": "一次性暖宝宝(使い捨てカイロ)→『金属・陶器・ガラスごみ』(月2次),不是可燃。", "source_title": "新宿区 金属・陶器・ガラスごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00003.html", "last_updated": "2025-02-25"},
+    {"id": "it-lighter", "区": "新宿区", "type": "item", "category": "金属・陶器・ガラスごみ", "keywords_cn": ["打火机"], "keywords_jp": ["ライター"], "text_cn": "一次性打火机→『金属・陶器・ガラスごみ』,务必用完,单独装袋并标注『ライター』。", "source_title": "新宿区 金属・陶器・ガラスごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00003.html", "last_updated": "2025-02-25"},
+    {"id": "it-blade", "区": "新宿区", "type": "item", "category": "金属・陶器・ガラスごみ", "keywords_cn": ["菜刀", "刀", "针", "剃须刀", "刀片"], "keywords_jp": ["刃物", "針", "かみそり"], "text_cn": "刀具、针、剃须刀等→『金属・陶器・ガラスごみ』,要用厚纸包好并标注『危険』。", "source_title": "新宿区 金属・陶器・ガラスごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00003.html", "last_updated": "2025-02-25"},
+    {"id": "it-bulb", "区": "新宿区", "type": "item", "category": "金属・陶器・ガラスごみ", "keywords_cn": ["灯泡", "荧光灯", "日光灯"], "keywords_jp": ["電球", "蛍光灯"], "text_cn": "灯泡、荧光灯→『金属・陶器・ガラスごみ』,装进纸盒后投放。", "source_title": "新宿区 金属・陶器・ガラスごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00003.html", "last_updated": "2025-02-25"},
+    {"id": "it-glasscup", "区": "新宿区", "type": "item", "category": "金属・陶器・ガラスごみ", "keywords_cn": ["玻璃杯", "耐热玻璃", "陶瓷杯", "盘子", "碗", "镜子"], "keywords_jp": ["コップ", "耐熱ガラス", "陶器"], "text_cn": "玻璃杯、耐热玻璃、陶瓷餐具、盘子、镜子→『金属・陶器・ガラスごみ』(不属瓶罐类资源)。", "source_title": "新宿区 びん、缶、ペットボトル等の出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00009.html", "last_updated": "2025-04-01"},
+    {"id": "it-sneaker", "区": "新宿区", "type": "item", "category": "燃やすごみ", "keywords_cn": ["运动鞋", "鞋", "球鞋"], "keywords_jp": ["スニーカー"], "text_cn": "运动鞋→『燃やすごみ』(可燃,周2次)。", "source_title": "新宿区 燃やすごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00002.html", "last_updated": "2026-04-03"},
+    {"id": "it-jeans", "区": "新宿区", "type": "item", "category": "燃やすごみ", "keywords_cn": ["牛仔裤", "裤子", "衣服", "布"], "keywords_jp": ["ジーンズ", "布製品"], "text_cn": "牛仔裤、布制品、丝袜、连裤袜→『燃やすごみ』(可燃)。", "source_title": "新宿区 燃やすごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00002.html", "last_updated": "2026-04-03"},
+    {"id": "it-oil", "区": "新宿区", "type": "item", "category": "燃やすごみ", "keywords_cn": ["食用油", "废油", "油"], "keywords_jp": ["食用油"], "text_cn": "食用油→『燃やすごみ』,先用纸/布吸附或用凝固剂固化后再扔。", "source_title": "新宿区 燃やすごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00002.html", "last_updated": "2026-04-03"},
+    {"id": "it-diaper", "区": "新宿区", "type": "item", "category": "燃やすごみ", "keywords_cn": ["纸尿裤", "尿不湿"], "keywords_jp": ["紙おむつ"], "text_cn": "纸尿裤→『燃やすごみ』,先去除污物再扔。", "source_title": "新宿区 燃やすごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00002.html", "last_updated": "2026-04-03"},
+    {"id": "it-petcap", "区": "新宿区", "type": "item", "category": "資源プラスチック", "keywords_cn": ["瓶盖", "塑料瓶盖", "标签", "ラベル"], "keywords_jp": ["ペットボトルのキャップ", "ラベル"], "text_cn": "塑料瓶的瓶盖和标签→『资源塑料』(容器包装塑料);但瓶身本体走瓶罐类(带PET标志)。", "source_title": "新宿区 資源プラスチックの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00005.html", "last_updated": "2025-02-25"},
+    {"id": "it-pet", "区": "新宿区", "type": "item", "category": "びん・缶・ペットボトル", "keywords_cn": ["塑料瓶", "宝特瓶", "矿泉水瓶", "饮料瓶", "PET"], "keywords_jp": ["ペットボトル"], "text_cn": "带PET识别标志的塑料瓶(饮料/酒/味淋/酱油/食醋/无油沙拉汁)→瓶罐类『资源』(周1次);投放前去盖去标签(盖与标签走资源塑料)、冲洗干净。", "source_title": "新宿区 びん、缶、ペットボトル等の出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00009.html", "last_updated": "2025-04-01"},
+    {"id": "it-spray", "区": "新宿区", "type": "item", "category": "スプレー缶・カセットボンベ", "keywords_cn": ["喷雾罐", "喷雾", "卡式炉气罐", "卡式罐", "气罐"], "keywords_jp": ["スプレー缶", "カセットボンベ"], "text_cn": "喷雾罐、卡式炉气罐→瓶罐类『资源』(周1次)。新宿区规则:『不要扎孔』,即使没用完也回收;没用完请贴纸写『中身あり(有残留)』。", "source_title": "新宿区 びん、缶、ペットボトル等の出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00009.html", "last_updated": "2025-04-01"},
+    {"id": "it-battery", "区": "新宿区", "type": "item", "category": "乾電池・小型充電式電池", "keywords_cn": ["电池", "干电池", "纽扣电池", "充电电池", "移动电源", "充电宝", "加热式香烟"], "keywords_jp": ["乾電池", "ボタン電池", "小型充電式電池", "モバイルバッテリー"], "text_cn": "干电池/纽扣电池/小型充电式电池→瓶罐类『资源』收集日投放,端子要用胶带绝缘。⚠️移动电源(充电宝)、加热式香烟等含小型充电式电池的物品,绝对不要混入资源塑料或可燃,否则会引发起火事故。", "source_title": "新宿区 びん、缶、ペットボトル等の出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00009.html", "last_updated": "2025-04-01"},
+    {"id": "it-plasticgoods", "区": "新宿区", "type": "item", "category": "資源プラスチック", "keywords_cn": ["直尺", "定规", "文件夹", "衣架", "牙刷", "吸管", "洗脸盆", "海绵", "自封袋", "塑料玩具", "密封盒"], "keywords_jp": ["定規", "ハンガー", "歯ブラシ", "ストロー"], "text_cn": "单一材质塑料、约30cm见方以内的制品(直尺/文件夹/衣架/洗脸盆/餐具/吸管/牙刷/玩具/密封容器/海绵/自封袋)→『资源塑料』(制品プラ,周1次)。", "source_title": "新宿区 資源プラスチックの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00005.html", "last_updated": "2025-02-25"},
+    {"id": "it-large", "区": "新宿区", "type": "item", "category": "粗大ごみ", "keywords_cn": ["大件", "粗大垃圾", "家具", "大", "30cm以上"], "keywords_jp": ["粗大ごみ"], "text_cn": "一边约30cm以上的大件→『粗大ごみ』,需事先申请预约、购买处理券,付费收集(不能直接放集积所)。", "source_title": "新宿区 粗大ごみの出し方", "source_url": "https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00016.html", "last_updated": "2025-04-01"}
+  ]
+}

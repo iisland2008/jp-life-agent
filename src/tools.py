@@ -12,7 +12,7 @@ from . import kb
 TOOL_SCHEMAS = [
     {
         "name": "search_gomi",
-        "description": "查询日本垃圾分类:某个物品属于哪类垃圾、所在区的收集日和规则。当用户问『这个垃圾怎么扔/属于什么类/哪天收』时调用。",
+        "description": "查询日本垃圾分类:某个物品属于哪类垃圾、所在区的收集日和规则。当用户问『这个垃圾怎么扔/属于什么类/哪天收』时调用。若 ward 为『新宿区』,会返回新宿区官方数据(hits 数组,每条含 source 官方来源URL与更新日期),回答时【必须】引用其中的 source。",
         "input_schema": {
             "type": "object",
             "properties": {

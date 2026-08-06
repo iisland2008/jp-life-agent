@@ -24,6 +24,7 @@ ADMIN = _load("admin.json")
 MEDICAL = _load("medical.json")
 TIPS = _load("tips.json")
 EXPERIENCE = _load("experience.json")
+GOMI_SJK = _load("gomi_shinjuku.json")  # 新宿区官方垃圾数据(带来源URL)
 
 
 # ---------- 通用文本打分 (轻量语义检索,无需外部 embedding) ----------
@@ -46,8 +47,62 @@ def _score(query: str, doc_text: str, tags=None) -> float:
     return overlap + tag_bonus
 
 
+# ---------- 新宿区官方垃圾数据:跨语言检索 + 出处引用 ----------
+def _score_doc(query: str, doc: dict) -> float:
+    """中文/日文关键词命中 + 字符 n-gram 语义重叠,支持中文提问检索日文来源的数据。"""
+    score = 0.0
+    for kw in doc.get("keywords_cn", []) + doc.get("keywords_jp", []):
+        if kw and kw in query:
+            score += 2.0
+    for part in re.split(r"[ /・]", doc.get("category", "")):
+        if part and part in query:
+            score += 0.5
+    blob = doc.get("text_cn", "") + "".join(doc.get("keywords_cn", []))
+    q, d = _char_ngrams(query), _char_ngrams(blob)
+    if q and d:
+        score += len(q & d) / len(q)
+    return score
+
+
+def search_gomi_shinjuku(query: str = "", k: int = 3) -> dict:
+    """对新宿区官方数据做 Top-K 检索,每条附官方来源 URL 供引用。"""
+    scored = []
+    for doc in GOMI_SJK["docs"]:
+        s = _score_doc(query, doc)
+        if doc.get("type") == "item":
+            s += 0.3  # 物品级条目对『XX怎么扔』更精确,轻微加权
+        if s > 0.5:
+            scored.append((s, doc))
+    scored.sort(key=lambda x: -x[0])
+    hits = []
+    for s, doc in scored[:k]:
+        hits.append(
+            {
+                "category": doc["category"],
+                "content": doc.get("text_cn", ""),
+                "confusing": doc.get("confusing_cn"),
+                "source": {
+                    "title": doc["source_title"],
+                    "url": doc["source_url"],
+                    "updated": doc["last_updated"],
+                },
+            }
+        )
+    return {
+        "区": "新宿区",
+        "query": query,
+        "source_mode": "新宿区官方数据(带出处)",
+        "hits": hits,
+        "disclaimer": GOMI_SJK["_meta"]["免责"],
+    }
+
+
 # ---------- 垃圾分类检索 ----------
 def search_gomi(item: str = "", ward: str = "") -> dict:
+    # 新宿区:走官方结构化数据,返回带来源的检索结果
+    if ward and "新宿" in ward:
+        return search_gomi_shinjuku(item, k=3)
+
     result = {"ward": ward or "default", "matched_items": [], "ward_info": None, "notes": []}
 
     ward_key = None
