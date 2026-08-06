@@ -212,6 +212,27 @@
   .wk-lb{font-size:11px;color:var(--ink2);}
   .wk-pill{padding:4px 11px;border-radius:20px;background:rgba(0,0,0,.045);color:var(--ink2);font-size:11.5px;cursor:pointer;transition:.15s;}
   .wk-pill.on{background:var(--green);color:#fff;font-weight:700;}
+  /* ===== 关注 IP / 上新直达 ===== */
+  .ip-add{display:flex;gap:8px;margin-bottom:11px;}
+  .ip-add input{flex:1;min-width:0;border:1.5px solid #ece1cd;background:var(--card);border-radius:12px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:var(--ink);outline:none;}
+  .ip-add input:focus{border-color:#e7bf6b;}
+  .ip-addbtn{border:none;background:var(--yellow);color:#fff;font-weight:700;font-size:13px;padding:0 17px;border-radius:12px;cursor:pointer;flex:none;}
+  .ip-addbtn:active{transform:scale(.95);}
+  .ip-quick{display:flex;flex-wrap:wrap;gap:6px;}
+  .ip-chip{font-size:12px;background:var(--yellow-t);color:#a5852f;padding:5px 11px;border-radius:16px;cursor:pointer;}
+  .ip-chip:active{transform:scale(.95);}
+  .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
+  .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
+  .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
+  .ip-tag i{font-style:normal;color:#c9b48a;cursor:pointer;font-size:11px;}
+  .ip-card{border:1px solid var(--line);border-radius:16px;padding:11px 12px;margin-bottom:10px;background:var(--card);box-shadow:0 2px 7px rgba(150,120,80,.06);}
+  .ip-card-h{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .ip-e{font-size:21px;}
+  .ip-card-h b{font-size:14.5px;color:#5f5245;}
+  .ip-jp{font-size:11px;color:var(--ink2);}
+  .ip-plats{display:flex;flex-wrap:wrap;gap:7px;}
+  .ip-plat{text-decoration:none;font-size:12px;font-weight:600;background:rgba(0,0,0,.04);color:#6b5f52;padding:6px 11px;border-radius:12px;border:1px solid var(--line);}
+  .ip-plat:active{transform:scale(.96);}
   .gcat-item{padding:8px 0;border-bottom:1px dashed var(--line);}
   .gcat-item:last-of-type{border-bottom:none;}
   .gcat-item b{font-size:13px;color:#5f5245;display:block;margin-bottom:3px;font-weight:700;}
@@ -910,9 +931,15 @@ function content(key){
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
   }
   if(key==='event'){
-    return `<div class="panel"><h3>🎡 关注领域</h3><div class="chips">${['三丽鸥','自嘲熊','初音未来','宝可梦'].map(t=>
-      `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('最近${t}在东京有什么活动?')">${t}</span>`).join('')}</div>
-      <div class="sub" style="font-size:12px;color:var(--ink2);margin-top:10px;line-height:1.6">添加感兴趣的 IP,我会帮你留意快闪/活动的时间地点。<b>自动推送即将上线。</b></div></div>`;
+    return `<div class="panel"><h3>⭐ 我的关注 IP</h3>
+      <div class="ip-add"><input id="ipInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="搜索/添加 IP,如 三丽鸥 / Chiikawa" onkeydown="if(event.key==='Enter')addIPInput()"/><button class="ip-addbtn" onclick="addIPInput()">添加</button></div>
+      <div class="ip-quick" id="ipQuick"></div>
+      <div id="ipFav"></div>
+    </div>
+    <div class="panel"><h3>🆕 上新 · 热帖直达</h3>
+      <div class="pit-hint" style="margin-bottom:10px">点卡片上的平台,直达该 IP 在<b>小红书 / 微博 / X / 官方站</b>的最新与热门内容(受平台限制,不内嵌帖子)。</div>
+      <div id="ipFeed"></div>
+    </div>`;
   }
   if(key==='rent'){
     return `<div class="panel" style="padding:12px 14px"><div class="banner" style="background:var(--pink-t);color:#c56a8a">🏠 租房不踩坑指南。找房源用 SUUMO / HOME'S / UR,这里帮你看懂套路、审合同。</div></div>
@@ -925,6 +952,47 @@ function content(key){
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
   }
   return '';
+}
+
+/* ===== 关注 IP + 各平台直达(合规:只做深链,不抓取内容)===== */
+const IPCAT=[
+  {n:'三丽鸥',jp:'サンリオ',e:'🎀',off:'https://www.sanrio.co.jp/'},
+  {n:'吉伊卡哇',jp:'ちいかわ',e:'🐹',off:'https://chiikawa.jp/'},
+  {n:'库洛米',jp:'クロミ',e:'😈',off:'https://www.sanrio.co.jp/character/kuromi/'},
+  {n:'玉桂狗',jp:'シナモロール',e:'🐶',off:'https://www.sanrio.co.jp/character/cinnamoroll/'},
+  {n:'Hello Kitty',jp:'ハローキティ',e:'🎀',off:'https://www.sanrio.co.jp/character/hellokitty/'},
+  {n:'宝可梦',jp:'ポケモン',e:'⚡',off:'https://www.pokemon.co.jp/'},
+  {n:'哆啦A梦',jp:'ドラえもん',e:'🔔',off:'https://dora-world.com/'},
+  {n:'蜡笔小新',jp:'クレヨンしんちゃん',e:'🖍️',off:'https://www.shinchan-app.jp/'},
+  {n:'米菲兔',jp:'ミッフィー',e:'🐰',off:'https://www.miffy.com/ja/'},
+  {n:'史努比',jp:'スヌーピー',e:'🐶',off:'https://www.snoopy.co.jp/'},
+  {n:'吉卜力',jp:'ジブリ',e:'🌿',off:'https://www.ghibli.jp/'},
+  {n:'迪士尼',jp:'ディズニー',e:'🏰',off:'https://www.disney.co.jp/'},
+  {n:'初音未来',jp:'初音ミク',e:'🎤',off:'https://piapro.net/'}
+];
+const IPKEY='jp_fav_ip'; let IPS=[]; try{IPS=JSON.parse(localStorage.getItem(IPKEY)||'[]');}catch(e){}
+function saveIPS(){try{localStorage.setItem(IPKEY,JSON.stringify(IPS));}catch(e){}}
+function isIP(n){return IPS.some(x=>x.n===n);}
+function addIP(o){ if(!o||!o.n||isIP(o.n))return; IPS.push({n:o.n,jp:o.jp||o.n,e:o.e||'⭐',off:o.off||''}); saveIPS(); renderIP(); toast('已关注 '+o.n+' ⭐'); }
+function addIPByName(n){ addIP(IPCAT.find(x=>x.n===n)||{n}); }
+function addIPInput(){ const el=document.getElementById('ipInput'); if(!el)return; const v=el.value.trim(); if(!v)return; const hit=IPCAT.find(x=>x.n===v||x.jp===v||x.n.toLowerCase()===v.toLowerCase()); addIP(hit||{n:v}); el.value=''; }
+function removeIP(n){ IPS=IPS.filter(x=>x.n!==n); saveIPS(); renderIP(); }
+function ipLinks(ip){
+  const xhs=encodeURIComponent(ip.n+' 快闪'), wb=encodeURIComponent(ip.n+' 日本'), x=encodeURIComponent((ip.jp||ip.n)+' イベント'), g=encodeURIComponent((ip.jp||ip.n)+' 日本 ポップアップ');
+  const links=[['📕 小红书','https://www.xiaohongshu.com/search_result?keyword='+xhs],['🔴 微博','https://s.weibo.com/weibo?q='+wb],['✖ X','https://twitter.com/search?q='+x+'&f=live'],['🔍 Google活动','https://www.google.com/search?q='+g]];
+  if(ip.off) links.unshift(['🏠 官方',ip.off]);
+  return links;
+}
+function renderIP(){
+  const q=document.getElementById('ipQuick');
+  if(q) q.innerHTML=IPCAT.filter(x=>!isIP(x.n)).map(x=>`<span class="ip-chip" onclick="addIPByName('${x.n}')">${x.e} ${x.n} ＋</span>`).join('')||'<span class="sub" style="font-size:11px;color:var(--ink2)">推荐都已关注,可在上方自定义添加</span>';
+  const fav=document.getElementById('ipFav');
+  if(fav) fav.innerHTML=IPS.length?`<div class="ip-fav-hd">已关注 ${IPS.length}</div><div class="ip-favs">${IPS.map(x=>`<span class="ip-tag">${x.e} ${x.n}<i onclick="removeIP('${x.n.replace(/'/g,"\\'")}')">✕</i></span>`).join('')}</div>`:'';
+  const feed=document.getElementById('ipFeed');
+  if(feed) feed.innerHTML=IPS.length?IPS.map(x=>{
+    const links=ipLinks(x).map(([t,u])=>`<a class="ip-plat" href="${u}" target="_blank" rel="noopener">${t}</a>`).join('');
+    return `<div class="ip-card"><div class="ip-card-h"><span class="ip-e">${x.e}</span><b>${x.n}</b><span class="ip-jp">${x.jp||''}</span></div><div class="ip-plats">${links}</div></div>`;
+  }).join(''):`<div class="fav-empty">还没关注 IP~<br>上方搜索或点推荐添加,这里就会出现各平台直达卡片。</div>`;
 }
 
 /* ---------- 屏幕切换 ---------- */
@@ -1087,6 +1155,7 @@ function openCat(key){
         <button class="sendb" style="background:${c.c}" onclick="send()">➤</button>
       </div></div>`;
   if(key==='gomi') renderGomiSched();
+  if(key==='event') renderIP();
   const log=document.getElementById('chatlog');
   log.innerHTML=state[key].msgs||`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
   fetch('/api/meta').then(r=>r.json()).then(m=>{const t=document.getElementById('modeTag');if(t)t.textContent=m.mode==='real'?'在线':'演示模式';}).catch(()=>{});
