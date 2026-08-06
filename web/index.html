@@ -852,6 +852,41 @@ function goBack(){
   if(cur&&document.getElementById('chatlog')) state[cur].msgs=document.getElementById('chatlog').innerHTML;
   showScreen(originScreen); navHL(originScreen);
 }
+/* 各功能的官方 / 参考链接(真实已核实网址) */
+const REFLINKS={
+  admin:[
+    {t:'出入国在留管理厅 · 在留手续',u:'https://www.moj.go.jp/isa/applications/index.html',d:'在留卡更新/变更等官方手续'},
+    {t:'在留卡有效期更新 · 申请',u:'https://www.moj.go.jp/isa/applications/procedures/nyuukokukanri10_00011.html',d:'所需材料与流程'},
+    {t:'日本年金机构 · 学生纳付特例',u:'https://www.nenkin.go.jp/service/kokunen/menjo/20150514.html',d:'留学生年金缓缴申请'},
+    {t:'マイナンバーカード 综合网站',u:'https://www.kojinbango-card.go.jp/',d:'个人编号卡申领'},
+    {t:'新宿区役所 · 生活手续',u:'https://www.city.shinjuku.lg.jp/living.html',d:'住民登录/国保等 · 以你所在区为准'},
+  ],
+  medical:[
+    {t:'东京都医疗机关案内「ひまわり」',u:'https://www.himawari.metro.tokyo.jp/',d:'按地区/科室/外语查医院'},
+    {t:'东京都 · 外国人患者医疗信息',u:'https://www.hokeniryo.metro.tokyo.lg.jp/iryo/iryo_hoken/gaikokujin/interpreter/himawari',d:'多语言医疗咨询'},
+    {t:'东京都 · 24小时急救案内',u:'https://www.hokeniryo.metro.tokyo.lg.jp/iryo/sodan/komatta/kyuubyou/24h_annai',d:'#7119 急救咨询 · #8000 儿童夜间'},
+  ],
+  work:[
+    {t:'东京劳动局 · 最低工资',u:'https://jsite.mhlw.go.jp/tokyo-roudoukyoku/home.html',d:'东京都最低时薪(每年更新)'},
+    {t:'新宿区 · 最低工资通知',u:'https://www.city.shinjuku.lg.jp/seikatsu/shohi01_002333_00003.html',d:'当前约 ¥1,226/时 · 以官方为准'},
+    {t:'出入国在留管理厅 · 资格外活动',u:'https://www.moj.go.jp/isa/applications/index.html',d:'打工许可 · 每周28小时限制'},
+  ],
+  rent:[
+    {t:'UR 都市机构 · UR 赁贷住宅',u:'https://www.ur-net.go.jp/',d:'免礼金/免中介/免保证人'},
+    {t:'SUUMO 租房信息',u:'https://suumo.jp/',d:'房源检索(信息网站)'},
+  ],
+  gomi:[
+    {t:'新宿区 · 资源与垃圾收集日',u:'https://www.city.shinjuku.lg.jp/seikatsu/file09_01_00001.html',d:'查你所在地区的收集曜日'},
+    {t:'新宿区 · 垃圾分别辞典',u:'https://www.city.shinjuku.lg.jp/seikatsu/seiso01_001025.html',d:'逐个物品检索'},
+    {t:'新宿区 · 塑料分类 中文传单(PDF)',u:'https://www.city.shinjuku.lg.jp/content/000409301.pdf',d:'2024年4月新规'},
+  ],
+};
+function refLinksHTML(key){
+  const list=REFLINKS[key]; if(!list||!list.length) return '';
+  const cards=list.map(s=>`<a class="src-card" href="${s.u}" target="_blank" rel="noopener">
+    <span class="src-ic">🔗</span><span class="src-tx"><b>${esc(s.t)}</b><span>${esc(s.d)}</span></span><span class="src-go">›</span></a>`).join('');
+  return `<div class="panel"><div class="src-hd" style="font-size:12.5px;color:#6b4e3d;font-weight:600;margin-bottom:8px">📎 官方 / 参考链接(可点击查最新)</div>${cards}</div>`;
+}
 function openCat(key){
   const from=curScreen();
   if(from!=='detail') originScreen=from;
@@ -861,7 +896,7 @@ function openCat(key){
   if(!state[key]) state[key]={history:[]};
   document.getElementById('dHead').style.background=c.ct;
   document.getElementById('dTitle').innerHTML=`${c.name}<span class="jp">${c.jp}</span>`;
-  document.getElementById('dBody').innerHTML=content(key)+`
+  document.getElementById('dBody').innerHTML=content(key)+refLinksHTML(key)+`
     <div class="aiwrap">
       <div class="aihead"><span style="font-size:16px">🤖</span><span class="t">AI 问答</span>
         <span class="tag" id="modeTag" style="background:${c.c}">…</span>
