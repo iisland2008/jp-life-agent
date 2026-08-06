@@ -180,6 +180,30 @@
   .daybadge{width:44px;height:44px;border-radius:14px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;line-height:1.1;}
   .freqbadge{min-width:62px;padding:7px 9px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;text-align:center;line-height:1.2;}
   .gomi-note{font-size:11.5px;color:#8a6b4a;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:12px;padding:8px 11px;margin-top:9px;line-height:1.6;}
+  /* ===== 垃圾收集日/分类标准 滑动卡 ===== */
+  .gcard{padding:11px 0 2px;}
+  .gtabs{display:flex;gap:6px;padding:0 12px 9px;}
+  .gtab{flex:1;border:none;background:rgba(0,0,0,.04);color:var(--ink2);font-size:13px;font-weight:600;padding:8px;border-radius:12px;cursor:pointer;font-family:inherit;transition:background .2s;}
+  .gtab.on{background:var(--green-t);color:#5a7a4a;}
+  .gswipe{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .gswipe::-webkit-scrollbar{display:none;}
+  .gpage{flex:0 0 100%;scroll-snap-align:start;padding:0 14px 10px;box-sizing:border-box;}
+  .gday-hd{font-size:13px;font-weight:700;color:#6b4e3d;margin:2px 0 8px;}
+  .gday-hd span{font-size:10.5px;color:var(--ink2);font-weight:400;margin-left:4px;}
+  .gday-row{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer;}
+  .gday-row:active{opacity:.7;}
+  .gday-badge{width:40px;height:40px;border-radius:12px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#efe6d7;color:#7a6b58;font-size:15px;font-weight:700;line-height:1;}
+  .gday-badge span{font-size:7.5px;opacity:.8;font-weight:400;margin-top:1px;}
+  .gday-types{flex:1;display:flex;flex-wrap:wrap;gap:5px;}
+  .gtchip{color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px;}
+  .gday-empty{font-size:12px;color:var(--ink2);}
+  .gcat-item{padding:8px 0;border-bottom:1px dashed var(--line);}
+  .gcat-item:last-of-type{border-bottom:none;}
+  .gcat-item b{font-size:13px;color:#5f5245;display:block;margin-bottom:3px;font-weight:700;}
+  .gcat-item span{font-size:11.5px;color:var(--ink2);line-height:1.65;}
+  .gd-opts{display:flex;flex-wrap:wrap;gap:8px;}
+  .gd-opt{font-size:13.5px;padding:8px 15px;border-radius:20px;border:2px solid var(--line);color:var(--ink2);cursor:pointer;}
+  .gd-opt.on{border-color:var(--gc);color:#fff;background:var(--gc);}
   .row-day .what{font-size:13.5px;color:#5f574c;font-weight:500;}
   .row-day .sub{font-size:11px;color:var(--ink2);}
   .tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
@@ -564,6 +588,16 @@
     </div>
   </div>
 
+  <!-- 设置某天收集的垃圾 -->
+  <div class="mask" id="maskGomiDay">
+    <div class="sheet">
+      <h4 id="gdTitle">设置收集日</h4>
+      <div class="gd-opts" id="gdChips"></div>
+      <div class="frm" style="margin-top:12px"><button class="btn-add" onclick="saveGomiDay()">保存</button></div>
+      <button class="btn-close" onclick="document.getElementById('maskGomiDay').classList.remove('on')">取消</button>
+    </div>
+  </div>
+
   <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)"/>
 
   <div class="toast" id="toast"></div>
@@ -655,28 +689,54 @@ const AVATARS=[
 function avatarObj(id){return AVATARS.find(a=>a.id===id)||AVATARS[0];}
 function renderAvatarInto(el,id,px){ if(!el)return; const a=avatarObj(id); el.style.background=a.bg; el.innerHTML=a.em?`<span style="font-size:${px}px;line-height:1">${a.em}</span>`:a.svg; }
 
-/* 各区『收集频率』(按区固定,已核实):[类别, 频率, 颜色, 备注]。注意:具体星期按住址不同,不在此固定。 */
-const GOMI_FREQ={
-  '新宿区':[['可燃垃圾','每周2次','var(--green)','燃やすごみ'],['资源塑料','每周1次','var(--blue)','資源プラ'],['瓶/罐/塑料瓶/电池','每周1次','var(--yellow)','資源'],['金属·陶器·玻璃','每月2次','var(--coral)','']],
-  '涩谷区':[['可燃垃圾','每周2次','var(--green)','可燃ごみ'],['资源','每周1次','var(--yellow)','瓶/罐/PET/古纸'],['不可燃','每月1次','var(--coral)','玻璃陶器金属等']],
-  '丰岛区':[['可燃垃圾','每周2次','var(--green)','燃やすごみ'],['塑料','每周1次','var(--blue)','プラ'],['瓶/罐/塑料瓶','每周1次','var(--yellow)',''],['纸箱/纸/布','每周1次','var(--yellow)',''],['金属·陶器·玻璃','每月2次','var(--coral)','']],
-  '大田区':[['可燃垃圾','每周2次','var(--green)',''],['塑料','每周1次','var(--blue)',''],['资源(7品目)','每周1次','var(--yellow)',''],['不燃','每月2次','var(--coral)','']]
-};
 const GOMI_ALIAS={'渋谷区':'涩谷区','豊島区':'丰岛区'};
-function findGomiDays(city){return GOMI_FREQ[city]||GOMI_FREQ[GOMI_ALIAS[city]];}
 let currentGomi={pref:'東京都',city:'新宿区'};
-function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=document.getElementById('gomiPref'); if(ps)ps.value='東京都'; const ci=document.getElementById('gomiCity'); if(ci)ci.value=city; renderGomiSched(); refreshRefLinks(); }
-function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiSched(); refreshRefLinks(); }
-function renderGomiSched(){
-  const el=document.getElementById('gomiSched'); if(!el) return;
-  const {pref,city}=currentGomi;
-  const freq=(pref==='東京都')?findGomiDays(city):null;
-  const addrNote=`<div class="gomi-note">📅 具体收集『星期』按你的住址(丁目)不同,请点下方官方链接按地址查询。</div>`;
-  let inner;
-  if(freq){ inner=freq.map(([w,fr,col,s])=>`<div class="row-day"><div class="freqbadge" style="background:${col}">${fr}</div><div><div class="what">${w}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`).join('')+addrNote; }
-  else { inner=`<div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.7;padding:2px 0 6px">${esc(city||pref)} 的分类体系与收集频率见下方官方链接。</div>`+addrNote; }
-  el.innerHTML=`<h3>📍 ${esc(pref)} ${esc(city||'')} · 收集频率</h3>${inner}`;
+function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=document.getElementById('gomiPref'); if(ps)ps.value='東京都'; const ci=document.getElementById('gomiCity'); if(ci)ci.value=city; renderGomiCat(); refreshRefLinks(); }
+function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiCat(); refreshRefLinks(); }
+
+/* ===== 我的收集日(用户自设,像课表,存本地)===== */
+const GWD=['月','火','水','木','金','土','日'];
+const GTYPES=[['可燃','var(--green)'],['不燃','var(--coral)'],['资源','var(--yellow)'],['塑料','var(--blue)'],['瓶/罐','#6fae86'],['古纸','#b79dd4'],['粗大','#a9865a']];
+function gColor(t){const f=GTYPES.find(x=>x[0]===t);return f?f[1]:'var(--ink2)';}
+const GSKEY='jp_gomi_sched'; let GS={}; try{GS=JSON.parse(localStorage.getItem(GSKEY)||'{}');}catch(e){}
+function saveGS(){try{localStorage.setItem(GSKEY,JSON.stringify(GS));}catch(e){}}
+function renderGomiDays(){
+  const el=document.getElementById('gPageDays'); if(!el) return;
+  const rows=GWD.map(d=>{
+    const arr=GS[d]||[];
+    const chips=arr.length?arr.map(t=>`<span class="gtchip" style="background:${gColor(t)}">${t}</span>`).join(''):`<span class="gday-empty">未设置 · 点击添加</span>`;
+    return `<div class="gday-row" onclick="openGomiDay('${d}')"><div class="gday-badge">${d}<span>曜日</span></div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
+  }).join('');
+  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日 <span>点每一天设置这天收什么垃圾</span></div>${rows}`;
 }
+let gEditDay=null, gEditSel=[];
+function openGomiDay(d){ gEditDay=d; gEditSel=(GS[d]||[]).slice();
+  document.getElementById('gdTitle').textContent=d+'曜日 · 收什么垃圾';
+  document.getElementById('gdChips').innerHTML=GTYPES.map(([t,c])=>`<span class="gd-opt${gEditSel.includes(t)?' on':''}" style="--gc:${c}" onclick="toggleGd('${t}',this)">${t}</span>`).join('');
+  document.getElementById('maskGomiDay').classList.add('on');
+}
+function toggleGd(t,el){ const i=gEditSel.indexOf(t); if(i<0){gEditSel.push(t);el.classList.add('on');}else{gEditSel.splice(i,1);el.classList.remove('on');} }
+function saveGomiDay(){ if(gEditDay!=null){ if(gEditSel.length)GS[gEditDay]=gEditSel; else delete GS[gEditDay]; saveGS(); renderGomiDays(); } document.getElementById('maskGomiDay').classList.remove('on'); toast('已保存收集日 ✓'); }
+
+/* ===== 分类标准(按区,包含什么)===== */
+const WARD_CAT={
+  '新宿区':[['🔥 可燃垃圾(燃やす)','厨余、食用油、脏纸、树枝草花、衣物纸尿裤、含其他材质的塑料、脏的资源塑料、橡胶皮革;运动鞋/牛仔裤/贝壳蛋壳鱼骨/纸杯也算'],['🍶 金属·陶器·玻璃','金属(铝箔/暖宝宝/伞)、陶器玻璃碎瓶、小家电、刀针剃须刀(包好写危険)、灯泡荧光灯、打火机(用完)'],['♻️ 资源塑料','带プラマーク的容器包装 + 单一材质塑料制品(≤30cm):瓶盖标签、托盘、衣架牙刷吸管等,需洗净'],['🧴 瓶/罐/塑料瓶/电池','玻璃瓶、铝罐钢罐、PET塑料瓶、喷雾罐卡式炉(别扎孔)、干电池(端子绝缘)']],
+  '涩谷区':[['🔥 可燃','厨余、纸屑等适合焚烧的垃圾'],['🚯 不可燃(每月1次)','玻璃、陶器、金属、小家电、喷雾罐等不适合焚烧的'],['♻️ 资源','瓶、罐、PET、古纸(报纸/杂志/纸箱)']],
+  '丰岛区':[['🔥 可燃','厨余、少量木枝草花、脏纸、食用油、纸尿裤、脏布、洗不掉的塑料、橡胶皮革'],['🍶 金属·陶器·玻璃','小金属、小刃物、小家电、陶器玻璃、灯泡荧光灯、喷雾罐卡式炉、含水银制品'],['♳ 塑料','带プラマーク:购物袋/零食袋/容器/蛋盒/瓶盖标签/托盘 + 单一材质塑料制品'],['🧴 瓶/罐/塑料瓶','瓶(去盖轻洗)、罐(压扁)、PET(去盖去标签压扁)'],['📦 纸箱/纸/布','报纸杂志纸箱、牛奶盒、旧布(装袋写古布)']]
+};
+const WARD_CAT_DEFAULT=[['🔥 可燃垃圾','一般:厨余、脏纸、衣物、木、橡胶皮革等适合焚烧的'],['🚯 不可燃 / 金属陶器玻璃','一般:玻璃、陶器、金属、小家电、喷雾罐、灯泡等'],['♻️ 资源','一般:瓶、罐、PET、古纸'],['♳ 塑料','部分区单独收容器包装/制品塑料(看プラマーク)']];
+function renderGomiCat(){
+  const el=document.getElementById('gPageCat'); if(!el) return;
+  const city=(currentGomi&&currentGomi.city)||'';
+  const list=WARD_CAT[city]||WARD_CAT[GOMI_ALIAS[city]]||WARD_CAT_DEFAULT;
+  const isDefault=!(WARD_CAT[city]||WARD_CAT[GOMI_ALIAS[city]]);
+  const cards=list.map(([t,d])=>`<div class="gcat-item"><b>${t}</b><span>${d}</span></div>`).join('');
+  const note=isDefault?`<div class="gomi-note">ℹ️ ${esc(city||'该区')}的具体分类以本区官方为准(见下方官方链接);新宿/涩谷/丰岛已内置详细标准。</div>`:`<div class="gomi-note">ℹ️ 具体某物品请点下方「${esc(city)}」官方辞典检索。</div>`;
+  el.innerHTML=`<div class="gday-hd">♻️ ${esc(city||'')} 分类标准 <span>各类垃圾都包括什么</span></div>${cards}${note}`;
+}
+function renderGomiSched(){ renderGomiDays(); renderGomiCat(); }
+function gomiTab(i){ const s=document.getElementById('gomiSwipe'); if(s) s.scrollTo({left:i*s.clientWidth,behavior:'smooth'}); document.getElementById('gtab0').classList.toggle('on',i===0); document.getElementById('gtab1').classList.toggle('on',i===1); }
+function gomiSyncTab(){ const s=document.getElementById('gomiSwipe'); if(!s)return; const i=Math.round(s.scrollLeft/s.clientWidth); document.getElementById('gtab0').classList.toggle('on',i===0); document.getElementById('gtab1').classList.toggle('on',i===1); }
 function renderProfile(){
   const n=document.getElementById('pfName'); if(n)n.textContent=USER.name||'小留同学';
   const s=document.getElementById('pfSub'); if(s)s.textContent='留学中 · '+USER.pref+' '+USER.city;
@@ -793,7 +853,10 @@ function content(key){
         <div style="font-size:11px;color:var(--ink2);margin:7px 0 4px">🟢 东京23区均有官方数据(新宿/涩谷/丰岛最详细) · 常用区快速选</div>
         <div class="chips">${['新宿区','涩谷区','丰岛区'].map(w=>`<span class="qa-chip" style="background:var(--green-t);color:#5a7a4a" onclick="setGomiWard('${w}')">${w}</span>`).join('')}</div>
       </div></div>
-    <div class="panel" id="gomiSched"></div>
+    <div class="panel gcard">
+      <div class="gtabs"><button class="gtab on" id="gtab0" onclick="gomiTab(0)">🗓️ 我的收集日</button><button class="gtab" id="gtab1" onclick="gomiTab(1)">♻️ 分类标准</button></div>
+      <div class="gswipe" id="gomiSwipe" onscroll="gomiSyncTab()"><div class="gpage" id="gPageDays"></div><div class="gpage" id="gPageCat"></div></div>
+    </div>
     <div class="panel"><h3>🔎 分类速查</h3><div class="chips">${['塑料瓶怎么扔?','喷雾罐怎么处理?','大件垃圾怎么办?','旧衣服算什么?'].map(q=>
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
   }
