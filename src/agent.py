@@ -44,6 +44,8 @@ SYSTEM_PROMPT = """你是『日本生活小助手』,专门帮助在日本的中
 铁律:
 - 涉及事实(材料、科室、垃圾类别、收集日、金额、规则)必须先调用工具从知识库获取,不要凭记忆编造。
 - 当工具结果带有 source(官方来源)时,回答末尾必须注明依据,格式如「依据:新宿区役所官网(2026-04-03更新)」并附上 source 的 url,让用户可核实。这是本产品区别于通用 AI 的关键。
+- 垃圾分类问题【必须】调用 search_gomi,并把【当前功能】标注里的区(如「新宿区」)作为 ward 传入;不要仅凭记忆回答。若该区无本地数据,如实说明是通用规则、提示以当地役所为准。
+- 目前本产品的本地数据主要覆盖东京地区(尤其新宿区)。用户问到东京以外地区时,坦诚说明本地数据有限、给出通用性回答并建议查当地官方。
 - 回答生活类问题时,【优先】调用 search_experience(留学生亲身经验库),它最贴近实际;再用 search_tips 及各专用知识库补充。
 - 用简洁、口语化的中文回答;关键的日语词汇附上假名/汉字方便用户到现场对照。
 - 医疗类回答必须带免责声明,提示急症拨打 119 / #7119。
@@ -75,6 +77,23 @@ def _emit(on_event, name, args):
             pass
 
 
+def _collect_sources(result, sink):
+    """从工具结果里收集官方来源(带 url),供前端渲染来源卡片。"""
+    if sink is None or not isinstance(result, dict):
+        return
+    hits = result.get("hits")
+    if hits:
+        sink.setdefault("sources", [])
+        seen = {s.get("url") for s in sink["sources"]}
+        for h in hits:
+            src = h.get("source") if isinstance(h, dict) else None
+            if src and src.get("url") and src["url"] not in seen:
+                sink["sources"].append(src)
+                seen.add(src["url"])
+    if result.get("区"):
+        sink["region"] = result["区"]
+
+
 def _strip_images(msgs):
     """把带图片的用户消息在历史里替换成纯文本,避免 localStorage 里塞大段 base64。"""
     out = []
@@ -90,7 +109,7 @@ def _strip_images(msgs):
     return out
 
 
-def _run_llm(user_input, history, verbose=True, on_event=None, image=None):
+def _run_llm(user_input, history, verbose=True, on_event=None, image=None, default_ward=None, sink=None):
     import datetime
 
     from openai import OpenAI
@@ -136,8 +155,12 @@ def _run_llm(user_input, history, verbose=True, on_event=None, image=None):
                     args = {}
                 if verbose:
                     print(f"  🔧 调用知识库工具: {tc.function.name}({json.dumps(args, ensure_ascii=False)})")
+                # 强制注入当前地区:模型漏传 ward 时,用用户所在区补上,保证命中本地官方数据
+                if tc.function.name == "search_gomi" and default_ward and not args.get("ward"):
+                    args["ward"] = default_ward
                 _emit(on_event, tc.function.name, args)
                 result = run_tool(tc.function.name, args)
+                _collect_sources(result, sink)
                 messages.append(
                     {
                         "role": "tool",
@@ -156,7 +179,7 @@ def _run_llm(user_input, history, verbose=True, on_event=None, image=None):
 
 
 # ---------------- Mock 模式(离线演示检索链路,无需 API) ----------------
-def _run_mock(user_input, history, verbose=True, on_event=None, image=None):
+def _run_mock(user_input, history, verbose=True, on_event=None, image=None, default_ward=None, sink=None):
     """
     简易意图路由 + 工具调用,用来在没有 API key 时演示『Agent 挑工具 -> 查知识库』的链路。
     真实效果请配置 GEMINI_API_KEY 后运行。
@@ -166,7 +189,7 @@ def _run_mock(user_input, history, verbose=True, on_event=None, image=None):
     text = user_input
     calls = []
     if any(k in text for k in ["扔", "垃圾", "分类", "ゴミ", "怎么丢", "哪天收"]):
-        ward = next((w for w in ["新宿区", "涩谷区", "丰岛区"] if w in text), "")
+        ward = next((w for w in ["新宿区", "涩谷区", "丰岛区"] if w in text), "") or (default_ward or "")
         calls.append(("search_gomi", {"item": text, "ward": ward}))
     if any(k in text for k in ["保险", "在留", "年金", "编号", "住民", "市役所", "手续", "签证"]):
         calls.append(("search_admin", {"query": text}))
@@ -181,11 +204,15 @@ def _run_mock(user_input, history, verbose=True, on_event=None, image=None):
             print(f"  🔧 调用知识库工具: {name}({json.dumps(args, ensure_ascii=False)})")
         _emit(on_event, name, args)
         result = run_tool(name, args)
+        _collect_sources(result, sink)
         out.append(f"[{name}] 检索结果:\n{json.dumps(result, ensure_ascii=False, indent=2)}\n")
     return "\n".join(out), history
 
 
-def chat(user_input, history=None, verbose=True, on_event=None, image=None):
+def chat(user_input, history=None, verbose=True, on_event=None, image=None, default_ward=None, sink=None):
     history = history or []
     runner = _run_llm if has_api_key() else _run_mock
-    return runner(user_input, history, verbose=verbose, on_event=on_event, image=image)
+    return runner(
+        user_input, history, verbose=verbose, on_event=on_event, image=image,
+        default_ward=default_ward, sink=sink,
+    )

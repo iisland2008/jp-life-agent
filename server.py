@@ -76,6 +76,7 @@ def api_chat():
     message = (data.get("message") or "").strip()
     history = data.get("history") or []
     category = (data.get("category") or "").strip()
+    region = (data.get("region") or "").strip()  # 用户当前查询地区(如“新宿区”)
     image = data.get("image")  # 可选:base64 data URL
     if not message and not image:
         return jsonify({"error": "empty message"}), 400
@@ -86,14 +87,22 @@ def api_chat():
         sent = f"【当前功能:{category}】{sent}"
 
     tool_events = []
+    sink = {}  # 收集官方来源与命中地区
     try:
         answer, new_history = chat(
-            sent, history=history, verbose=False, on_event=tool_events.append, image=image
+            sent, history=history, verbose=False, on_event=tool_events.append,
+            image=image, default_ward=region or None, sink=sink,
         )
     except Exception as e:
         return jsonify({"error": f"{type(e).__name__}: {e}"}), 500
 
-    return jsonify({"answer": answer, "tools": tool_events, "history": new_history})
+    return jsonify({
+        "answer": answer,
+        "tools": tool_events,
+        "history": new_history,
+        "sources": sink.get("sources", []),
+        "region": sink.get("region"),
+    })
 
 
 if __name__ == "__main__":
