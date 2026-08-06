@@ -249,6 +249,10 @@
   .act-top{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap;}
   .act-src{font-size:10px;font-weight:700;color:#9a8b6f;background:rgba(0,0,0,.04);padding:2px 8px;border-radius:8px;}
   .act-src.off{color:#5a7a4a;background:var(--green-t);}
+  .act-src.demo{color:#8a6b2f;background:#efe0b0;}
+  .act-demo-note{font-size:11px;color:#8a6b4a;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:12px;padding:8px 11px;margin-bottom:11px;line-height:1.6;}
+  .act-demo-note b{color:#b6862f;}
+  .act-demo-clear{display:inline-block;margin-left:6px;color:#c56a8a;font-weight:700;cursor:pointer;text-decoration:underline;}
   .act-dl{font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:8px;}
   .act-title{font-size:15px;font-weight:800;color:#5f5245;line-height:1.35;}
   .act-meta{font-size:12px;color:var(--ink2);margin:3px 0 7px;}
@@ -1118,11 +1122,13 @@ const GLOSS=[['抽選','抽签,不是先到先得'],['先着','先到先得(手�
 const ACTKEY='jp_acts'; let ACTS=[]; try{ACTS=JSON.parse(localStorage.getItem(ACTKEY)||'[]');}catch(e){}
 function saveACTS(){try{localStorage.setItem(ACTKEY,JSON.stringify(ACTS));}catch(e){}}
 if(!localStorage.getItem('jp_acts_seed')){ ACTS=[
-  {id:'a1',title:'三丽鸥 快闪店 SANRIO POP-UP',ip:'三丽鸥',type:'popup_store',date:'2026-08-15T10:00',deadline:'',venue:'新宿マルイ',area:'东京',official:'https://www.sanrio.co.jp/',status:'interested',source:'official',part:{}},
-  {id:'a2',title:'SEVENTEEN FANMEETING 2026 抽選',ip:'SEVENTEEN',type:'fan_meeting',date:'2026-09-10T18:00',deadline:'2026-08-10T23:59',venue:'东京ドーム',area:'东京',official:'',status:'applied',source:'official',part:{jp_phone:'req',fc:'req',honnin:'req'}},
-  {id:'a3',title:'吉伊卡哇 一番くじ 新作发售',ip:'吉伊卡哇',type:'lottery_goods',date:'2026-08-09T00:00',deadline:'',venue:'各ローソン',area:'全国',official:'https://chiikawa.jp/',status:'interested',source:'official',part:{}}
+  {id:'a1',demo:true,title:'三丽鸥 快闪店 SANRIO POP-UP',ip:'三丽鸥',type:'popup_store',date:'2026-08-15T10:00',deadline:'',venue:'新宿マルイ',area:'东京',official:'https://www.sanrio.co.jp/',status:'interested',source:'official',part:{}},
+  {id:'a2',demo:true,title:'SEVENTEEN FANMEETING 2026 抽選',ip:'SEVENTEEN',type:'fan_meeting',date:'2026-09-10T18:00',deadline:'2026-08-10T23:59',venue:'东京ドーム',area:'东京',official:'',status:'applied',source:'official',part:{jp_phone:'req',fc:'req',honnin:'req'}},
+  {id:'a3',demo:true,title:'吉伊卡哇 一番くじ 新作发售',ip:'吉伊卡哇',type:'lottery_goods',date:'2026-08-09T00:00',deadline:'',venue:'各ローソン',area:'全国',official:'https://chiikawa.jp/',status:'interested',source:'official',part:{}}
 ]; try{localStorage.setItem('jp_acts_seed','1');}catch(e){} saveACTS(); }
-function daysTo(s){ if(!s)return null; const d=new Date(String(s).replace(' ','T')); if(isNaN(d))return null; return Math.ceil((d-new Date())/86400000); }
+function clearDemo(){ ACTS=ACTS.filter(a=>!a.demo); saveACTS(); renderActs(); toast('已清空示例'); }
+function parseDT(s){ if(!s)return null; const m=String(s).match(/(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{2}))?/); if(!m)return null; return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0)); }
+function daysTo(s){ const d=parseDT(s); if(!d)return null; return Math.ceil((d-new Date())/86400000); }
 let actFilter='all';
 function setActFilter(f){ actFilter=f; renderActs(); }
 function actMatch(a){ const dd=daysTo(a.deadline), de=daysTo(a.date);
@@ -1130,7 +1136,7 @@ function actMatch(a){ const dd=daysTo(a.deadline), de=daysTo(a.date);
   if(actFilter==='week') return de!==null&&de>=0&&de<=7;
   if(actFilter==='applied') return ['applied','won','payment_pending','paid','scheduled'].includes(a.status);
   return true; }
-function fmtDate(s){ if(!s)return ''; const d=new Date(String(s).replace(' ','T')); if(isNaN(d))return s; const wd='日一二三四五六'[d.getDay()]; const hm=(d.getHours()||d.getMinutes())?` ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:''; return `${d.getMonth()+1}月${d.getDate()}日(周${wd})${hm}`; }
+function fmtDate(s){ const d=parseDT(s); if(!d)return String(s||''); const wd='日一二三四五六'[d.getDay()]; const hm=(d.getHours()||d.getMinutes())?` ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:''; return `${d.getMonth()+1}月${d.getDate()}日(周${wd})${hm}`; }
 function renderActs(){
   const sum=document.getElementById('actSummary');
   if(sum){ const week=ACTS.filter(a=>{const d=daysTo(a.date);return d!==null&&d>=0&&d<=7;}).length;
@@ -1142,13 +1148,14 @@ function renderActs(){
   if(fl) fl.innerHTML=[['all','全部'],['deadline','即将截止'],['week','本周'],['applied','已申请']].map(([k,l])=>`<span class="act-fchip${actFilter===k?' on':''}" onclick="setActFilter('${k}')">${l}</span>`).join('');
   const feed=document.getElementById('actFeed'); if(!feed) return;
   const list=ACTS.filter(actMatch).slice().sort((a,b)=>{ const va=daysTo(a.deadline), vb=daysTo(b.deadline); const x=(va===null?9999:va), y=(vb===null?9999:vb); if(x!==y)return x-y; return (daysTo(a.date)||9999)-(daysTo(b.date)||9999); });
-  feed.innerHTML=list.length?list.map(actCard).join(''):`<div class="act-empty">还没有活动~<br>粘贴官网/票务链接,或手动创建,就能管理截止时间与参加准备。</div>`;
+  const demoNote=ACTS.some(a=>a.demo)?`<div class="act-demo-note">📌 下面带「示例」的是<b>演示样例</b>(非真实活动、与你的关注无关),可点右侧一键清空。你的真实活动请用下方「创建 / 粘贴链接」添加。<span class="act-demo-clear" onclick="clearDemo()">清空示例</span></div>`:'';
+  feed.innerHTML=demoNote+(list.length?list.map(actCard).join(''):`<div class="act-empty">还没有活动~<br>粘贴官网/票务链接,或手动创建,就能管理截止时间与参加准备。</div>`);
 }
 function actCard(a){
   const st=ACT_STATUS[a.status]||['',''];
   const dd=daysTo(a.deadline), de=daysTo(a.date);
   const dlBadge=(dd!==null)?`<span class="act-dl" style="background:${dd<=1?'#C95B55':dd<=3?'#D89A43':'#5F87B2'}">${dd<0?'已截止':'截止剩 '+dd+' 天'}</span>`:'';
-  const src=a.source==='official'?`<span class="act-src off">官方 ✓</span>`:(a.source==='user'?'':`<span class="act-src">非官方</span>`);
+  const src=(a.demo?`<span class="act-src demo">示例</span>`:'')+(a.source==='official'?`<span class="act-src off">官方 ✓</span>`:(a.source==='user'?'':`<span class="act-src">非官方</span>`));
   const parts=Object.keys(a.part||{}).filter(k=>a.part[k]==='req').map(k=>`<span class="act-part">${PART_LB[k]}必需</span>`).join('');
   return `<div class="act-card" style="border-left-color:${st[1]||'#ccc'}">
     <div class="act-top">${src}${dlBadge}${(de!==null&&de>=0&&de<=1)?'<span class="act-dl" style="background:#C95B55">'+(de===0?'今天':'明天')+'</span>':''}</div>
