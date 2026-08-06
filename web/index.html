@@ -188,15 +188,21 @@
   .gswipe{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
   .gswipe::-webkit-scrollbar{display:none;}
   .gpage{flex:0 0 100%;scroll-snap-align:start;padding:0 14px 10px;box-sizing:border-box;}
-  .gday-hd{font-size:13px;font-weight:700;color:#6b4e3d;margin:2px 0 8px;}
-  .gday-hd span{font-size:10.5px;color:var(--ink2);font-weight:400;margin-left:4px;}
-  .gday-row{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer;}
-  .gday-row:active{opacity:.7;}
-  .gday-badge{width:40px;height:40px;border-radius:12px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#efe6d7;color:#7a6b58;font-size:15px;font-weight:700;line-height:1;}
-  .gday-badge span{font-size:7.5px;opacity:.8;font-weight:400;margin-top:1px;}
+  .gday-hd{font-size:13.5px;font-weight:700;color:#6b4e3d;margin:2px 0 10px;display:flex;align-items:baseline;gap:6px;}
+  .gday-hd span{font-size:10.5px;color:var(--ink2);font-weight:400;}
+  .gday-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f3ecdd;cursor:pointer;}
+  .gday-row:last-child{border-bottom:none;}
+  .gday-row:active{opacity:.6;}
+  .gday-badge{width:44px;height:44px;border-radius:14px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(158deg,#fdf7ee,#f0e6d3);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 6px rgba(150,120,80,.08);}
+  .gday-badge b{font-size:17px;font-weight:800;color:#8a6f52;line-height:1;}
+  .gday-badge i{font-size:9px;font-style:normal;color:#ab9a80;margin-top:2px;}
+  .gday-row.is-rest .gday-badge{background:linear-gradient(158deg,#f3f0ea,#e8e2d6);}
+  .gday-row.is-rest .gday-badge b{color:#a89a86;}
   .gday-types{flex:1;display:flex;flex-wrap:wrap;gap:5px;}
-  .gtchip{color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px;}
-  .gday-empty{font-size:12px;color:var(--ink2);}
+  .gtchip{color:#fff;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:11px;}
+  .gtchip.rest{background:#c3b4a2;}
+  .gday-empty{font-size:12px;color:#b3a894;}
+  .arw{color:#cbbfa8;}
   .gcat-item{padding:8px 0;border-bottom:1px dashed var(--line);}
   .gcat-item:last-of-type{border-bottom:none;}
   .gcat-item b{font-size:13px;color:#5f5245;display:block;margin-bottom:3px;font-weight:700;}
@@ -695,27 +701,38 @@ function setGomiWard(city){ currentGomi={pref:'東京都',city}; const ps=docume
 function onGomiLoc(){ const ps=document.getElementById('gomiPref'),ci=document.getElementById('gomiCity'); currentGomi={pref:ps?ps.value:'東京都',city:ci?ci.value.trim():''}; renderGomiCat(); refreshRefLinks(); }
 
 /* ===== 我的收集日(用户自设,像课表,存本地)===== */
-const GWD=['月','火','水','木','金','土','日'];
+const GWD=[['月','周一'],['火','周二'],['水','周三'],['木','周四'],['金','周五'],['土','周六'],['日','周日']];
 const GTYPES=[['可燃','var(--green)'],['不燃','var(--coral)'],['资源','var(--yellow)'],['塑料','var(--blue)'],['瓶/罐','#6fae86'],['古纸','#b79dd4'],['粗大','#a9865a']];
 function gColor(t){const f=GTYPES.find(x=>x[0]===t);return f?f[1]:'var(--ink2)';}
+function gTypeChip(t){return t==='休息'?`<span class="gtchip rest">😴 休息日</span>`:`<span class="gtchip" style="background:${gColor(t)}">${t}</span>`;}
 const GSKEY='jp_gomi_sched'; let GS={}; try{GS=JSON.parse(localStorage.getItem(GSKEY)||'{}');}catch(e){}
 function saveGS(){try{localStorage.setItem(GSKEY,JSON.stringify(GS));}catch(e){}}
 function renderGomiDays(){
   const el=document.getElementById('gPageDays'); if(!el) return;
-  const rows=GWD.map(d=>{
-    const arr=GS[d]||[];
-    const chips=arr.length?arr.map(t=>`<span class="gtchip" style="background:${gColor(t)}">${t}</span>`).join(''):`<span class="gday-empty">未设置 · 点击添加</span>`;
-    return `<div class="gday-row" onclick="openGomiDay('${d}')"><div class="gday-badge">${d}<span>曜日</span></div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
+  const rows=GWD.map(([jp,cn])=>{
+    const arr=GS[jp]||[];
+    const rest=arr.includes('休息');
+    const chips=arr.length?arr.map(gTypeChip).join(''):`<span class="gday-empty">未设置 · 点击添加</span>`;
+    return `<div class="gday-row${rest?' is-rest':''}" onclick="openGomiDay('${jp}')"><div class="gday-badge"><b>${jp}</b><i>${cn}</i></div><div class="gday-types">${chips}</div><span class="arw">›</span></div>`;
   }).join('');
-  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日 <span>点每一天设置这天收什么垃圾</span></div>${rows}`;
+  el.innerHTML=`<div class="gday-hd">🗓️ 我的收集日<span>点每天设置收什么(可设休息日)</span></div>${rows}`;
 }
 let gEditDay=null, gEditSel=[];
+function renderGdChips(){
+  const box=document.getElementById('gdChips'); if(!box) return;
+  const opts=GTYPES.map(([t,c])=>`<span class="gd-opt${gEditSel.includes(t)?' on':''}" style="--gc:${c}" onclick="toggleGd('${t}')">${t}</span>`).join('');
+  box.innerHTML=opts+`<span class="gd-opt rest${gEditSel.includes('休息')?' on':''}" onclick="toggleGd('休息')">😴 休息日</span>`;
+}
 function openGomiDay(d){ gEditDay=d; gEditSel=(GS[d]||[]).slice();
   document.getElementById('gdTitle').textContent=d+'曜日 · 收什么垃圾';
-  document.getElementById('gdChips').innerHTML=GTYPES.map(([t,c])=>`<span class="gd-opt${gEditSel.includes(t)?' on':''}" style="--gc:${c}" onclick="toggleGd('${t}',this)">${t}</span>`).join('');
+  renderGdChips();
   document.getElementById('maskGomiDay').classList.add('on');
 }
-function toggleGd(t,el){ const i=gEditSel.indexOf(t); if(i<0){gEditSel.push(t);el.classList.add('on');}else{gEditSel.splice(i,1);el.classList.remove('on');} }
+function toggleGd(t){
+  if(t==='休息'){ gEditSel=gEditSel.includes('休息')?[]:['休息']; }
+  else { gEditSel=gEditSel.filter(x=>x!=='休息'); const i=gEditSel.indexOf(t); if(i<0)gEditSel.push(t); else gEditSel.splice(i,1); }
+  renderGdChips();
+}
 function saveGomiDay(){ if(gEditDay!=null){ if(gEditSel.length)GS[gEditDay]=gEditSel; else delete GS[gEditDay]; saveGS(); renderGomiDays(); } document.getElementById('maskGomiDay').classList.remove('on'); toast('已保存收集日 ✓'); }
 
 /* ===== 分类标准(按区,包含什么)===== */
