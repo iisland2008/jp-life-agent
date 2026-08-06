@@ -270,6 +270,17 @@
   .act-paste,.act-gloss{border:1px solid var(--line);background:var(--card);color:#6b5f52;font-size:13px;padding:0 14px;border-radius:14px;cursor:pointer;font-family:inherit;}
   .act-new:active,.act-paste:active,.act-gloss:active{transform:scale(.96);}
   .disc-h{display:flex;align-items:center;cursor:pointer;}
+  /* 最新动态:统一平台切换 + 每个对象一行 */
+  .dyn-plats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .dyn-plat{font-size:12px;padding:5px 11px;border-radius:16px;background:rgba(0,0,0,.04);color:var(--ink2);cursor:pointer;}
+  .dyn-plat.on{background:var(--coral);color:#fff;font-weight:600;}
+  .dyn-row{display:flex;align-items:center;gap:10px;text-decoration:none;padding:10px 4px;border-bottom:1px solid #f3ecdd;}
+  .dyn-row:last-child{border-bottom:none;}
+  .dyn-row:active{opacity:.6;}
+  .dyn-name{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .dyn-name b{font-size:14px;color:#5f5245;}
+  .dyn-name i{font-style:normal;font-size:10.5px;color:var(--ink2);margin-top:1px;}
+  .dyn-go{font-size:12px;font-weight:600;color:#b07a4a;flex:none;}
   .anlb{font-size:11px;color:var(--ink2);margin:2px 0 -4px;}
   .gloss-body{max-height:56vh;overflow-y:auto;}
   .gloss-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);}
@@ -1015,15 +1026,16 @@ function content(key){
       <div id="actFeed"></div>
       <div class="act-newrow"><button class="act-new" onclick="openActNew()">＋ 创建活动</button><button class="act-paste" onclick="pasteAct()">🔗 粘贴链接</button><button class="act-gloss" onclick="openGloss()">📖 术语</button></div>
     </div>
-    <div class="panel"><div class="disc-h" onclick="toggleDisc()"><h3 style="margin:0">⭐ 关注 & 发现活动途径</h3><span class="ipc-caret" id="discCaret">▸</span></div>
-      <div id="discBody" style="display:none">
+    <div class="panel"><div class="disc-h" onclick="toggleSec('Follow')"><h3 style="margin:0">⭐ 关注 & 找活动途径</h3><span class="ipc-caret" id="cFollowCaret">▸</span></div>
+      <div id="secFollow" style="display:none">
         <div class="ip-add" style="margin-top:10px"><input id="ipInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="搜索/添加,如 三丽鸥 / SEVENTEEN" onkeydown="if(event.key==='Enter')addIPInput()"/><button class="ip-addbtn" onclick="addIPInput()">添加</button></div>
         <div id="ipFav"></div>
         <div class="ipc-sub" style="margin-top:12px">🧭 按兴趣找活动 · 订票途径</div>
         <div id="ipCats"></div>
-        <div class="ipc-sub" style="margin-top:12px">🆕 关注对象最新动态</div>
-        <div id="ipFeed"></div>
       </div>
+    </div>
+    <div class="panel"><div class="disc-h" onclick="toggleSec('Dyn')"><h3 style="margin:0">🆕 关注对象最新动态</h3><span class="ipc-caret" id="cDynCaret">▸</span></div>
+      <div id="secDyn" style="display:none"><div id="ipFeed"></div></div>
     </div>`;
   }
   if(key==='rent'){
@@ -1106,13 +1118,28 @@ function renderIP(){
   const fav=document.getElementById('ipFav');
   if(fav) fav.innerHTML=IPS.length?`<div class="ip-fav-hd">已关注 ${IPS.length}</div><div class="ip-favs">${IPS.map(x=>`<span class="ip-tag">${x.e} ${x.n}<i onclick="removeIP('${x.n.replace(/'/g,"\\'")}')">✕</i></span>`).join('')}</div>`:'';
   const feed=document.getElementById('ipFeed');
-  if(feed) feed.innerHTML=IPS.length?IPS.map((x,idx)=>{
-    const open=(x.n in ipOpen)?ipOpen[x.n]:(idx===0);
-    const off=ipOfficial(x).map(([t,u])=>`<a class="ip-plat off" href="${u}" target="_blank" rel="noopener">${t}</a>`).join('');
-    const soc=ipSocial(x).map(([t,u])=>`<a class="ip-plat" href="${u}" target="_blank" rel="noopener">${t}</a>`).join('');
-    return `<div class="ip-card"><div class="ip-card-h" onclick="toggleIpCard('${x.n.replace(/'/g,"\\'")}')"><span class="ip-e">${x.e}</span><b>${x.n}</b><span class="ip-jp">${x.jp||''}</span><span class="ip-caret">${open?'▾':'▸'}</span></div>${open?`<div class="ip-body"><div class="ip-plats">${off}</div><div class="ip-social-lb">相关讨论 · 非官方(仅线索)</div><div class="ip-plats">${soc}</div></div>`:''}</div>`;
-  }).join(''):`<div class="fav-empty">还没关注 IP~<br>上方搜索或点推荐添加,这里就会出现官方/社交直达。</div>`;
+  if(feed){
+    if(!IPS.length){ feed.innerHTML=`<div class="fav-empty">还没关注对象~<br>去上方「关注 & 找活动」添加,这里就能一键看各平台最新。</div>`; }
+    else{
+      const plats=[['xhs','📕 小红书'],['wb','🔴 微博'],['x','✖ X'],['google','🔍 Google'],['off','🏠 官方']];
+      const sel=plats.map(([k,l])=>`<span class="dyn-plat${feedPlat===k?' on':''}" onclick="setFeedPlat('${k}')">${l}</span>`).join('');
+      const rows=IPS.map(x=>`<a class="dyn-row" href="${platUrl(x,feedPlat)}" target="_blank" rel="noopener"><span class="ip-e">${x.e}</span><span class="dyn-name"><b>${x.n}</b><i>${x.jp||''}</i></span><span class="dyn-go">看${platShort(feedPlat)} ›</span></a>`).join('');
+      feed.innerHTML=`<div class="pit-hint" style="margin-bottom:8px">先选平台,再点某个对象直接跳到该平台的最新/热门内容(官方可信,社交仅线索)。</div><div class="dyn-plats">${sel}</div>${rows}`;
+    }
+  }
 }
+let feedPlat='xhs';
+function setFeedPlat(p){ feedPlat=p; renderIP(); }
+function platShort(p){return {xhs:'小红书',wb:'微博',x:'X',google:'Google',off:'官方'}[p]||'';}
+function platUrl(x,p){
+  const n=encodeURIComponent(x.n+' 快闪'), nd=encodeURIComponent(x.n+' 日本'), j=encodeURIComponent((x.jp||x.n)+' イベント'), g=encodeURIComponent((x.jp||x.n)+' 日本 ポップアップ');
+  if(p==='wb') return 'https://s.weibo.com/weibo?q='+nd;
+  if(p==='x') return 'https://twitter.com/search?q='+j+'&f=live';
+  if(p==='google') return 'https://www.google.com/search?q='+g;
+  if(p==='off') return x.off||('https://www.google.com/search?q='+g);
+  return 'https://www.xiaohongshu.com/search_result?keyword='+n;
+}
+function toggleSec(name){ const b=document.getElementById('sec'+name), c=document.getElementById('c'+name+'Caret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; if(open) renderIP(); }
 
 /* ===== 活动个人工作台(本地/合规;含 mock 数据)===== */
 const ACT_TYPE={concert:'演唱会',live:'Live',fan_meeting:'见面会',popup_store:'快闪店',collab_cafe:'联名咖啡',exhibition:'展览',lottery_goods:'一番赏/扭蛋',goods_release:'周边发售',musical:'音乐剧',stage:'舞台',screening:'上映/舞台挨拶',other:'其他'};
@@ -1185,7 +1212,6 @@ function icsAct(id){ const a=ACTS.find(x=>x.id===id); if(!a)return; const dt=a.d
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//jp-life//act//CN','BEGIN:VEVENT','UID:'+a.id+'@jp-life','DTSTART:'+start,'DTEND:'+end,'SUMMARY:'+a.title,'LOCATION:'+(a.venue||''),'DESCRIPTION:'+(ACT_TYPE[a.type]||'')+' '+(a.official||''),a.official?'URL:'+a.official:'','BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+a.title,'END:VALARM','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
   try{ const blob=new Blob([ics],{type:'text/calendar'}); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download=(a.title||'event').slice(0,30)+'.ics'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); toast('已生成 .ics 日历文件'); }catch(e){ toast('导出失败'); } }
 function openGloss(){ document.getElementById('glossBody').innerHTML=GLOSS.map(([j,c])=>`<div class="gloss-row"><b>${j}</b><span>${c}</span></div>`).join(''); document.getElementById('maskGloss').classList.add('on'); }
-function toggleDisc(){ const b=document.getElementById('discBody'), c=document.getElementById('discCaret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; if(open) renderIP(); }
 
 /* ---------- 屏幕切换 ---------- */
 const state={}; let cur=null; let originScreen='home';
