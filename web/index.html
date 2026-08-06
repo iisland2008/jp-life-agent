@@ -224,6 +224,18 @@
   .ip-chip{font-size:12px;background:var(--yellow-t);color:#a5852f;padding:5px 11px;border-radius:16px;cursor:pointer;}
   .ip-chip.rec{background:var(--pink-t);color:#c56a8a;}
   .ip-chip:active{transform:scale(.95);}
+  /* 兴趣分类手风琴 */
+  .ipc-item{border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:var(--card);overflow:hidden;}
+  .ipc-h{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;}
+  .ipc-e{font-size:18px;}
+  .ipc-h b{font-size:14px;color:#5f5245;}
+  .ipc-jp{font-size:10.5px;color:var(--ink2);}
+  .ipc-caret{margin-left:auto;color:#c9b48a;font-size:13px;}
+  .ipc-body{padding:2px 13px 13px;animation:fade .2s ease;}
+  .ipc-sub{font-size:11px;color:var(--ink2);margin:8px 0 6px;font-weight:600;}
+  .ch-row{display:flex;flex-wrap:wrap;gap:7px;}
+  .ch-chip{text-decoration:none;font-size:12px;font-weight:600;background:var(--blue-t);color:#4f7aa5;padding:6px 11px;border-radius:12px;border:1px solid #cfe0ef;}
+  .ch-chip:active{transform:scale(.96);}
   .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
   .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
   .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
@@ -938,13 +950,16 @@ function content(key){
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
   }
   if(key==='event'){
-    return `<div class="panel"><h3>⭐ 我的关注 IP</h3>
-      <div class="ip-add"><input id="ipInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="搜索/添加 IP,如 三丽鸥 / Chiikawa" onkeydown="if(event.key==='Enter')addIPInput()"/><button class="ip-addbtn" onclick="addIPInput()">添加</button></div>
-      <div class="ip-quick" id="ipQuick"></div>
+    return `<div class="panel"><h3>⭐ 我的关注</h3>
+      <div class="ip-add"><input id="ipInput" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="搜索/添加,如 三丽鸥 / SEVENTEEN / 音乐剧" onkeydown="if(event.key==='Enter')addIPInput()"/><button class="ip-addbtn" onclick="addIPInput()">添加</button></div>
       <div id="ipFav"></div>
     </div>
+    <div class="panel"><h3>🧭 按兴趣找活动 · 订票途径</h3>
+      <div class="pit-hint" style="margin-bottom:8px">按分类展开:关注感兴趣的对象,并查看这类活动一般用<b>哪个 App 订票 / 看信息</b>。</div>
+      <div id="ipCats"></div>
+    </div>
     <div class="panel"><h3>🆕 最新动态</h3>
-      <div class="pit-hint" style="margin-bottom:10px">点每个 IP 展开,直达<b>官方</b>与<b>相关讨论(非官方)</b>看最新活动/上新。官方信息可信,社交平台仅作线索。</div>
+      <div class="pit-hint" style="margin-bottom:10px">点每个关注对象展开,直达<b>官方</b>与<b>相关讨论(非官方)</b>看最新活动/上新。</div>
       <div id="ipFeed"></div>
     </div>`;
   }
@@ -978,35 +993,53 @@ const IPCAT=[
   {n:'蜡笔小新',jp:'クレヨンしんちゃん',e:'🖍️',off:'https://www.shinchan-app.jp/',cat:'anime',aliases:['蜡笔小新','クレヨンしんちゃん','Crayon Shin-chan']},
   {n:'吉卜力',jp:'ジブリ',e:'🌿',off:'https://www.ghibli.jp/',cat:'anime',aliases:['Ghibli','ジブリ','吉卜力','宫崎骏']},
   {n:'初音未来',jp:'初音ミク',e:'🎤',off:'https://piapro.net/',cat:'anime',aliases:['Hatsune Miku','初音ミク','初音未来','miku']},
-  {n:'迪士尼',jp:'ディズニー',e:'🏰',off:'https://www.disney.co.jp/',cat:'park',aliases:['Disney','ディズニー','迪士尼']}
+  {n:'迪士尼',jp:'ディズニー',e:'🏰',off:'https://www.disney.co.jp/',cat:'ip',aliases:['Disney','ディズニー','迪士尼']}
 ];
-const IPCAT_LB={ip:'🎀 角色·品牌 IP', anime:'✨ 动漫·游戏', park:'🎡 乐园·娱乐'};
+/* GPT 一级分类(可折叠):关注对象 + 该类订票/信息 App(参考产品) */
+const ICATS=[
+  {id:'ip',cn:'角色·品牌 IP',jp:'キャラ・IP',e:'🎀',tags:[],ch:[['ポップアップポスト','https://popuppost.jp/'],['アニメイトカフェ','https://www.animatecafe.jp/'],['コラボカフェ东京','https://collabo-cafe.com/'],['一番くじ','https://1kuji.com/']]},
+  {id:'anime',cn:'动漫·漫画·游戏',jp:'アニメ・ゲーム',e:'📺',tags:['动画','漫画','乙女游戏','手游','音游'],ch:[['アニメイトカフェ','https://www.animatecafe.jp/'],['ポップアップポスト','https://popuppost.jp/'],['一番くじ','https://1kuji.com/']]},
+  {id:'music',cn:'音乐·Live',jp:'音楽・ライブ',e:'🎸',tags:['J-POP','乐队','音乐节','Anisong','Vocaloid'],ch:[['チケットぴあ','https://t.pia.jp/'],['ローチケ','https://l-tike.com/concert/'],['e+ (eplus)','https://eplus.jp/'],['LivePocket','https://t.livepocket.jp/']]},
+  {id:'kpop',cn:'K-POP·韩流',jp:'K-POP・韓流',e:'🎤',tags:['男团','女团','Solo','韩剧演员'],ch:[['チケットぴあ','https://t.pia.jp/'],['e+ (eplus)','https://eplus.jp/'],['ローチケ','https://l-tike.com/'],['Kstyle 资讯','https://news.kstyle.com/']]},
+  {id:'idol',cn:'日本偶像',jp:'アイドル',e:'✨',tags:['女性偶像','男性偶像','地下偶像','声优偶像'],ch:[['LivePocket','https://t.livepocket.jp/'],['TIGET','https://www.tiget.net/'],['TicketDive','https://ticketdive.com/'],['Eventernote','https://www.eventernote.com/']]},
+  {id:'seiyuu',cn:'声优·VTuber·主播',jp:'声優・VTuber',e:'🎧',tags:['声优','VTuber','虚拟歌手','YouTuber'],ch:[['Eventernote','https://www.eventernote.com/'],['チケットぴあ','https://t.pia.jp/'],['e+ (eplus)','https://eplus.jp/']]},
+  {id:'stage',cn:'舞台·音乐剧',jp:'舞台・ミュージカル',e:'🎭',tags:['音乐剧','2.5次元','宝塚','话剧','歌舞伎'],ch:[['チケットぴあ 演劇','https://t.pia.jp/'],['ローチケ 演劇','https://l-tike.com/play/'],['宝塚官网','https://kageki.hankyu.co.jp/']]},
+  {id:'movie',cn:'电影·电视剧·演员',jp:'映画・ドラマ',e:'🎬',tags:['日本电影','日剧','演员','舞台挨拶'],ch:[['映画.com','https://eiga.com/'],['チケットぴあ 映画','https://t.pia.jp/'],['ローチケ','https://l-tike.com/']]},
+  {id:'art',cn:'艺术·展览',jp:'アート・展覧会',e:'🖼️',tags:['原画展','美术展','沉浸式展','摄影展'],ch:[['ローチケ 展覧会','https://l-tike.com/'],['チケットぴあ','https://t.pia.jp/']]},
+  {id:'owarai',cn:'搞笑·Talk',jp:'お笑い・トーク',e:'🎙️',tags:['漫才','搞笑艺人','公开录制','Podcast'],ch:[['チケットぴあ','https://t.pia.jp/'],['よしもと','https://www.yoshimoto.co.jp/']]},
+  {id:'sports',cn:'体育·电竞',jp:'スポーツ・eスポーツ',e:'⚽',tags:['棒球','足球','花滑','格斗','电竞'],ch:[['チケットぴあ スポーツ','https://t.pia.jp/'],['ローチケ','https://l-tike.com/']]}
+];
 function ipFind(v){ v=v.trim(); return IPCAT.find(c=>c.n===v||c.jp===v||(c.aliases||[]).some(a=>a.toLowerCase()===v.toLowerCase())); }
 const IPKEY='jp_fav_ip'; let IPS=[]; try{IPS=JSON.parse(localStorage.getItem(IPKEY)||'[]');}catch(e){}
 // 迁移旧数据:按别名归一到统一命名(如 Hello Kitty→凯蒂猫、库洛米→酷洛米),并去重
 (function(){ const seen={}; IPS=IPS.map(x=>{ const h=ipFind(x.n); return h?{n:h.n,jp:h.jp,e:h.e,off:h.off,brand:h.brand||''}:x; }).filter(x=>seen[x.n]?false:(seen[x.n]=true)); try{localStorage.setItem(IPKEY,JSON.stringify(IPS));}catch(e){} })();
 function saveIPS(){try{localStorage.setItem(IPKEY,JSON.stringify(IPS));}catch(e){}}
 function isIP(n){return IPS.some(x=>x.n===n);}
-let ipOpen={};
-function addIP(o){ if(!o||!o.n||isIP(o.n))return; IPS.push({n:o.n,jp:o.jp||o.n,e:o.e||'⭐',off:o.off||'',brand:o.brand||''}); saveIPS(); renderIP(); toast('已关注 '+o.n+' ⭐'); }
+let ipOpen={}, catOpen={};
+function addIP(o){ if(!o||!o.n||isIP(o.n))return; IPS.push({n:o.n,jp:o.jp||o.n,e:o.e||'⭐',off:o.off||'',brand:o.brand||'',cat:o.cat||''}); saveIPS(); renderIP(); toast('已关注 '+o.n+' ⭐'); }
 function addIPByName(n){ addIP(ipFind(n)||{n}); }
+function addTag(n,cat){ addIP(ipFind(n)||{n,cat,e:'🏷️'}); }
 function addIPInput(){ const el=document.getElementById('ipInput'); if(!el)return; const v=el.value.trim(); if(!v)return; addIP(ipFind(v)||{n:v}); el.value=''; }
 function removeIP(n){ IPS=IPS.filter(x=>x.n!==n); saveIPS(); renderIP(); }
 function toggleIpCard(n){ ipOpen[n]=!ipOpen[n]; renderIP(); }
+function toggleCat(id){ catOpen[id]=!catOpen[id]; renderIP(); }
 function ipOfficial(ip){ const g=encodeURIComponent((ip.jp||ip.n)+' 日本 ポップアップ'); const a=ip.off?[['🏠 官方站',ip.off]]:[]; a.push(['🔍 Google 活动','https://www.google.com/search?q='+g]); return a; }
 function ipSocial(ip){ const xhs=encodeURIComponent(ip.n+' 快闪'), wb=encodeURIComponent(ip.n+' 日本'), x=encodeURIComponent((ip.jp||ip.n)+' イベント');
   return [['📕 小红书','https://www.xiaohongshu.com/search_result?keyword='+xhs],['🔴 微博','https://s.weibo.com/weibo?q='+wb],['✖ X','https://twitter.com/search?q='+x+'&f=live']]; }
+function esc2(s){return (s||'').replace(/'/g,"\\'");}
+function renderIPCats(){
+  const box=document.getElementById('ipCats'); if(!box) return;
+  box.innerHTML=ICATS.map(c=>{
+    const open=!!catOpen[c.id];
+    const ips=IPCAT.filter(x=>x.cat===c.id&&!isIP(x.n)).map(x=>`<span class="ip-chip" onclick="addIPByName('${esc2(x.n)}')">${x.e} ${x.n} ＋</span>`);
+    const tags=(c.tags||[]).filter(t=>!isIP(t)).map(t=>`<span class="ip-chip" onclick="addTag('${esc2(t)}','${c.id}')">${t} ＋</span>`);
+    const chips=ips.concat(tags).join('')||'<span class="sub" style="font-size:11px;color:var(--ink2)">已全部关注</span>';
+    const ch=(c.ch||[]).map(([n,u])=>`<a class="ch-chip" href="${u}" target="_blank" rel="noopener">🎫 ${n}</a>`).join('');
+    return `<div class="ipc-item"><div class="ipc-h" onclick="toggleCat('${c.id}')"><span class="ipc-e">${c.e}</span><b>${c.cn}</b><span class="ipc-jp">${c.jp}</span><span class="ipc-caret">${open?'▾':'▸'}</span></div>${open?`<div class="ipc-body"><div class="ipc-sub">关注对象</div><div class="ip-quickrow">${chips}</div><div class="ipc-sub">🎫 订票 / 信息 App</div><div class="ch-row">${ch}</div></div>`:''}</div>`;
+  }).join('');
+}
 function renderIP(){
-  // 推荐区:先按已关注品牌推荐「同家族」,再按一级分类浏览
-  const q=document.getElementById('ipQuick');
-  if(q){
-    const brands=new Set(IPS.filter(x=>x.brand).map(x=>x.brand));
-    const sib=IPCAT.filter(x=>x.brand&&brands.has(x.brand)&&!isIP(x.n));
-    let html='';
-    if(sib.length){ const b=[...brands][0]; html+=`<div class="ip-rec-lb">因为你关注了「${b}」,或许也喜欢</div><div class="ip-quickrow">${sib.map(x=>`<span class="ip-chip rec" onclick="addIPByName('${x.n}')">${x.e} ${x.n} ＋</span>`).join('')}</div>`; }
-    ['ip','anime','park'].forEach(cat=>{ const items=IPCAT.filter(x=>x.cat===cat&&!isIP(x.n)); if(items.length) html+=`<div class="ip-cat-lb">${IPCAT_LB[cat]}</div><div class="ip-quickrow">${items.map(x=>`<span class="ip-chip" onclick="addIPByName('${x.n}')">${x.e} ${x.n} ＋</span>`).join('')}</div>`; });
-    q.innerHTML=html||'<span class="sub" style="font-size:11px;color:var(--ink2)">推荐都已关注,可在上方自定义添加</span>';
-  }
+  renderIPCats();
   const fav=document.getElementById('ipFav');
   if(fav) fav.innerHTML=IPS.length?`<div class="ip-fav-hd">已关注 ${IPS.length}</div><div class="ip-favs">${IPS.map(x=>`<span class="ip-tag">${x.e} ${x.n}<i onclick="removeIP('${x.n.replace(/'/g,"\\'")}')">✕</i></span>`).join('')}</div>`:'';
   const feed=document.getElementById('ipFeed');
