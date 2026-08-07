@@ -288,20 +288,23 @@
   .gloss-row span{font-size:12.5px;color:var(--ink2);line-height:1.5;}
   /* 通用免责小字 */
   .mini-note{font-size:10.5px;color:var(--ink2);line-height:1.6;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);}
-  /* 租房初期费用计算器 */
-  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-  .calc-cell{display:flex;flex-direction:column;gap:4px;}
-  .calc-cell span{font-size:11.5px;color:var(--ink2);}
-  .calc-in{border:1.5px solid #ece1cd;background:var(--card);border-radius:11px;padding:9px 11px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;width:100%;box-sizing:border-box;}
-  .calc-in:focus{border-color:#dcccac;}
-  .calc-out{margin-top:12px;}
-  .calc-hint{font-size:12px;color:var(--ink2);text-align:center;padding:10px;}
-  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:13px;color:#6b5f52;}
-  .calc-row b{font-size:15px;color:#5f5245;}
-  .calc-row.big{background:var(--pink-t);border-radius:12px;padding:11px 13px;border-bottom:none;margin-bottom:4px;}
-  .calc-row.big span{color:#a55c7a;font-weight:600;}
-  .calc-row.big b{font-size:19px;color:#c56a8a;}
-  .calc-warn{font-size:11.5px;color:#b6862f;background:rgba(231,191,107,.16);border:1px solid rgba(231,191,107,.4);border-radius:11px;padding:8px 11px;margin-top:9px;line-height:1.6;}
+  /* 租房月度房费 + 币种切换 */
+  .rc-cur{display:flex;gap:6px;margin-bottom:11px;}
+  .rc-cbtn{flex:1;text-align:center;font-size:13px;padding:8px;border-radius:12px;background:rgba(0,0,0,.04);color:var(--ink2);cursor:pointer;}
+  .rc-cbtn.on{background:var(--pink);color:#fff;font-weight:700;}
+  .rc-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);}
+  .rc-lb{flex:none;width:64px;font-size:13.5px;color:#5f5245;}
+  .rc-inwrap{flex:1;display:flex;align-items:center;border:1.5px solid #ece1cd;border-radius:11px;padding:0 11px;background:var(--card);}
+  .rc-inwrap:focus-within{border-color:#e79fb6;}
+  .rc-yen{color:var(--ink2);font-size:14px;}
+  .rc-in{flex:1;min-width:0;border:none;background:transparent;padding:9px 6px;font-size:15px;font-family:inherit;color:var(--ink);outline:none;}
+  .rc-x{flex:none;color:#cbbfa8;font-size:16px;cursor:pointer;padding:2px 4px;}
+  .rc-add{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .rc-addchip{font-size:12px;background:var(--pink-t);color:#c56a8a;padding:5px 11px;border-radius:16px;cursor:pointer;}
+  .rc-total{display:flex;justify-content:space-between;align-items:center;background:var(--pink-t);border-radius:13px;padding:12px 14px;margin-top:12px;}
+  .rc-total span{color:#a55c7a;font-weight:600;font-size:13px;}
+  .rc-total b{font-size:21px;color:#c56a8a;}
+  .rc-alt{text-align:right;font-size:11.5px;color:var(--ink2);margin-top:5px;}
   /* 打工日语模板弹窗 */
   .tpl-body{max-height:60vh;overflow-y:auto;}
   .tpl-to{font-size:11.5px;color:var(--ink2);margin-bottom:10px;}
@@ -1071,12 +1074,11 @@ function content(key){
   }
   if(key==='rent'){
     return `<div class="panel" style="padding:12px 14px"><div class="banner" style="background:var(--pink-t);color:#c56a8a">🏠 租房不踩坑指南。找房源用 SUUMO / HOME'S / UR,这里帮你看懂套路、审合同。</div></div>
-    <div class="panel"><h3>🧮 初期费用计算器</h3>
-      <div class="calc-grid">${[['cRent','月租'],['cMgmt','管理费'],['cDep','敷金'],['cKey','礼金'],['cAgy','中介费'],['cGua','保证会社'],['cIns','火灾保险'],['cLock','换锁费'],['cCln','清扫费'],['cOth','其他']].map(([id,l])=>`<label class="calc-cell"><span>${l}</span><input id="${id}" type="number" inputmode="numeric" placeholder="0" class="calc-in" oninput="calcRent()"></label>`).join('')}</div>
-      <div id="calcOut" class="calc-out"></div>
-      <div class="mini-note">ℹ️ 未填的费用视为「未确认」,不等于 0;签约前请逐项向中介确认。计算仅供参考。</div></div>
-    <div class="panel"><h3>⚠️ 常见的坑,先看这些</h3>
-      ${PITFALLS.map(p=>`<div class="pit"><div class="pit-ic">${p.ic}</div><div class="pit-b"><b>${p.t}</b><span>${p.d}</span></div></div>`).join('')}
+    <div class="panel"><h3>💰 我的月度房费</h3><div id="rentCost"></div></div>
+    <div class="panel"><div class="disc-h" onclick="togglePit()"><h3 style="margin:0">⚠️ 常见的坑</h3><span class="ipc-caret" id="pitCaret">▸</span></div>
+      <div id="pitBody" style="display:none;margin-top:6px">
+        ${PITFALLS.map(p=>`<div class="pit"><div class="pit-ic">${p.ic}</div><div class="pit-b"><b>${p.t}</b><span>${p.d}</span></div></div>`).join('')}
+      </div>
     </div>
     <div class="panel"><h3>📄 帮你看租房合同</h3>
       <div class="pit-hint">把「重要事項説明書」或合同里担心的条款<b>拍照发我</b>,或直接把条款贴进对话——我帮你逐条翻译、标出容易吃亏的地方(退租费用、违约金、原状回復、自动续约、禁止事项等)。</div>
@@ -1409,26 +1411,35 @@ function openTpl(id){ const t=WORK_TPL.find(x=>x.id===id); if(!t)return;
 function copyTpl(id,f){ const t=WORK_TPL.find(x=>x.id===id); if(t)copyText(t[f]); }
 function copyText(s){ try{ (navigator.clipboard&&navigator.clipboard.writeText(s))||Promise.reject(); toast('已复制 ✓'); }catch(e){ toast('复制失败,请手动选择'); } }
 
-/* ===== 租房初期费用计算器 ===== */
-function calcRent(){
-  const out=document.getElementById('calcOut'); if(!out) return;
-  const g=id=>{ const el=document.getElementById(id); const v=el?parseFloat(el.value):NaN; return {v:isNaN(v)?0:v, filled:!!(el&&el.value.trim()!=='')}; };
-  const rent=g('cRent').v, mgmt=g('cMgmt').v;
-  const oneoff=g('cDep').v+g('cKey').v+g('cAgy').v+g('cGua').v+g('cIns').v+g('cLock').v+g('cCln').v+g('cOth').v;
-  const init=oneoff+rent+mgmt;         // 初期 = 一次性费用 + 首月(房租+管理费)
-  const monthly=rent+mgmt;
-  const year1=init+monthly*11;
-  const twoYr=init+monthly*23+rent;    // 两年:含一次更新料(约1个月租)
-  const monAvg=twoYr/24;
-  const unconfirmed=['cDep','cKey','cAgy','cGua','cIns','cLock','cCln'].filter(id=>!g(id).filled).length;
-  const yen=n=>'¥'+Math.round(n).toLocaleString('en-US');
-  if(!rent&&!oneoff){ out.innerHTML='<div class="calc-hint">填入各项费用(至少月租),自动算出初期与长期成本。</div>'; return; }
-  out.innerHTML=`<div class="calc-row big"><span>初期费用合计</span><b>${yen(init)}</b></div>
-    <div class="calc-row"><span>每月固定(房租+管理费)</span><b>${yen(monthly)}</b></div>
-    <div class="calc-row"><span>首年预计总成本</span><b>${yen(year1)}</b></div>
-    <div class="calc-row"><span>两年月均(含更新料)</span><b>${yen(monAvg)}/月</b></div>
-    ${unconfirmed?`<div class="calc-warn">⚠️ 有 ${unconfirmed} 项费用未填 → 视为「未确认」,不等于 0,签约前请逐项确认。</div>`:''}`;
+/* ===== 租房:月度房费 + 日元/人民币切换 ===== */
+const RC_ITEMS=[['rent','房租'],['mgmt','管理费'],['util','水电'],['net','网费']];
+let RC={vals:{},active:['rent','mgmt','util','net'],cur:'jpy'};
+try{ const s=JSON.parse(localStorage.getItem('jp_rent_cost')||'null'); if(s)RC=Object.assign(RC,s); }catch(e){}
+let RC_RATE=0.04276, RC_RATE_DATE='';
+function saveRC(){try{localStorage.setItem('jp_rent_cost',JSON.stringify(RC));}catch(e){}}
+function fetchRate(){ fetch('https://api.frankfurter.dev/v1/latest?from=JPY&to=CNY').then(r=>r.json()).then(d=>{ if(d&&d.rates&&d.rates.CNY){ RC_RATE=d.rates.CNY; RC_RATE_DATE=d.date||''; renderRentCost(); } }).catch(()=>{}); }
+function rcLabel(id){ const f=RC_ITEMS.find(x=>x[0]===id); return f?f[1]:id; }
+function rcTotalJPY(){ return RC.active.reduce((s,id)=>s+(parseFloat(RC.vals[id])||0),0); }
+function fmtMoney(jpy,cur){ return cur==='cny' ? '¥'+(jpy*RC_RATE).toLocaleString('en-US',{maximumFractionDigits:0})+' (RMB)' : '¥'+Math.round(jpy).toLocaleString('en-US'); }
+function rcAltText(tj){ return RC.cur==='cny' ? '≈ ¥'+Math.round(tj).toLocaleString('en-US')+' 日元' : (tj?'≈ '+fmtMoney(tj,'cny')+' 人民币':''); }
+function renderRentCost(){
+  const el=document.getElementById('rentCost'); if(!el)return;
+  const cur=RC.cur;
+  const toggle=`<div class="rc-cur"><span class="rc-cbtn${cur==='jpy'?' on':''}" onclick="rcCur('jpy')">🇯🇵 日元</span><span class="rc-cbtn${cur==='cny'?' on':''}" onclick="rcCur('cny')">🇨🇳 人民币</span></div>`;
+  const rows=RC.active.map(id=>`<div class="rc-row"><span class="rc-lb">${rcLabel(id)}</span><span class="rc-inwrap"><span class="rc-yen">¥</span><input type="number" inputmode="numeric" class="rc-in" value="${RC.vals[id]||''}" placeholder="0" oninput="rcInput('${id}',this.value)"></span><span class="rc-x" onclick="rcRemove('${id}')">×</span></div>`).join('');
+  const removed=RC_ITEMS.filter(x=>!RC.active.includes(x[0]));
+  const addChips=removed.length?`<div class="rc-add">${removed.map(x=>`<span class="rc-addchip" onclick="rcAdd('${x[0]}')">＋ ${x[1]}</span>`).join('')}</div>`:'';
+  const tj=rcTotalJPY();
+  const total=`<div class="rc-total"><span>每月合计</span><b id="rcTotalV">${fmtMoney(tj,cur)}</b></div><div class="rc-alt" id="rcAlt">${rcAltText(tj)}</div>`;
+  const rateNote=`<div class="mini-note">💱 汇率 1 日元 ≈ ${RC_RATE.toFixed(4)} 人民币${RC_RATE_DATE?'('+RC_RATE_DATE+')':''} · 金额按日元填,切换只换算显示,实际以银行结算为准。</div>`;
+  el.innerHTML=toggle+rows+addChips+total+rateNote;
 }
+function rcInput(id,val){ RC.vals[id]=val; saveRC(); const tj=rcTotalJPY(); const tv=document.getElementById('rcTotalV'); if(tv)tv.textContent=fmtMoney(tj,RC.cur); const alt=document.getElementById('rcAlt'); if(alt)alt.textContent=rcAltText(tj); }
+function rcRemove(id){ RC.active=RC.active.filter(x=>x!==id); saveRC(); renderRentCost(); }
+function rcAdd(id){ if(!RC.active.includes(id))RC.active.push(id); saveRC(); renderRentCost(); }
+function rcCur(c){ RC.cur=c; saveRC(); renderRentCost(); }
+function togglePit(){ const b=document.getElementById('pitBody'),c=document.getElementById('pitCaret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; }
+fetchRate();
 
 function openCat(key){
   const from=curScreen();
@@ -1453,7 +1464,7 @@ function openCat(key){
       </div></div>`;
   if(key==='gomi') renderGomiSched();
   if(key==='event') renderActs();
-  if(key==='rent') calcRent();
+  if(key==='rent'){ renderRentCost(); fetchRate(); }
   const log=document.getElementById('chatlog');
   log.innerHTML=state[key].msgs||`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
   fetch('/api/meta').then(r=>r.json()).then(m=>{const t=document.getElementById('modeTag');if(t)t.textContent=m.mode==='real'?'在线':'演示模式';}).catch(()=>{});
