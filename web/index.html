@@ -313,6 +313,16 @@
   .tpl-copy{color:#b07a4a;font-weight:700;cursor:pointer;font-size:11px;padding:2px 9px;background:var(--coral-t);border-radius:9px;}
   .tpl-jp{font-size:13.5px;color:#5f5245;line-height:1.65;}
   .tpl-cn{font-size:12px;color:var(--ink2);margin-top:2px;}
+  /* 我的小厨房 + 厨房用语 */
+  #kitChips{display:flex;flex-wrap:wrap;gap:7px;}
+  .kit-chip{display:inline-flex;flex-direction:column;align-items:center;font-size:12.5px;font-weight:600;color:var(--ink2);background:rgba(0,0,0,.04);border:1.5px solid transparent;padding:6px 12px;border-radius:14px;cursor:pointer;line-height:1.15;}
+  .kit-chip i{font-style:normal;font-size:9px;opacity:.7;margin-top:1px;}
+  .kit-chip.on{background:var(--blue-t);border-color:#83a9cf;color:#4f7aa5;}
+  .term-sec{margin-bottom:12px;}
+  .term-h{font-size:12.5px;font-weight:700;color:#6b4e3d;margin-bottom:6px;}
+  .term-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .term-row b{flex:none;width:130px;font-size:13px;color:#5f5245;font-weight:600;}
+  .term-row span{font-size:12.5px;color:var(--ink2);line-height:1.5;}
   .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
   .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
   .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
@@ -1049,7 +1059,16 @@ function content(key){
       <div class="mini-note">ℹ️ 本功能仅辅助整理信息,不构成法律/劳动意见;工时、工资、合同等重要事项以官方与雇主答复为准。</div></div>`;
   }
   if(key==='recipe'){
-    return `<div class="panel"><h3>🍳 单人快手餐</h3><div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.6">买菜时告诉我你有的食材,我推荐单人/双人餐、做法和大致热量,热量高还会给后几天的饮食建议。<br><b>更多菜谱库即将上线。</b></div>
+    return `<div class="panel"><div class="disc-h" onclick="toggleKit()"><h3 style="margin:0">🍳 我的小厨房</h3><span class="ipc-caret" id="kitCaret">▸</span></div>
+      <div id="kitBody" style="display:none;margin-top:8px">
+        <div class="pit-hint" style="margin-bottom:8px">勾选你有的设备,问我做菜时会<b>按你的条件</b>推荐(没烤箱就不给你要烤箱的菜)。</div>
+        <div id="kitChips"></div>
+      </div>
+    </div>
+    <div class="panel"><div class="disc-h" onclick="toggleTerms()"><h3 style="margin:0">📖 日式厨房用语</h3><span class="ipc-caret" id="termCaret">▸</span></div>
+      <div id="termBody" style="display:none;margin-top:8px"></div>
+    </div>
+    <div class="panel"><h3>🍳 单人快手餐</h3><div class="sub" style="font-size:12.5px;color:var(--ink2);line-height:1.6">买菜时告诉我你有的食材,我推荐单人/双人餐、做法和大致热量,热量高还会给后几天的饮食建议。</div>
       <div class="chips" style="margin-top:10px">${['我有鸡蛋和西红柿,能做什么?','想吃日式简单的,推荐一下','这道菜热量高吗?'].map(q=>
       `<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="ask('${q}')">${q}</span>`).join('')}</div></div>`;
   }
@@ -1388,6 +1407,24 @@ function refLinksHTML(key){
   return `<div id="refLinks"><div class="panel"><div class="src-hd" style="font-size:12.5px;color:#6b4e3d;font-weight:600;margin-bottom:8px">📎 官方 / 参考链接(可点击查最新)</div>${cards}</div></div>`;
 }
 function refreshRefLinks(){ const rl=document.getElementById('refLinks'); if(rl) rl.outerHTML=refLinksHTML(cur); }
+/* ===== 食谱:我的小厨房(设备) ===== */
+const KIT_ITEMS=[['renji','微波炉','電子レンジ'],['rice','电饭煲','炊飯器'],['oven','烤箱','オーブン'],['airfry','空气炸锅','ノンフライヤー'],['gas','燃气灶/明火','ガスコンロ'],['ih','电磁炉 IH','IH'],['grill','烤鱼架','魚焼きグリル'],['toaster','烤面包机','トースター'],['kettle','电水壶','ケトル'],['freezer','冷冻室','冷凍庫'],['pan','平底锅','フライパン'],['pot','汤锅','鍋']];
+function kitCN(id){const f=KIT_ITEMS.find(x=>x[0]===id);return f?f[1]:id;}
+const KITKEY='jp_kitchen'; let KIT=[]; try{KIT=JSON.parse(localStorage.getItem(KITKEY)||'[]');}catch(e){}
+function saveKIT(){try{localStorage.setItem(KITKEY,JSON.stringify(KIT));}catch(e){}}
+function toggleKitItem(id){ const i=KIT.indexOf(id); if(i<0)KIT.push(id); else KIT.splice(i,1); saveKIT(); renderKit(); }
+function renderKit(){ const el=document.getElementById('kitChips'); if(!el)return; el.innerHTML=KIT_ITEMS.map(([id,cn,jp])=>`<span class="kit-chip${KIT.includes(id)?' on':''}" onclick="toggleKitItem('${id}')">${cn}<i>${jp}</i></span>`).join(''); }
+function toggleKit(){ const b=document.getElementById('kitBody'),c=document.getElementById('kitCaret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; if(open)renderKit(); }
+/* ===== 食谱:日式厨房用语 ===== */
+const COOK_TERMS=[
+  {t:'📏 计量',rows:[['大さじ1','15ml(一大勺)'],['小さじ1','5ml(一小勺)'],['1カップ','200ml(一量杯)'],['1合(米)','≈180ml(量米杯一杯生米)'],['少々','少量(拇指食指两指捏)'],['ひとつまみ','一撮(三指捏,比少々多)'],['適量','适量,按口味']]},
+  {t:'🔥 火候',rows:[['弱火','小火'],['中火','中火'],['強火','大火'],['余熱','余温/预热']]},
+  {t:'🔪 处理',rows:[['下ごしらえ','备料/预处理'],['水にさらす','泡水去涩/去味'],['湯を切る / 水気を切る','沥干水分'],['粗熱を取る','放到不烫手再操作'],['千切り','切丝'],['みじん切り','切末'],['一口大','切成一口大小'],['落し蓋','内盖(直接盖在食材上)']]},
+  {t:'🏷️ 包装 / 加热',rows:[['要冷蔵 / 冷蔵','需冷藏 / 冷藏'],['冷凍 / 解凍','冷冻 / 解冻'],['常温','常温保存'],['500W 2分','微波 500 瓦 2 分钟'],['湯せん','隔水加热'],['賞味期限','最佳赏味期(过了多半仍可食)'],['消費期限','消费期限(过了不建议食用)']]}
+];
+function renderTerms(){ const el=document.getElementById('termBody'); if(!el)return; el.innerHTML=COOK_TERMS.map(s=>`<div class="term-sec"><div class="term-h">${s.t}</div>${s.rows.map(([j,cc])=>`<div class="term-row"><b>${j}</b><span>${cc}</span></div>`).join('')}</div>`).join(''); }
+function toggleTerms(){ const b=document.getElementById('termBody'),c=document.getElementById('termCaret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; if(open)renderTerms(); }
+
 /* ===== 打工日语模板 ===== */
 const WORK_TPL=[
   {id:'sick',scene:'😷 生病请假',to:'店长/责任者',polite:'お疲れ様です。本日、体調不良のためお休みをいただけますでしょうか。ご迷惑をおかけし申し訳ありません。',short:'すみません、体調不良で本日お休みしたいです。',cn:'今天身体不适,想请假'},
@@ -1776,7 +1813,7 @@ async function send(imageData){
     const region = cur==='gomi' ? (currentGomi.city||currentGomi.pref||'') : (USER.city||USER.pref||'');
     const catName = cur==='gomi' ? c.name+'·'+currentGomi.pref+currentGomi.city : c.name;
     const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:text,history:state[cur].history,category:catName,region:region,image:imageData||undefined})});
+      body:JSON.stringify({message:(cur==='recipe'&&typeof KIT!=='undefined'&&KIT.length)?text+` 【我的厨房设备:${KIT.map(kitCN).join('、')};请只推荐这些设备能做的菜】`:text,history:state[cur].history,category:catName,region:region,image:imageData||undefined})});
     const d=await r.json(); tp.remove();
     // 仅保留“动作”确认(写日程/打工/课程),去掉“已查xxx”噪音
     if(d.tools&&d.tools.length){
