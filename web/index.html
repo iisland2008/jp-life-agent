@@ -1039,16 +1039,20 @@ function workDaysFor(y,m){
 }
 
 /* ---------- 行政子分类 ---------- */
+const ADMIN_CHECKED='2026-08';
 const ADMIN_DATA={
-  在留卡:{k:'在留期間更新',mat:'在留卡 / 护照 / 申请书 / 证件照 / 在学·成绩证明 / 经费证明',win:'地方出入国在留管理局',rsv:'可在线申请或到场取号',note:'期限前3个月内可办;出勤率过低可能不予更新。'},
-  国保:{k:'国民健康保险加入',mat:'在留卡 / 护照 / 个人编号 / 已完成住民登录',win:'市/区役所 保险年金课',rsv:'多为现场办理',note:'入国后14天内办;保费按前年收入算,可申请减免。'},
-  年金:{k:'国民年金',mat:'在留卡 / 个人编号 / 年金手册',win:'市役所 / 年金事务所',rsv:'现场办理为主',note:'留学生可申请「学生纳付特例」暂缓缴纳,每年申请。'},
-  个人编号:{k:'マイナンバーカード',mat:'通知卡 / 在留卡 / 证件照 / 本人确认',win:'市役所 或 在线申请',rsv:'支持在线申请',note:'制卡约1个月;可绑定健康保险证。'}
+  在留卡:{k:'在留期間更新(签证续签)',mat:'在留卡 / 护照 / 更新申请书 / 证件照(4×3cm) / 在学·成绩证明 / 经费支付证明',win:'住所地管辖的地方出入国在留管理局(或在线申请)',fee:'许可时 ¥6,000(收入印纸);在线申请 ¥5,500',when:'在留期限满了日前;持6个月以上在留者约满了日前3个月起可办',dur:'标准审查 2周～1个月',note:'受付平日9–12/13–16。出勤率过低或打工超28h可能影响更新;忘记更新=非法滞在,务必提前办。',src:'https://www.moj.go.jp/isa/applications/procedures/16-3.html',srcN:'出入国在留管理庁'},
+  国保:{k:'国民健康保险 加入',mat:'在留卡 / 护照 / 个人番号(マイナンバー) / 已完成住民登录(转入届)',win:'住所地 市/区役所 国保年金课',fee:'保费按前年度所得计;刚来日无日本收入者通常最低档,可申请减免',when:'住民登录(转入)后14天内',dur:'现场当日加入,保险证当场或随后邮寄',note:'看病自付3成(其余70%由国保负担)。未加入期间的保费会追溯征收;不与公司社保重复参保。',src:'https://www.moj.go.jp/isa/support/portal/index.html',srcN:'外国人生活支援门户'},
+  年金:{k:'国民年金 + 学生纳付特例',mat:'基础年金番号通知书(或年金手册) / 学生证或在学证明 / 在留卡 / 个人番号',win:'住所地 市/区役所 国民年金窗口(或年金事务所)',fee:'保费 ¥17,510/月(令和7年度);申请学生特例期间可暂缓缴纳',when:'满20岁起有加入义务;学生特例按学年(4月～次年3月)每年申请',dur:'现场受理,审查后邮寄结果',note:'本人前年所得 ≤128万円+(扶养人数×38万)可用学生特例。特例期算「资格期间」但不算「领取金额」,10年内可追缴补足。',src:'https://www.nenkin.go.jp/service/kokunen/menjo/20150710.html',srcN:'日本年金机构'},
+  个人编号:{k:'マイナンバーカード(个人番号卡)',mat:'交付申请书(含QR) / 通知卡 / 在留卡 / 证件照 / 本人确认书类',win:'手机·电脑在线申请为主,到市/区役所领取',fee:'首次交付免费',when:'随时;搬家或在留更新后需同步信息',dur:'申请后约1个月制卡,收到领取通知再到窗口领',note:'可作身份证、绑定健康保险证、网上办各种手续更方便。',src:'https://www.moj.go.jp/isa/support/portal/index.html',srcN:'外国人生活支援门户'}
 };
 function admCard(o){return `<div class="matrow"><span class="k">材料</span><span class="v">${o.mat}</span></div>
   <div class="matrow"><span class="k">窗口</span><span class="v">${o.win}</span></div>
-  <div class="matrow"><span class="k">预约</span><span class="v">${o.rsv}</span></div>
-  <div class="matrow"><span class="k">提醒</span><span class="v" style="color:#c58a4a">${o.note}</span></div>`;}
+  <div class="matrow"><span class="k">费用</span><span class="v">${o.fee}</span></div>
+  <div class="matrow"><span class="k">期限</span><span class="v">${o.when}</span></div>
+  <div class="matrow"><span class="k">时长</span><span class="v">${o.dur}</span></div>
+  <div class="matrow"><span class="k">提醒</span><span class="v" style="color:#c58a4a">${o.note}</span></div>
+  <a class="src-card" href="${o.src}" target="_blank" rel="noopener"><span class="src-ic">🏛️</span><span class="src-tx"><b>${o.srcN} · 官方页</b><span>手续以官方最新说明为准 · 核对 ${ADMIN_CHECKED}</span></span><span class="src-go">›</span></a>`;}
 
 function content(key){
   const c=CATS[key];
