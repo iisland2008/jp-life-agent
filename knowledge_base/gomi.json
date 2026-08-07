@@ -7,7 +7,8 @@
       "moenai": "不可燃垃圾 (燃えないゴミ / 不燃ごみ)",
       "shigen": "资源垃圾 (資源ごみ:瓶/罐/塑料瓶/纸)",
       "sodai": "大件垃圾 (粗大ごみ)",
-      "yugai": "有害垃圾 (有害ごみ:电池/灯管/喷雾罐等)"
+      "yugai": "有害垃圾 (有害ごみ:电池/灯管/喷雾罐等)",
+      "kaden": "家电回收 (家電リサイクル:电视/冰箱/洗衣机/空调 等,不可当普通垃圾)"
     }
   },
   "wards": {
@@ -63,19 +64,395 @@
     }
   },
   "item_classification": [
-    {"item": "塑料瓶 ペットボトル", "category": "shigen", "tips": "去盖、撕标签、冲洗;瓶身投资源,盖和标签投塑料包装"},
-    {"item": "便当盒/塑料托盘 プラ容器", "category": "shigen", "tips": "带プラマーク标识的塑料包装,洗净后投资源(丰岛区等并入可燃)"},
-    {"item": "厨余 生ごみ", "category": "moeru", "tips": "沥干水分,可燃垃圾"},
-    {"item": "纸尿裤 紙おむつ", "category": "moeru", "tips": "去除污物后投可燃"},
-    {"item": "玻璃杯/陶瓷 ガラス・陶器", "category": "moenai", "tips": "不可燃;破碎品用纸包好注明危险"},
-    {"item": "干电池 乾電池", "category": "yugai", "tips": "有害垃圾,单独透明袋"},
-    {"item": "喷雾罐 スプレー缶", "category": "yugai", "tips": "用完扎孔排气,按区指示投有害/不可燃"},
-    {"item": "荧光灯管 蛍光灯", "category": "yugai", "tips": "有害垃圾,避免破碎"},
-    {"item": "菜刀/剪刀 刃物", "category": "moenai", "tips": "不可燃;用厚纸包裹注明キケン"},
-    {"item": "旧衣服 古着", "category": "shigen", "tips": "多数区可作资源回收(古布),雨天顺延"},
-    {"item": "小型家电 小型家電", "category": "shigen", "tips": "手机/充电器等投小型家电回收箱"},
-    {"item": "自行车/家具 自転車・家具", "category": "sodai", "tips": "大件垃圾,必须预约+处理券"},
-    {"item": "易拉罐 缶 / 玻璃瓶 びん", "category": "shigen", "tips": "冲洗后投资源,瓶罐分开"},
-    {"item": "报纸/纸箱 新聞・段ボール", "category": "shigen", "tips": "捆扎后投纸类资源"}
+    {
+      "item": "塑料瓶 ペットボトル",
+      "category": "shigen",
+      "tips": "去盖、撕标签、冲洗;瓶身投资源,盖和标签投塑料包装"
+    },
+    {
+      "item": "便当盒/塑料托盘 プラ容器",
+      "category": "shigen",
+      "tips": "带プラマーク标识的塑料包装,洗净后投资源(丰岛区等并入可燃)"
+    },
+    {
+      "item": "厨余 生ごみ",
+      "category": "moeru",
+      "tips": "沥干水分,可燃垃圾"
+    },
+    {
+      "item": "纸尿裤 紙おむつ",
+      "category": "moeru",
+      "tips": "去除污物后投可燃"
+    },
+    {
+      "item": "玻璃杯/陶瓷 ガラス・陶器",
+      "category": "moenai",
+      "tips": "不可燃;破碎品用纸包好注明危险"
+    },
+    {
+      "item": "干电池 乾電池",
+      "category": "yugai",
+      "tips": "有害垃圾,单独透明袋"
+    },
+    {
+      "item": "喷雾罐 スプレー缶",
+      "category": "yugai",
+      "tips": "用完扎孔排气,按区指示投有害/不可燃"
+    },
+    {
+      "item": "荧光灯管 蛍光灯",
+      "category": "yugai",
+      "tips": "有害垃圾,避免破碎"
+    },
+    {
+      "item": "菜刀/剪刀 刃物",
+      "category": "moenai",
+      "tips": "不可燃;用厚纸包裹注明キケン"
+    },
+    {
+      "item": "旧衣服 古着",
+      "category": "shigen",
+      "tips": "多数区可作资源回收(古布),雨天顺延"
+    },
+    {
+      "item": "小型家电 小型家電",
+      "category": "shigen",
+      "tips": "手机/充电器等投小型家电回收箱"
+    },
+    {
+      "item": "自行车/家具 自転車・家具",
+      "category": "sodai",
+      "tips": "大件垃圾,必须预约+处理券"
+    },
+    {
+      "item": "易拉罐 缶 / 玻璃瓶 びん",
+      "category": "shigen",
+      "tips": "冲洗后投资源,瓶罐分开"
+    },
+    {
+      "item": "报纸/纸箱 新聞・段ボール",
+      "category": "shigen",
+      "tips": "捆扎后投纸类资源"
+    },
+    {
+      "item": "牛奶盒 紙パック",
+      "category": "shigen",
+      "tips": "洗净、剪开、晾干,投古紙/紙パック;内侧铝箔的部分区归可燃"
+    },
+    {
+      "item": "杂志·书籍 雑誌・本",
+      "category": "shigen",
+      "tips": "捆扎投古紙(雑誌类)"
+    },
+    {
+      "item": "传单·广告纸 チラシ",
+      "category": "shigen",
+      "tips": "并入「雑がみ(混合纸)」投古紙"
+    },
+    {
+      "item": "纸袋 紙袋",
+      "category": "shigen",
+      "tips": "雑がみ,投古紙"
+    },
+    {
+      "item": "复印纸·笔记本 コピー用紙",
+      "category": "shigen",
+      "tips": "雑がみ,投古紙;有塑料封面先拆"
+    },
+    {
+      "item": "信封·明信片 封筒・はがき",
+      "category": "shigen",
+      "tips": "雑がみ;带塑料窗的撕掉塑料部分"
+    },
+    {
+      "item": "泡沫托盘 白色トレー",
+      "category": "shigen",
+      "tips": "洗净,超市回收箱或按プラ投资源"
+    },
+    {
+      "item": "食品塑料袋·包装 プラ包装",
+      "category": "shigen",
+      "tips": "带プラマーク、洗净的投资源;脏的归可燃"
+    },
+    {
+      "item": "一次性筷子 割り箸",
+      "category": "moeru",
+      "tips": "木制,可燃"
+    },
+    {
+      "item": "牙刷 歯ブラシ",
+      "category": "moeru",
+      "tips": "小型塑料,多数区并入可燃"
+    },
+    {
+      "item": "圆珠笔·记号笔 ボールペン",
+      "category": "moeru",
+      "tips": "小型塑料,可燃"
+    },
+    {
+      "item": "保鲜膜 ラップ",
+      "category": "moeru",
+      "tips": "可燃"
+    },
+    {
+      "item": "口罩 マスク",
+      "category": "moeru",
+      "tips": "可燃"
+    },
+    {
+      "item": "湿巾·纸巾 ウェットティッシュ",
+      "category": "moeru",
+      "tips": "可燃"
+    },
+    {
+      "item": "棉签·化妆棉 綿棒・コットン",
+      "category": "moeru",
+      "tips": "可燃"
+    },
+    {
+      "item": "保冷剂 保冷剤",
+      "category": "moeru",
+      "tips": "可燃(不要倒进下水道)"
+    },
+    {
+      "item": "干燥剂 乾燥剤",
+      "category": "moeru",
+      "tips": "可燃"
+    },
+    {
+      "item": "猫砂 猫砂",
+      "category": "moeru",
+      "tips": "纸/木/矿物砂多按可燃,沥干;量大分次"
+    },
+    {
+      "item": "暖宝宝 使い捨てカイロ",
+      "category": "moeru",
+      "tips": "多数区可燃;部分区归不可燃,以各区为准"
+    },
+    {
+      "item": "皮鞋·皮包 革靴・バッグ",
+      "category": "moeru",
+      "tips": "皮革制品,可燃;过大按粗大"
+    },
+    {
+      "item": "毛绒玩具 ぬいぐるみ",
+      "category": "moeru",
+      "tips": "可燃;超过约30cm按粗大"
+    },
+    {
+      "item": "枕头 枕",
+      "category": "moeru",
+      "tips": "小型可燃;荞麦壳/大号按各区或粗大"
+    },
+    {
+      "item": "坐垫·靠垫 クッション",
+      "category": "moeru",
+      "tips": "可燃;大号按粗大"
+    },
+    {
+      "item": "CD·DVD ディスク",
+      "category": "moeru",
+      "tips": "小型塑料,多数区可燃"
+    },
+    {
+      "item": "橡胶制品 ゴム製品",
+      "category": "moeru",
+      "tips": "可燃"
+    },
+    {
+      "item": "蛋壳·菜渣 卵殻・野菜くず",
+      "category": "moeru",
+      "tips": "厨余,沥干水分,可燃"
+    },
+    {
+      "item": "茶渣·咖啡渣 茶がら",
+      "category": "moeru",
+      "tips": "沥干,可燃"
+    },
+    {
+      "item": "食用废油 廃食用油",
+      "category": "moeru",
+      "tips": "用凝固剂或吸油纸吸附后可燃,勿倒下水道"
+    },
+    {
+      "item": "贝壳·鸡骨 貝殻・骨",
+      "category": "moeru",
+      "tips": "多数区可燃;部分区归不可燃"
+    },
+    {
+      "item": "植物·枯枝 剪定枝",
+      "category": "moeru",
+      "tips": "短截捆扎按可燃;量大按粗大"
+    },
+    {
+      "item": "玻璃碎片 割れたガラス",
+      "category": "moenai",
+      "tips": "用厚纸包好、写上「キケン(危险)」,不可燃"
+    },
+    {
+      "item": "镜子 鏡",
+      "category": "moenai",
+      "tips": "小号不可燃;大号按粗大"
+    },
+    {
+      "item": "陶瓷餐具 食器",
+      "category": "moenai",
+      "tips": "不可燃"
+    },
+    {
+      "item": "白炽灯泡 白熱電球",
+      "category": "moenai",
+      "tips": "不可燃(荧光灯管才属有害)"
+    },
+    {
+      "item": "保温杯·水壶 水筒",
+      "category": "moenai",
+      "tips": "金属制,不可燃"
+    },
+    {
+      "item": "平底锅·锅 フライパン・鍋",
+      "category": "moenai",
+      "tips": "金属,不可燃;过大按粗大"
+    },
+    {
+      "item": "剃须刀·刀片 カミソリ",
+      "category": "moenai",
+      "tips": "用纸包好,不可燃"
+    },
+    {
+      "item": "衣架 ハンガー",
+      "category": "moenai",
+      "tips": "金属→不可燃;塑料→可燃"
+    },
+    {
+      "item": "眼镜 メガネ",
+      "category": "moenai",
+      "tips": "金属塑料混合,多数区不可燃"
+    },
+    {
+      "item": "指甲刀 爪切り",
+      "category": "moenai",
+      "tips": "金属,不可燃"
+    },
+    {
+      "item": "小金属件·螺丝 金属小物",
+      "category": "moenai",
+      "tips": "不可燃"
+    },
+    {
+      "item": "陶瓷花盆 植木鉢",
+      "category": "moenai",
+      "tips": "不可燃;大号按粗大"
+    },
+    {
+      "item": "电子体温计 電子体温計",
+      "category": "moenai",
+      "tips": "取出电池;电池投有害,主体按不可燃/小型家电"
+    },
+    {
+      "item": "纽扣电池·充电电池 ボタン電池",
+      "category": "yugai",
+      "tips": "不可当普通垃圾,投家电店/回收箱"
+    },
+    {
+      "item": "水银体温计·温度计 水銀体温計",
+      "category": "yugai",
+      "tips": "含水银,属有害,单独交回收"
+    },
+    {
+      "item": "被子·棉被 布団",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约并贴处理券"
+    },
+    {
+      "item": "床垫 マットレス",
+      "category": "sodai",
+      "tips": "弹簧床垫属粗大,需预约"
+    },
+    {
+      "item": "桌子·椅子 机・椅子",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "沙发 ソファ",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "衣柜·收纳架 タンス",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "地毯 カーペット",
+      "category": "sodai",
+      "tips": "多数按粗大;小块剪碎部分区可燃"
+    },
+    {
+      "item": "电风扇 扇風機",
+      "category": "sodai",
+      "tips": "粗大;部分区按小型家电回收"
+    },
+    {
+      "item": "吸尘器 掃除機",
+      "category": "sodai",
+      "tips": "粗大/小型家电,取出电池"
+    },
+    {
+      "item": "行李箱 スーツケース",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "暖桌 こたつ",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "婴儿车 ベビーカー",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "熨衣板 アイロン台",
+      "category": "sodai",
+      "tips": "粗大垃圾,需预约"
+    },
+    {
+      "item": "微波炉 電子レンジ",
+      "category": "sodai",
+      "tips": "多数区按粗大(如新宿);部分区按小型家电回收"
+    },
+    {
+      "item": "电视 テレビ",
+      "category": "kaden",
+      "tips": "家电四品目,不能当垃圾;购买店回收+付家电回收券"
+    },
+    {
+      "item": "冰箱 冷蔵庫",
+      "category": "kaden",
+      "tips": "家电四品目,不能当垃圾;联系购买店或指定回收"
+    },
+    {
+      "item": "洗衣机 洗濯機",
+      "category": "kaden",
+      "tips": "家电四品目,不能当垃圾;购买店回收+回收券"
+    },
+    {
+      "item": "空调 エアコン",
+      "category": "kaden",
+      "tips": "家电四品目,不能当垃圾;需专业拆卸回收"
+    },
+    {
+      "item": "电脑 パソコン",
+      "category": "kaden",
+      "tips": "不能当垃圾;走厂商PC回收(PCリサイクルマーク)或小型家电回收,先清数据"
+    },
+    {
+      "item": "手机·智能机 スマホ",
+      "category": "kaden",
+      "tips": "运营商/家电店回收;务必先删除个人信息"
+    }
   ]
 }
