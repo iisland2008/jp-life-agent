@@ -25,7 +25,7 @@ MEDICAL = _load("medical.json")
 TIPS = _load("tips.json")
 EXPERIENCE = _load("experience.json")
 # 各区官方垃圾数据(带来源URL);合并成一个带『区』标签的文档列表,便于按区检索
-_GOMI_FILES = ["gomi_shinjuku.json", "gomi_shibuya.json", "gomi_toshima.json", "gomi_tokyo23.json"]
+_GOMI_FILES = ["gomi_shinjuku.json", "gomi_shibuya.json", "gomi_toshima.json", "gomi_tokyo23.json", "gomi_shinjuku_dict.json"]
 GOMI_LOCAL_DOCS = []
 for _f in _GOMI_FILES:
     try:
