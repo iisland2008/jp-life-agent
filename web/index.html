@@ -323,18 +323,26 @@
   .term-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);}
   .term-row b{flex:none;width:130px;font-size:13px;color:#5f5245;font-weight:600;}
   .term-row span{font-size:12.5px;color:var(--ink2);line-height:1.5;}
-  /* 打工排班表 */
-  .sh-wk{font-size:12px;color:#b07a4a;background:var(--coral-t);border-radius:12px;padding:8px 12px;margin-bottom:9px;}
-  .sh-wk b{font-size:15px;}
-  .sh-wk span{color:var(--ink2);font-size:10.5px;}
-  .sh-row{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--line);}
-  .sh-date{flex:none;width:46px;text-align:center;background:#f6efe2;border-radius:11px;padding:5px 0;line-height:1.1;}
-  .sh-date b{font-size:13px;color:#8a6f52;}
-  .sh-date i{display:block;font-style:normal;font-size:9px;color:#ab9a80;margin-top:1px;}
-  .sh-info{flex:1;min-width:0;}
-  .sh-info b{font-size:13.5px;color:#5f5245;display:block;}
-  .sh-info span{font-size:11.5px;color:var(--ink2);}
-  .sh-x{flex:none;width:22px;text-align:center;color:#c9a9b4;font-size:17px;cursor:pointer;}
+  /* 打工排班表(课表式周视图) */
+  .sh-nav{display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;font-weight:700;color:#6b4e3d;margin-bottom:8px;}
+  .sh-navb{width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;color:#8a6f52;cursor:pointer;}
+  .sh-total{text-align:center;font-size:12px;color:#b07a4a;background:var(--coral-t);border-radius:12px;padding:7px;margin-bottom:10px;}
+  .sh-total b{font-size:16px;}
+  .sh-total.over{color:#c0392b;background:#fbe0dc;}
+  .sh-day{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer;}
+  .sh-day:last-child{border-bottom:none;}
+  .sh-day:active{opacity:.6;}
+  .sh-db{flex:none;width:44px;height:44px;border-radius:13px;background:linear-gradient(158deg,#fdf7ee,#efe4d0);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
+  .sh-db b{font-size:13px;color:#8a6f52;}
+  .sh-db i{font-style:normal;font-size:9px;color:#ab9a80;margin-top:2px;}
+  .sh-day.is-today .sh-db{background:linear-gradient(158deg,#fcddd0,#f6b49c);}
+  .sh-day.is-today .sh-db b{color:#b2543a;}
+  .sh-cells{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:5px;}
+  .sh-item{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#b07a4a;background:var(--coral-t);border-radius:10px;padding:4px 9px;}
+  .sh-item b{font-weight:700;}
+  .sh-item i{font-style:normal;color:#c9a9b4;cursor:pointer;font-size:12px;}
+  .sh-rest{font-size:11.5px;color:#b3a894;}
+  .sh-plus{flex:none;width:22px;text-align:center;color:#cbbfa8;font-size:16px;}
   .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
   .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
   .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
@@ -1473,17 +1481,23 @@ const JOB_SITES=[
 const SHKEY='jp_shifts'; let SHIFTS=[]; try{SHIFTS=JSON.parse(localStorage.getItem(SHKEY)||'[]');}catch(e){}
 function saveSHIFTS(){try{localStorage.setItem(SHKEY,JSON.stringify(SHIFTS));}catch(e){}}
 function shiftHours(s){ if(!s.start||!s.end)return 0; const p=t=>{const m=t.split(':');return (+m[0])*60+(+m[1]);}; let d=p(s.end)-p(s.start); if(d<=0)d+=1440; return Math.round(d/60*10)/10; }
-function weekRange(){ const n=new Date(); const day=(n.getDay()+6)%7; const mon=new Date(n.getFullYear(),n.getMonth(),n.getDate()-day); const sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6); return [mon,sun]; }
+let shWeekOff=0;
+function shWeek(d){ shWeekOff+=d; renderShifts(); }
+function isoD(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function weekMon(off){ const n=new Date(); const day=(n.getDay()+6)%7; return new Date(n.getFullYear(),n.getMonth(),n.getDate()-day+off*7); }
 function renderShifts(){ const el=document.getElementById('shiftList'); if(!el)return;
-  if(!SHIFTS.length){ el.innerHTML='<div class="act-empty" style="padding:16px">还没有排班~点下面「添加排班」把你的班表记进来。</div>'; return; }
-  const list=SHIFTS.slice().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
-  const [mon,sun]=weekRange();
-  let wk=0; SHIFTS.forEach(s=>{ const d=parseDT(s.date); if(d&&d>=mon&&d<=new Date(sun.getFullYear(),sun.getMonth(),sun.getDate()+1)) wk+=shiftHours(s); });
-  const rows=list.map(s=>{ const d=parseDT(s.date); const wd=d?'日一二三四五六'[d.getDay()]:''; const md=d?`${d.getMonth()+1}/${d.getDate()}`:s.date;
-    return `<div class="sh-row"><div class="sh-date"><b>${md}</b><i>周${wd}</i></div><div class="sh-info"><b>${esc(s.job||'打工')}</b><span>${s.start||''}–${s.end||''} · ${shiftHours(s)}h</span></div><span class="sh-x" onclick="delShift('${s.id}')">×</span></div>`; }).join('');
-  el.innerHTML=`<div class="sh-wk">本周合计 <b>${Math.round(wk*10)/10}</b> 小时 <span>(留学生上限 28h/周)</span></div>${rows}`;
+  const mon=weekMon(shWeekOff); const days=[]; for(let i=0;i<7;i++) days.push(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i));
+  const todayIso=isoD(new Date()); const cnwd=['周一','周二','周三','周四','周五','周六','周日']; let total=0;
+  const rows=days.map((d,i)=>{ const ds=isoD(d); const items=SHIFTS.filter(s=>s.date===ds).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+    items.forEach(s=>total+=shiftHours(s));
+    const cells=items.length? items.map(s=>`<span class="sh-item">${esc(s.job||'打工')} ${s.start}-${s.end} <b>${shiftHours(s)}h</b><i onclick="event.stopPropagation();delShift('${s.id}')">×</i></span>`).join('') : `<span class="sh-rest">休 · 点＋加班</span>`;
+    return `<div class="sh-day${ds===todayIso?' is-today':''}" onclick="openShiftAdd('${ds}')"><div class="sh-db"><b>${cnwd[i]}</b><i>${d.getMonth()+1}/${d.getDate()}</i></div><div class="sh-cells">${cells}</div><span class="sh-plus">＋</span></div>`;
+  }).join('');
+  const rangeLb=`${mon.getMonth()+1}/${mon.getDate()}–${days[6].getMonth()+1}/${days[6].getDate()}`;
+  const over=total>28; const wkLb=shWeekOff===0?'本周':(shWeekOff>0?'+'+shWeekOff+'周':shWeekOff+'周');
+  el.innerHTML=`<div class="sh-nav"><span class="sh-navb" onclick="event.stopPropagation();shWeek(-1)">‹</span><b>${wkLb} ${rangeLb}</b><span class="sh-navb" onclick="event.stopPropagation();shWeek(1)">›</span></div><div class="sh-total${over?' over':''}">合计 <b>${Math.round(total*10)/10}</b> h ${over?'⚠️ 超过 28h/周':' / 28h 上限'}</div>${rows}`;
 }
-function openShiftAdd(){ const g=id=>document.getElementById(id); g('shDate').value=new Date().toISOString().slice(0,10); g('shJob').value=''; g('shStart').value=''; g('shEnd').value=''; g('maskShift').classList.add('on'); }
+function openShiftAdd(date){ const g=id=>document.getElementById(id); g('shDate').value=(typeof date==='string'&&date)?date:new Date().toISOString().slice(0,10); g('shJob').value=''; g('shStart').value=''; g('shEnd').value=''; g('maskShift').classList.add('on'); }
 function saveShift(){ const g=id=>document.getElementById(id); const date=g('shDate').value, start=g('shStart').value, end=g('shEnd').value; if(!date||!start||!end){toast('请填日期和起止时间');return;}
   SHIFTS.push({id:'s'+Date.now(),date,job:g('shJob').value.trim(),start,end}); saveSHIFTS(); renderShifts(); g('maskShift').classList.remove('on'); toast('已加入排班 ✓'); }
 function delShift(id){ SHIFTS=SHIFTS.filter(s=>s.id!==id); saveSHIFTS(); renderShifts(); }
