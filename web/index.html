@@ -323,6 +323,18 @@
   .term-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);}
   .term-row b{flex:none;width:130px;font-size:13px;color:#5f5245;font-weight:600;}
   .term-row span{font-size:12.5px;color:var(--ink2);line-height:1.5;}
+  /* 打工排班表 */
+  .sh-wk{font-size:12px;color:#b07a4a;background:var(--coral-t);border-radius:12px;padding:8px 12px;margin-bottom:9px;}
+  .sh-wk b{font-size:15px;}
+  .sh-wk span{color:var(--ink2);font-size:10.5px;}
+  .sh-row{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--line);}
+  .sh-date{flex:none;width:46px;text-align:center;background:#f6efe2;border-radius:11px;padding:5px 0;line-height:1.1;}
+  .sh-date b{font-size:13px;color:#8a6f52;}
+  .sh-date i{display:block;font-style:normal;font-size:9px;color:#ab9a80;margin-top:1px;}
+  .sh-info{flex:1;min-width:0;}
+  .sh-info b{font-size:13.5px;color:#5f5245;display:block;}
+  .sh-info span{font-size:11.5px;color:var(--ink2);}
+  .sh-x{flex:none;width:22px;text-align:center;color:#c9a9b4;font-size:17px;cursor:pointer;}
   .ip-fav-hd{font-size:11px;color:var(--ink2);margin:13px 0 6px;}
   .ip-favs{display:flex;flex-wrap:wrap;gap:6px;}
   .ip-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--yellow);color:#8a6b2f;padding:5px 11px;border-radius:16px;}
@@ -744,6 +756,17 @@
     </div>
     <button class="btn-close" onclick="document.getElementById('maskActNew').classList.remove('on')">取消</button></div></div>
 
+  <!-- 打工:添加排班 -->
+  <div class="mask" id="maskShift"><div class="sheet"><h4>添加排班</h4>
+    <div class="frm">
+      <input id="shDate" type="date"/>
+      <input id="shJob" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" placeholder="店名,如 セブン / 居酒屋"/>
+      <div class="anlb">开始 – 结束时间</div>
+      <div class="r"><input id="shStart" type="time"/><input id="shEnd" type="time"/></div>
+      <button class="btn-add" onclick="saveShift()">保存</button>
+    </div>
+    <button class="btn-close" onclick="document.getElementById('maskShift').classList.remove('on')">取消</button></div></div>
+
   <!-- 打工:日语模板 -->
   <div class="mask" id="maskTpl"><div class="sheet"><h4 id="tplTitle"></h4><div id="tplBody" class="tpl-body"></div><button class="btn-close" onclick="document.getElementById('maskTpl').classList.remove('on')">关闭</button></div></div>
 
@@ -1051,6 +1074,18 @@ function content(key){
       <div class="matrow"><span class="k">103万</span><span class="v">超过开始产生所得税</span></div>
       <div class="matrow"><span class="k">130万</span><span class="v">脱离扶养,需自付社保</span></div>
       <div class="matrow"><span class="k">28h/周</span><span class="v" style="color:#c58a4a">留学生打工上限,超时影响签证</span></div></div>
+    <div class="panel"><div class="disc-h" onclick="toggleFold('foldJobs')"><h3 style="margin:0">🔎 找工网站 / App</h3><span class="ipc-caret" id="foldJobsCaret">▸</span></div>
+      <div id="foldJobs" style="display:none;margin-top:8px">
+        <div class="pit-hint" style="margin-bottom:9px">多数平台都有手机 App,在 App Store / Google Play 搜同名即可下载。带「外国人向け」的对留学生更友好。</div>
+        ${JOB_SITES.map(j=>`<a class="src-card" href="${j.u}" target="_blank" rel="noopener"><span class="src-ic">🔎</span><span class="src-tx"><b>${j.n}</b><span>${j.d}</span></span><span class="src-go">›</span></a>`).join('')}
+      </div>
+    </div>
+    <div class="panel"><div class="disc-h" onclick="toggleFold('foldShift');renderShifts()"><h3 style="margin:0">📋 我的排班表</h3><span class="ipc-caret" id="foldShiftCaret">▸</span></div>
+      <div id="foldShift" style="display:none;margin-top:8px">
+        <div id="shiftList"></div>
+        <button class="act-new" style="margin-top:8px" onclick="openShiftAdd()">＋ 添加排班</button>
+      </div>
+    </div>
     <div class="panel"><h3>🗣️ 打工日语模板</h3>
       <div class="pit-hint" style="margin-bottom:8px">点场景看「礼貌 / 简短」说法,复制即用——<b>不会自动发送</b>给雇主。</div>
       <div class="chips">${WORK_TPL.map(t=>`<span class="qa-chip" style="background:${c.ct};color:${c.lab}" onclick="openTpl('${t.id}')">${t.scene}</span>`).join('')}</div></div>
@@ -1425,6 +1460,34 @@ const COOK_TERMS=[
 function renderTerms(){ const el=document.getElementById('termBody'); if(!el)return; el.innerHTML=COOK_TERMS.map(s=>`<div class="term-sec"><div class="term-h">${s.t}</div>${s.rows.map(([j,cc])=>`<div class="term-row"><b>${j}</b><span>${cc}</span></div>`).join('')}</div>`).join(''); }
 function toggleTerms(){ const b=document.getElementById('termBody'),c=document.getElementById('termCaret'); if(!b)return; const open=b.style.display==='none'; b.style.display=open?'block':'none'; if(c)c.textContent=open?'▾':'▸'; if(open)renderTerms(); }
 
+/* ===== 打工:找工网站/App + 排班表 ===== */
+function toggleFold(id){ const b=document.getElementById(id), c=document.getElementById(id+'Caret'); if(!b)return; const o=b.style.display==='none'; b.style.display=o?'block':'none'; if(c)c.textContent=o?'▾':'▸'; }
+const JOB_SITES=[
+  {n:'TownWork タウンワーク',u:'https://townwork.net/',d:'最大级兼职招聘,门店/便利店/餐饮多'},
+  {n:'バイトル Baitoru',u:'https://www.baitoru.com/',d:'兼职多,可看店铺氛围/短视频'},
+  {n:'マイナビバイト',u:'https://baito.mynavi.jp/',d:'マイナビ系,正规店铺多'},
+  {n:'Indeed(日本)',u:'https://jp.indeed.com/',d:'综合搜索,短期/长期都有'},
+  {n:'YOLO JAPAN',u:'https://www.yolo-japan.com/',d:'面向在日外国人,多语言(含中文)'},
+  {n:'GaijinPot Jobs',u:'https://jobs.gaijinpot.com/',d:'英语/外国人友好职位'}
+];
+const SHKEY='jp_shifts'; let SHIFTS=[]; try{SHIFTS=JSON.parse(localStorage.getItem(SHKEY)||'[]');}catch(e){}
+function saveSHIFTS(){try{localStorage.setItem(SHKEY,JSON.stringify(SHIFTS));}catch(e){}}
+function shiftHours(s){ if(!s.start||!s.end)return 0; const p=t=>{const m=t.split(':');return (+m[0])*60+(+m[1]);}; let d=p(s.end)-p(s.start); if(d<=0)d+=1440; return Math.round(d/60*10)/10; }
+function weekRange(){ const n=new Date(); const day=(n.getDay()+6)%7; const mon=new Date(n.getFullYear(),n.getMonth(),n.getDate()-day); const sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6); return [mon,sun]; }
+function renderShifts(){ const el=document.getElementById('shiftList'); if(!el)return;
+  if(!SHIFTS.length){ el.innerHTML='<div class="act-empty" style="padding:16px">还没有排班~点下面「添加排班」把你的班表记进来。</div>'; return; }
+  const list=SHIFTS.slice().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  const [mon,sun]=weekRange();
+  let wk=0; SHIFTS.forEach(s=>{ const d=parseDT(s.date); if(d&&d>=mon&&d<=new Date(sun.getFullYear(),sun.getMonth(),sun.getDate()+1)) wk+=shiftHours(s); });
+  const rows=list.map(s=>{ const d=parseDT(s.date); const wd=d?'日一二三四五六'[d.getDay()]:''; const md=d?`${d.getMonth()+1}/${d.getDate()}`:s.date;
+    return `<div class="sh-row"><div class="sh-date"><b>${md}</b><i>周${wd}</i></div><div class="sh-info"><b>${esc(s.job||'打工')}</b><span>${s.start||''}–${s.end||''} · ${shiftHours(s)}h</span></div><span class="sh-x" onclick="delShift('${s.id}')">×</span></div>`; }).join('');
+  el.innerHTML=`<div class="sh-wk">本周合计 <b>${Math.round(wk*10)/10}</b> 小时 <span>(留学生上限 28h/周)</span></div>${rows}`;
+}
+function openShiftAdd(){ const g=id=>document.getElementById(id); g('shDate').value=new Date().toISOString().slice(0,10); g('shJob').value=''; g('shStart').value=''; g('shEnd').value=''; g('maskShift').classList.add('on'); }
+function saveShift(){ const g=id=>document.getElementById(id); const date=g('shDate').value, start=g('shStart').value, end=g('shEnd').value; if(!date||!start||!end){toast('请填日期和起止时间');return;}
+  SHIFTS.push({id:'s'+Date.now(),date,job:g('shJob').value.trim(),start,end}); saveSHIFTS(); renderShifts(); g('maskShift').classList.remove('on'); toast('已加入排班 ✓'); }
+function delShift(id){ SHIFTS=SHIFTS.filter(s=>s.id!==id); saveSHIFTS(); renderShifts(); }
+
 /* ===== 打工日语模板 ===== */
 const WORK_TPL=[
   {id:'sick',scene:'😷 生病请假',to:'店长/责任者',polite:'お疲れ様です。本日、体調不良のためお休みをいただけますでしょうか。ご迷惑をおかけし申し訳ありません。',short:'すみません、体調不良で本日お休みしたいです。',cn:'今天身体不适,想请假'},
@@ -1502,6 +1565,7 @@ function openCat(key){
   if(key==='gomi') renderGomiSched();
   if(key==='event') renderActs();
   if(key==='rent'){ renderRentCost(); fetchRate(); }
+  if(key==='work') renderShifts();
   const log=document.getElementById('chatlog');
   log.innerHTML=state[key].msgs||`<div class="msg bot">你好~ 我是${c.name}助手 🌿 有问题直接问我,我会查专属知识库再回答。</div>`;
   fetch('/api/meta').then(r=>r.json()).then(m=>{const t=document.getElementById('modeTag');if(t)t.textContent=m.mode==='real'?'在线':'演示模式';}).catch(()=>{});
